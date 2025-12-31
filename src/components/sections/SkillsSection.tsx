@@ -1,6 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { SiReact, SiPython, SiTypescript, SiAmazon, SiDocker, SiPostgresql, SiNodedotjs, SiFastapi } from "react-icons/si";
+import { TechOrbit } from "@/components/animated";
 import { skillCategories } from "@/data/profile";
+
+const techIcons = [
+  { name: "React", icon: SiReact, color: "#61DAFB" },
+  { name: "Python", icon: SiPython, color: "#3776AB" },
+  { name: "TypeScript", icon: SiTypescript, color: "#3178C6" },
+  { name: "AWS", icon: SiAmazon, color: "#FF9900" },
+  { name: "Docker", icon: SiDocker, color: "#2496ED" },
+  { name: "PostgreSQL", icon: SiPostgresql, color: "#4169E1" },
+  { name: "Node.js", icon: SiNodedotjs, color: "#339933" },
+  { name: "FastAPI", icon: SiFastapi, color: "#009688" },
+];
 
 const SkillsSection = () => {
   const sectionRef = useRef<HTMLElement>(null);
@@ -24,8 +37,13 @@ const SkillsSection = () => {
   }, []);
 
   return (
-    <section id="skills" ref={sectionRef} className="py-24 px-4">
-      <div className="container mx-auto max-w-4xl">
+    <section id="skills" ref={sectionRef} className="py-24 px-4 relative">
+      <div className="container mx-auto max-w-4xl relative">
+        {/* Tech Orbit - Behind content */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[400px] hidden lg:block pointer-events-none opacity-80" style={{ zIndex: 0 }}>
+          <TechOrbit icons={techIcons} orbitRadius={{ x: 200, y: 150 }} duration={45} />
+        </div>
+
         {/* Section Title */}
         <motion.h2
           initial={{ opacity: 0, y: 20 }}

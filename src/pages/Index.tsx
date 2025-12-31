@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet";
 import AuroraBackground from "@/components/AuroraBackground";
+import { GeometricAmbience, CodeParticles } from "@/components/animated";
 import NavBar from "@/components/NavBar";
 import HeroSection from "@/components/sections/HeroSection";
 import AboutSection from "@/components/sections/AboutSection";
@@ -43,6 +44,7 @@ const Index = () => {
       <div className="relative min-h-screen">
         {/* Animated Background */}
         <AuroraBackground />
+        <GeometricAmbience shapeCount={10} colorPalette={["cyan", "purple", "pink"]} />
 
         {/* Navigation */}
         <NavBar onResumeClick={() => setIsResumeModalOpen(true)} />
@@ -50,10 +52,15 @@ const Index = () => {
         {/* Main Content */}
         <main>
           <HeroSection onResumeClick={() => setIsResumeModalOpen(true)} />
+          <CodeParticles count={3} area="section" />
           <AboutSection />
+          <CodeParticles count={3} area="section" />
           <ExperienceSection />
+          <CodeParticles count={3} area="section" />
           <SkillsSection />
+          <CodeParticles count={3} area="section" />
           <EducationSection />
+          <CodeParticles count={3} area="section" />
           <ProjectsSection />
         </main>
 

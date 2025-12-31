@@ -230,4 +230,80 @@
   ::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--muted-foreground));
   }
+
+  /* Animated Components Utilities */
+  .hide-mobile {
+    @apply hidden md:block;
+  }
+
+  .particle-blur {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  /* Keyframes for code particles - multiple random float patterns */
+  @keyframes float-random-1 {
+    0%, 100% {
+      transform: translate(0, 0) rotate(0deg);
+      opacity: 0.15;
+    }
+    33% {
+      transform: translate(20px, -30px) rotate(5deg);
+      opacity: 0.25;
+    }
+    66% {
+      transform: translate(-15px, 20px) rotate(-3deg);
+      opacity: 0.1;
+    }
+  }
+
+  @keyframes float-random-2 {
+    0%, 100% {
+      transform: translate(0, 0) rotate(0deg);
+      opacity: 0.2;
+    }
+    33% {
+      transform: translate(-25px, 15px) rotate(-4deg);
+      opacity: 0.1;
+    }
+    66% {
+      transform: translate(30px, -10px) rotate(6deg);
+      opacity: 0.3;
+    }
+  }
+
+  @keyframes float-random-3 {
+    0%, 100% {
+      transform: translate(0, 0) rotate(0deg);
+      opacity: 0.18;
+    }
+    33% {
+      transform: translate(15px, 25px) rotate(3deg);
+      opacity: 0.25;
+    }
+    66% {
+      transform: translate(-20px, -15px) rotate(-5deg);
+      opacity: 0.12;
+    }
+  }
+
+  @keyframes float-random-4 {
+    0%, 100% {
+      transform: translate(0, 0) rotate(0deg);
+      opacity: 0.22;
+    }
+    33% {
+      transform: translate(-18px, -20px) rotate(-6deg);
+      opacity: 0.15;
+    }
+    66% {
+      transform: translate(25px, 18px) rotate(4deg);
+      opacity: 0.28;
+    }
+  }
+
+  /* Will-change for performance */
+  .will-change-transform {
+    will-change: transform;
+  }
 }

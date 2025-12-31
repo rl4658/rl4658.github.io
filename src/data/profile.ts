@@ -37,7 +37,7 @@ export const profile = {
   contact: {
     phone: "925-366-1456",
     email: "ruifeng2002@gmail.com",
-    linkedin: "https://linkedin.com/in/raymond-li",
+    linkedin: "https://www.linkedin.com/in/ruifeng-raymond-li/",
     github: "https://github.com/rl4658",
     website: "https://rl4658.github.io",
   },
