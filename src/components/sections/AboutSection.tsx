@@ -27,10 +27,14 @@ const AboutSection = () => {
     <section id="about" ref={sectionRef} className="py-24 px-4">
       <div className="container mx-auto max-w-4xl">
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={isVisible ? { opacity: 1, y: 0 } : {}}
+          initial={{ opacity: 0, y: 40, scale: 0.95, filter: "blur(10px)" }}
+          animate={isVisible ? { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" } : {}}
+          whileHover={{
+            y: -8,
+            boxShadow: "0 20px 60px rgba(11, 165, 236, 0.15)",
+          }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="glass rounded-3xl p-8 md:p-12 hover-lift"
+          className="glass rounded-3xl p-8 md:p-12"
         >
           {/* Section Title */}
           <h2 className="font-display text-3xl md:text-4xl font-bold mb-6 text-gradient">

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet";
 import AuroraBackground from "@/components/AuroraBackground";
-import { GeometricAmbience, CodeParticles } from "@/components/animated";
+import { GeometricAmbience, CodeParticles, ScrollProgress } from "@/components/animated";
 import NavBar from "@/components/NavBar";
 import HeroSection from "@/components/sections/HeroSection";
 import AboutSection from "@/components/sections/AboutSection";
@@ -42,6 +42,9 @@ const Index = () => {
       </Helmet>
 
       <div className="relative min-h-screen">
+        {/* Scroll Progress Indicator */}
+        <ScrollProgress />
+
         {/* Animated Background */}
         <AuroraBackground />
         <GeometricAmbience shapeCount={10} colorPalette={["cyan", "purple", "pink"]} />

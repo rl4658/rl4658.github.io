@@ -46,8 +46,8 @@ const SkillsSection = () => {
 
         {/* Section Title */}
         <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          animate={isVisible ? { opacity: 1, y: 0 } : {}}
+          initial={{ opacity: 0, y: 20, scale: 0.95, filter: "blur(10px)" }}
+          animate={isVisible ? { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" } : {}}
           transition={{ duration: 0.6 }}
           className="font-display text-3xl md:text-4xl font-bold mb-12 text-center text-gradient"
         >
@@ -59,10 +59,14 @@ const SkillsSection = () => {
           {skillCategories.map((category, categoryIndex) => (
             <motion.div
               key={category.name}
-              initial={{ opacity: 0, y: 30 }}
-              animate={isVisible ? { opacity: 1, y: 0 } : {}}
+              initial={{ opacity: 0, y: 30, scale: 0.95, filter: "blur(10px)" }}
+              animate={isVisible ? { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" } : {}}
+              whileHover={{
+                y: -8,
+                boxShadow: "0 20px 60px rgba(11, 165, 236, 0.15)",
+              }}
               transition={{ duration: 0.6, delay: 0.1 * categoryIndex }}
-              className="glass rounded-3xl p-6 md:p-8 hover-lift"
+              className="glass rounded-3xl p-6 md:p-8"
             >
               <h3 className="font-display text-lg font-semibold mb-4 text-primary">
                 {category.name}
@@ -73,11 +77,17 @@ const SkillsSection = () => {
                     key={skill}
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={isVisible ? { opacity: 1, scale: 1 } : {}}
+                    whileHover={{
+                      scale: 1.05,
+                      boxShadow: "0 0 20px rgba(11, 165, 236, 0.5)",
+                      backgroundColor: "rgba(11, 165, 236, 0.1)",
+                    }}
+                    whileTap={{ scale: 0.95 }}
                     transition={{
                       duration: 0.3,
                       delay: 0.1 * categoryIndex + 0.02 * skillIndex,
                     }}
-                    className="pill text-xs md:text-sm"
+                    className="pill text-xs md:text-sm cursor-pointer"
                   >
                     {skill}
                   </motion.span>

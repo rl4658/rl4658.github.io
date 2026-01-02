@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { MapPin, Download, ChevronDown } from "lucide-react";
 import { SiGithub, SiLinkedin } from "react-icons/si";
@@ -8,6 +9,38 @@ import { profile } from "@/data/profile";
 interface HeroSectionProps {
   onResumeClick: () => void;
 }
+
+// Magnetic Icon Component
+const MagneticIcon = ({ children, href, label }: { children: React.ReactNode; href: string; label: string }) => {
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 16;
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 16;
+    setPosition({ x, y });
+  };
+
+  const handleMouseLeave = () => {
+    setPosition({ x: 0, y: 0 });
+  };
+
+  return (
+    <motion.a
+      href={href}
+      target={href.startsWith('http') ? "_blank" : undefined}
+      rel={href.startsWith('http') ? "noopener noreferrer" : undefined}
+      className="p-4 glass rounded-2xl transition-all"
+      aria-label={label}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      animate={position}
+      transition={{ type: "spring", stiffness: 150, damping: 15 }}
+    >
+      {children}
+    </motion.a>
+  );
+};
 
 const HeroSection = ({ onResumeClick }: HeroSectionProps) => {
   return (
@@ -29,15 +62,20 @@ const HeroSection = ({ onResumeClick }: HeroSectionProps) => {
           <span className="text-sm text-foreground/70">{profile.region}</span>
         </motion.div>
 
-        {/* Name */}
-        <motion.h1
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-7xl xl:text-8xl font-bold mb-6 tracking-tight"
-        >
-          <span className="text-gradient">{profile.name}</span>
-        </motion.h1>
+        {/* Name - Character-by-character reveal */}
+        <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-7xl xl:text-8xl font-bold mb-6 tracking-tight text-gradient">
+          {profile.name.split('').map((letter, i) => (
+            <motion.span
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 + i * 0.05, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              style={{ display: letter === ' ' ? 'inline' : 'inline-block' }}
+            >
+              {letter === ' ' ? '\u00A0' : letter}
+            </motion.span>
+          ))}
+        </h1>
 
         {/* Tagline */}
         <motion.p
@@ -56,31 +94,15 @@ const HeroSection = ({ onResumeClick }: HeroSectionProps) => {
           transition={{ duration: 0.8, delay: 0.4 }}
           className="flex items-center justify-center lg:justify-start gap-4 mb-10"
         >
-          <a
-            href={profile.contact.github}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-4 glass rounded-2xl hover-lift transition-all"
-            aria-label="GitHub"
-          >
+          <MagneticIcon href={profile.contact.github} label="GitHub">
             <SiGithub size={24} />
-          </a>
-          <a
-            href={profile.contact.linkedin}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-4 glass rounded-2xl hover-lift transition-all"
-            aria-label="LinkedIn"
-          >
+          </MagneticIcon>
+          <MagneticIcon href={profile.contact.linkedin} label="LinkedIn">
             <SiLinkedin size={24} />
-          </a>
-          <a
-            href={`mailto:${profile.contact.email}`}
-            className="p-4 glass rounded-2xl hover-lift transition-all"
-            aria-label="Email"
-          >
+          </MagneticIcon>
+          <MagneticIcon href={`mailto:${profile.contact.email}`} label="Email">
             <HiOutlineMail size={24} />
-          </a>
+          </MagneticIcon>
         </motion.div>
 
         {/* CTA Buttons */}
@@ -92,7 +114,7 @@ const HeroSection = ({ onResumeClick }: HeroSectionProps) => {
         >
           <button
             onClick={onResumeClick}
-            className="px-8 py-4 rounded-2xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-all hover-lift flex items-center gap-2"
+            className="px-8 py-4 rounded-2xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-all hover-lift flex items-center gap-2 btn-shimmer"
           >
             <Download size={20} />
             View Resume

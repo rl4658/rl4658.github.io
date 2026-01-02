@@ -91,13 +91,20 @@ const NavBar = ({ onResumeClick }: NavBarProps) => {
               <button
                 key={link.href}
                 onClick={() => handleNavClick(link.href)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+                className={`relative px-4 py-2 rounded-xl text-sm font-medium transition-colors duration-300 ${
                   activeSection === link.href
-                    ? "bg-primary/20 text-primary"
-                    : "text-foreground/70 hover:text-foreground hover:bg-foreground/5"
+                    ? "text-primary"
+                    : "text-foreground/70 hover:text-foreground"
                 }`}
               >
-                {link.label}
+                {activeSection === link.href && (
+                  <motion.div
+                    layoutId="activeIndicator"
+                    className="absolute inset-0 bg-primary/20 rounded-xl"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10">{link.label}</span>
               </button>
             ))}
             <button

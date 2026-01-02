@@ -29,8 +29,8 @@ const ProjectsSection = () => {
       <div className="container mx-auto max-w-4xl">
         {/* Section Title */}
         <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          animate={isVisible ? { opacity: 1, y: 0 } : {}}
+          initial={{ opacity: 0, y: 20, scale: 0.95, filter: "blur(10px)" }}
+          animate={isVisible ? { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" } : {}}
           transition={{ duration: 0.6 }}
           className="font-display text-3xl md:text-4xl font-bold mb-12 text-center text-gradient"
         >
@@ -42,10 +42,14 @@ const ProjectsSection = () => {
           {projects.map((project, index) => (
             <motion.div
               key={project.name}
-              initial={{ opacity: 0, y: 30 }}
-              animate={isVisible ? { opacity: 1, y: 0 } : {}}
+              initial={{ opacity: 0, y: 30, scale: 0.95, filter: "blur(10px)" }}
+              animate={isVisible ? { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" } : {}}
+              whileHover={{
+                y: -8,
+                boxShadow: "0 20px 60px rgba(11, 165, 236, 0.15)",
+              }}
               transition={{ duration: 0.6, delay: 0.1 * index }}
-              className="glass rounded-3xl p-6 md:p-8 hover-lift"
+              className="glass rounded-3xl p-6 md:p-8"
             >
               <div className="flex items-center gap-2 text-primary mb-3">
                 <Code size={20} />
@@ -70,10 +74,14 @@ const ProjectsSection = () => {
 
           {/* Awards */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={isVisible ? { opacity: 1, y: 0 } : {}}
+            initial={{ opacity: 0, y: 30, scale: 0.95, filter: "blur(10px)" }}
+            animate={isVisible ? { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" } : {}}
+            whileHover={{
+              y: -8,
+              boxShadow: "0 20px 60px rgba(11, 165, 236, 0.15)",
+            }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="glass rounded-3xl p-6 md:p-8 hover-lift"
+            className="glass rounded-3xl p-6 md:p-8"
           >
             <div className="flex items-center gap-2 text-accent mb-4">
               <Trophy size={20} />
