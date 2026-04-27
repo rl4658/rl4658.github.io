@@ -17,7 +17,7 @@ import ResumeModal from "@/components/ResumeModal";
 import BackToTop from "@/components/BackToTop";
 import IntroOverlay from "@/components/intro/IntroOverlay";
 import { IntroProvider, useIntro } from "@/contexts/IntroContext";
-import { SceneProvider } from "@/contexts/SceneContext";
+import { SceneProvider, useScene } from "@/contexts/SceneContext";
 import { profile } from "@/data/profile";
 
 const Index = () => {
@@ -33,9 +33,11 @@ const Index = () => {
 const IndexInner = () => {
   const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
   const { phase, replayIntro } = useIntro();
+  const { isWarping } = useScene();
 
   /* Body content fades in once the dive completes — synced with overlay's fade-out. */
-  const bodyVisible = phase === "done";
+  /* Body hides during warp so only the donut is visible */
+  const bodyVisible = phase === "done" && !isWarping;
 
   /*
    * Force-close the resume modal whenever we leave the "done" phase.

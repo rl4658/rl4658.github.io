@@ -86,12 +86,11 @@ export const SceneProvider = ({ children }: { children: ReactNode }) => {
 
   const triggerWarp = useCallback((callback: () => void) => {
     setIsWarping(true);
-    // The hyperspace animation takes about 1.2s to feel impactful
+    // Give the hyperspace zoom 2s to fully play out
     setTimeout(() => {
       callback();
-      // Reset after navigation so the main page is normal if they return
       setTimeout(() => setIsWarping(false), 100);
-    }, 1200);
+    }, 2000);
   }, []);
 
   const recomputeActive = useCallback(() => {

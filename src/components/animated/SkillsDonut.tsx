@@ -59,7 +59,7 @@ const SkillsDonut = ({ rotationSpeed = 0.003 }: SkillsDonutProps) => {
    * The CSS background color is solid slate during the intro so body content
    * never peeks through transparent gaps in the wireframe.
    */
-  const isForeground = phase !== "done";
+  const isForeground = phase !== "done" || isWarping;
 
   return (
     <div
