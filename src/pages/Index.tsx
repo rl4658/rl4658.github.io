@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import { AnimatePresence, motion } from "framer-motion";
 import AuroraBackground from "@/components/AuroraBackground";
-import { GeometricAmbience, CodeParticles, ScrollProgress, SkillsDonut } from "@/components/animated";
+import CursorGlow from "@/components/CursorGlow";
+import ScrollMotionBlur from "@/components/ScrollMotionBlur";
+import { GeometricAmbience, ChapterStrip, SceneCutLine, SectionCutSentinel, SkillsDonut } from "@/components/animated";
 import NavBar from "@/components/NavBar";
 import HeroSection from "@/components/sections/HeroSection";
 import AboutSection from "@/components/sections/AboutSection";
@@ -15,12 +17,15 @@ import ResumeModal from "@/components/ResumeModal";
 import BackToTop from "@/components/BackToTop";
 import IntroOverlay from "@/components/intro/IntroOverlay";
 import { IntroProvider, useIntro } from "@/contexts/IntroContext";
+import { SceneProvider } from "@/contexts/SceneContext";
 import { profile } from "@/data/profile";
 
 const Index = () => {
   return (
     <IntroProvider>
-      <IndexInner />
+      <SceneProvider>
+        <IndexInner />
+      </SceneProvider>
     </IntroProvider>
   );
 };
@@ -67,6 +72,10 @@ const IndexInner = () => {
       </Helmet>
 
       <div className="relative min-h-screen">
+        {/* Feature A: Cursor glow halo — always on */}
+        <CursorGlow />
+        {/* Feature C: Scroll-velocity motion blur — writes --scroll-blur CSS var */}
+        <ScrollMotionBlur />
         {/* Donut canvas — persistent across intro/ambient. Reads phase from context. */}
         <SkillsDonut rotationSpeed={0.003} />
 
@@ -94,7 +103,8 @@ const IndexInner = () => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             >
-              <ScrollProgress />
+              <ChapterStrip />
+              <SceneCutLine />
               <AuroraBackground />
               <GeometricAmbience shapeCount={10} colorPalette={["cyan", "purple", "pink"]} />
 
@@ -105,15 +115,15 @@ const IndexInner = () => {
 
               <main>
                 <HeroSection onResumeClick={() => setIsResumeModalOpen(true)} />
-                <CodeParticles count={3} area="section" />
+                <SectionCutSentinel />
                 <AboutSection />
-                <CodeParticles count={3} area="section" />
+                <SectionCutSentinel />
                 <ExperienceSection />
-                <CodeParticles count={3} area="section" />
+                <SectionCutSentinel />
                 <SkillsSection />
-                <CodeParticles count={3} area="section" />
+                <SectionCutSentinel />
                 <EducationSection />
-                <CodeParticles count={3} area="section" />
+                <SectionCutSentinel />
                 <ProjectsSection />
               </main>
 

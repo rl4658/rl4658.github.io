@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Menu, X, FileText } from "lucide-react";
 import { navLinks, profile } from "@/data/profile";
 import { motion, AnimatePresence } from "framer-motion";
+import { useScene } from "@/contexts/SceneContext";
+import GlitchText from "@/components/animated/GlitchText";
 
 interface NavBarProps {
   onResumeClick: () => void;
@@ -11,43 +13,22 @@ interface NavBarProps {
 const NavBar = ({ onResumeClick, onLogoClick }: NavBarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState("");
+  const { activeScene } = useScene();
+
+  /*
+   * Active link is derived from `activeScene` (single source of truth shared
+   * with ChapterStrip), so the navbar highlight, the chapter strip, and the
+   * match-cut line all switch in lockstep instead of via competing IOs.
+   */
+  const activeSection = activeScene === "hero" ? "" : `#${activeScene}`;
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
 
-    const handleSectionObserver = () => {
-      const sections = navLinks.map((link) => 
-        document.querySelector(link.href)
-      );
-      
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              setActiveSection(`#${entry.target.id}`);
-            }
-          });
-        },
-        { threshold: 0.3, rootMargin: "-80px 0px -50% 0px" }
-      );
-
-      sections.forEach((section) => {
-        if (section) observer.observe(section);
-      });
-
-      return () => observer.disconnect();
-    };
-
     window.addEventListener("scroll", handleScroll);
-    const cleanup = handleSectionObserver();
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      cleanup?.();
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleNavClick = (href: string) => {
@@ -94,8 +75,10 @@ const NavBar = ({ onResumeClick, onLogoClick }: NavBarProps) => {
             title="Replay intro"
             aria-label="Replay intro"
           >
-            {profile.name.split(" ")[0]}
-            <span className="text-foreground/60">.dev</span>
+            <GlitchText text={`${profile.name.split(" ")[0]}.dev`} className="font-display font-bold text-xl text-gradient">
+              {profile.name.split(" ")[0]}
+              <span className="text-foreground/60">.dev</span>
+            </GlitchText>
             {/* Subtle hint underline that reveals on hover */}
             <span className="absolute -bottom-0.5 left-0 right-0 h-px scale-x-0 group-hover:scale-x-100 transition-transform origin-left bg-gradient-to-r from-primary to-accent" />
           </button>

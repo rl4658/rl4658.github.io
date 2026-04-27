@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
-import { motion, useMotionValue } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { motion, useMotionValue, useScroll, useTransform } from "framer-motion";
 import { MapPin, Download, ChevronDown } from "lucide-react";
 import { SiGithub, SiLinkedin } from "react-icons/si";
 import { HiOutlineMail } from "react-icons/hi";
 import { CodeParticles } from "@/components/animated";
 import { profile } from "@/data/profile";
+import { useScene } from "@/contexts/SceneContext";
 
 interface HeroSectionProps {
   onResumeClick: () => void;
@@ -162,9 +163,49 @@ const HeroSection = ({ onResumeClick }: HeroSectionProps) => {
     (profile.name.length * STAGE.charSpeedMs) / 1000 +
     0.7;
 
+  /*
+   * Pinned-hero "camera pull-back."
+   *
+   * The hero is wrapped in a 200vh outer container; the inner section sticks
+   * to the viewport top for the first 100vh of scroll. During that pin, the
+   * hero content slides up and fades — like a camera pulling back into the
+   * rest of the film. The outer container is what we register with the
+   * SceneDirector, so "hero" stays the active scene for the full 200vh.
+   */
+  const outerRef = useRef<HTMLDivElement>(null);
+  const { registerSection } = useScene();
+
+  useEffect(() => registerSection("hero", outerRef), [registerSection]);
+
+  const { scrollYProgress: heroScrollProgress } = useScroll({
+    target: outerRef,
+    offset: ["start start", "end start"],
+  });
+
+  /* Hero content rises and fades. Non-linear opacity range so it doesn't vanish too early. */
+  const heroY = useTransform(heroScrollProgress, [0, 1], ["0%", "-32%"]);
+  const heroOpacity = useTransform(heroScrollProgress, [0, 0.6, 0.85], [1, 0.4, 0]);
+  /* Subtle scale-down compounds the "camera pulling back" feeling. */
+  const heroScale = useTransform(heroScrollProgress, [0, 1], [1, 0.92]);
+  /*
+   * No on-screen chapter caption during the pull-back: the chapter strip on
+   * the right edge already indicates which chapter is active, and the
+   * match-cut line fires at the boundary. Adding a center caption fought the
+   * donut visually as it travelled between marks.
+   */
+
   return (
-    <section className="min-h-screen flex items-center justify-center pt-20 pb-12 px-4 relative overflow-hidden">
-      <div className="container mx-auto max-w-7xl">
+    <div
+      id="hero"
+      ref={outerRef}
+      className="relative"
+      style={{ height: "200vh" }}
+    >
+      <section className="sticky top-0 h-screen flex items-center justify-center pt-20 pb-12 px-4 overflow-hidden">
+      <motion.div
+        style={{ y: heroY, opacity: heroOpacity, scale: heroScale }}
+        className="container mx-auto max-w-7xl"
+      >
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* LEFT: Hero Content */}
           <div className="text-center lg:text-left">
@@ -289,27 +330,37 @@ const HeroSection = ({ onResumeClick }: HeroSectionProps) => {
           {/* RIGHT: Reserved space for the donut */}
           <div className="hidden lg:block h-[700px] w-[700px] relative" />
         </div>
-      </div>
+      </motion.div>
 
-      {/* Stage 6: Scroll Indicator — last to fade in */}
+      {/*
+        Stage 6: Scroll Indicator — last to fade in.
+        Wrapped in an outer motion.div tied to heroOpacity so it fades alongside
+        the hero content during the pinned camera pull-back. CSS opacity
+        multiplies through the tree, so the inner mount-time fade-in still works.
+      */}
       <motion.div
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{
-          delay: typewriterEndSec + STAGE.scrollHintOffset,
-          duration: 0.8,
-        }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-2"
+        style={{ opacity: heroOpacity }}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:flex"
       >
-        <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-foreground/40">
-          scroll
-        </span>
         <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="p-2 glass rounded-full"
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            delay: typewriterEndSec + STAGE.scrollHintOffset,
+            duration: 0.8,
+          }}
+          className="flex flex-col items-center gap-2"
         >
-          <ChevronDown size={20} className="text-foreground/60" />
+          <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-foreground/40">
+            scroll
+          </span>
+          <motion.div
+            animate={{ y: [0, 10, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="p-2 glass rounded-full"
+          >
+            <ChevronDown size={20} className="text-foreground/60" />
+          </motion.div>
         </motion.div>
       </motion.div>
 
@@ -321,7 +372,9 @@ const HeroSection = ({ onResumeClick }: HeroSectionProps) => {
       >
         <CodeParticles count={6} area="hero" colorScheme="mixed" />
       </motion.div>
-    </section>
+      </section>
+
+    </div>
   );
 };
 

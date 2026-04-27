@@ -1,5 +1,5 @@
-import { motion, useScroll, useTransform, type MotionStyle } from "framer-motion";
-import { useRef, type ReactNode } from "react";
+import { motion } from "framer-motion";
+import { type ReactNode } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 type RevealDirection = "up" | "left" | "right" | "zoom";
@@ -11,97 +11,88 @@ interface ScrollRevealProps {
   from?: RevealDirection;
   /** Multiplier on the entry distance/rotation. 1 = standard, 1.5 = exaggerated. */
   intensity?: number;
-  /**
-   * Where in the viewport the entrance plays.
-   *  - "early"  : starts as soon as element bottom enters viewport (default)
-   *  - "center" : starts when element top enters viewport (slower, more dramatic)
-   */
-  pace?: "early" | "center";
   /** Disable the 3D rotation if you just want translation. */
   flat?: boolean;
+  /** Optional delay in seconds before the entrance starts. */
+  delay?: number;
 }
 
 /**
- * Scroll-tied 3D entrance wrapper.
+ * One-shot 3D entrance wrapper.
  *
- * The element's transform is *literally driven by scroll position*:
- *   - When the element is below the viewport → fully translated/rotated/scaled-down/transparent.
- *   - When the element reaches the viewport center → fully at rest.
- *   - Scrolling back up reverses the entry, so the page feels physical.
+ * Previously this was scroll-tied (transforms followed `scrollY`), which had
+ * a subtle but real failure mode: when the user landed on a section via a
+ * nav click or a fast scroll, cards lower in the section were stuck at
+ * mid-animation (e.g. progress 0.7) because their scroll-tied transforms
+ * never completed. Visually the cards looked "not fully arrived."
  *
- * Honors `prefers-reduced-motion` — disables transforms entirely if the user opts out.
+ * The new model uses `whileInView` with `once: true`: the animation fires
+ * once when the element enters the viewport, plays over a fixed 0.7s with
+ * a smooth ease, then *latches* in the settled state. So whenever a section
+ * is on screen, its content is guaranteed to be fully present.
+ *
+ * Trigger margin extends 150px below the viewport bottom so the animation
+ * starts slightly before the element is visible — by the time the user is
+ * focused on it, the entrance has already completed.
+ *
+ * Honors `prefers-reduced-motion`.
  */
 const ScrollReveal = ({
   children,
   className,
   from = "up",
   intensity = 1,
-  pace = "early",
   flat = false,
+  delay = 0,
 }: ScrollRevealProps) => {
   const prefersReducedMotion = useReducedMotion();
-  const ref = useRef<HTMLDivElement>(null);
-
-  const offset = pace === "early"
-    ? (["start end", "center center"] as const)
-    : (["start 90%", "end 70%"] as const);
-
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset,
-  });
-
-  /*
-   * Output ranges derived from `from` direction.
-   * The slight scale overshoot (1.02 → 1.0) gives a subtle pop at landing.
-   */
-  const yRange = from === "up" ? [80 * intensity, 0] : [0, 0];
-  const xRange =
-    from === "left" ? [-90 * intensity, 0] :
-    from === "right" ? [90 * intensity, 0] : [0, 0];
-  const rotateXRange = !flat && from === "up" ? [-14 * intensity, 0] : [0, 0];
-  const rotateYRange = !flat && from === "left" ? [18 * intensity, 0]
-    : !flat && from === "right" ? [-18 * intensity, 0]
-    : [0, 0];
-
-  const opacity = useTransform(scrollYProgress, [0, 0.45], [0, 1]);
-  const y = useTransform(scrollYProgress, [0, 0.85], yRange);
-  const x = useTransform(scrollYProgress, [0, 0.85], xRange);
-  const rotateX = useTransform(scrollYProgress, [0, 0.85], rotateXRange);
-  const rotateY = useTransform(scrollYProgress, [0, 0.85], rotateYRange);
-
-  const startScale = from === "zoom" ? 0.78 : 0.94;
-  const scale = useTransform(
-    scrollYProgress,
-    [0, 0.78, 1],
-    [startScale, 1.02, 1.0],
-  );
 
   if (prefersReducedMotion) {
     return <div className={className}>{children}</div>;
   }
 
-  /*
-   * NOTE: previously this also animated `filter: blur`. Removed because animated
-   * filters allocate a fresh GPU surface each frame — when 10+ cards are
-   * simultaneously lerping their blur during scroll, low/mid-end GPUs stutter.
-   * The opacity + 3D transform + scale combo gives plenty of "lift" feel.
-   * `will-change` is *only* declared for properties we actually animate.
-   */
-  const style: MotionStyle = {
-    opacity,
-    x,
-    y,
-    rotateX,
-    rotateY,
-    scale,
-    transformPerspective: 1100,
-    transformStyle: "preserve-3d",
-    willChange: "transform, opacity",
-  };
+  /* Initial transform values per direction. Settled state is always all-zeros + scale 1. */
+  const startY = from === "up" ? 60 * intensity : 0;
+  const startX =
+    from === "left" ? -80 * intensity :
+    from === "right" ? 80 * intensity : 0;
+  const startRotateX = !flat && from === "up" ? -10 * intensity : 0;
+  const startRotateY =
+    !flat && from === "left" ? 14 * intensity :
+    !flat && from === "right" ? -14 * intensity : 0;
+  const startScale = from === "zoom" ? 0.85 : 0.95;
 
   return (
-    <motion.div ref={ref} style={style} className={className}>
+    <motion.div
+      initial={{
+        opacity: 0,
+        x: startX,
+        y: startY,
+        rotateX: startRotateX,
+        rotateY: startRotateY,
+        scale: startScale,
+      }}
+      whileInView={{
+        opacity: 1,
+        x: 0,
+        y: 0,
+        rotateX: 0,
+        rotateY: 0,
+        scale: 1,
+      }}
+      viewport={{ once: true, margin: "0px 0px 150px 0px" }}
+      transition={{
+        duration: 0.75,
+        delay,
+        ease: [0.16, 1, 0.3, 1],
+      }}
+      style={{
+        transformPerspective: 1100,
+        transformStyle: "preserve-3d",
+        willChange: "transform, opacity",
+      }}
+      className={className}
+    >
       {children}
     </motion.div>
   );

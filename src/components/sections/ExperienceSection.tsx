@@ -1,11 +1,16 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Briefcase, MapPin, Calendar } from "lucide-react";
 import { experiences } from "@/data/profile";
-import { ScrollReveal } from "@/components/animated";
+import { ScrollReveal, TiltCard, KineticTitle } from "@/components/animated";
+import { parseBulletWithCounts } from "@/components/animated/CountUp";
+import { useScene } from "@/contexts/SceneContext";
 
 const ExperienceSection = () => {
   const sectionRef = useRef<HTMLElement>(null);
+  const { registerSection } = useScene();
+
+  useEffect(() => registerSection("experience", sectionRef), [registerSection]);
 
   /*
    * Two scroll subscriptions:
@@ -27,18 +32,12 @@ const ExperienceSection = () => {
   const timelineScaleY = useTransform(timelineProgress, [0, 1], [0, 1]);
 
   return (
-    <section id="experience" ref={sectionRef} className="py-24 px-4">
+    <section id="experience" ref={sectionRef} className="py-24 px-4 relative">
       <motion.div style={{ y }} className="container mx-auto max-w-4xl">
-        {/* Section Title */}
-        <motion.h2
-          initial={{ opacity: 0, y: 20, scale: 0.95, filter: "blur(10px)" }}
-          whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
-          className="font-display text-3xl md:text-4xl font-bold mb-4 text-center text-gradient"
-        >
-          Experience
-        </motion.h2>
+        {/* Section Title — kinetic word-by-word reveal. */}
+        <h2 className="font-display text-3xl md:text-4xl font-bold mb-4 text-center text-gradient">
+          <KineticTitle text="Experience" />
+        </h2>
         <motion.p
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 0.6 }}
@@ -67,6 +66,7 @@ const ExperienceSection = () => {
                 <div className="relative md:pl-16">
                   <div className="hidden md:block timeline-dot top-8" />
 
+                  <TiltCard>
                   <motion.div
                     className="glass-strong rounded-3xl p-6 md:p-8"
                     whileHover={{
@@ -107,12 +107,13 @@ const ExperienceSection = () => {
                         >
                           <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0 shadow-[0_0_10px_hsl(var(--primary))]" />
                           <span className="text-sm md:text-base leading-relaxed">
-                            {bullet}
+                            {parseBulletWithCounts(bullet)}
                           </span>
                         </li>
                       ))}
                     </ul>
                   </motion.div>
+                  </TiltCard>
                 </div>
               </ScrollReveal>
             ))}

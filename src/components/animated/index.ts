@@ -6,4 +6,11 @@ export { default as SkillsDonut } from "./SkillsDonut";
 export { default as ScrollProgress } from "./ScrollProgress";
 export { default as SkillsGlobe } from "./SkillsGlobe";
 export { default as ScrollReveal } from "./ScrollReveal";
+export { default as ChapterStrip } from "./ChapterStrip";
+export { default as SceneCutLine } from "./SceneCutLine";
+export { default as TiltCard } from "./TiltCard";
+export { default as SectionCutSentinel } from "./SectionCutSentinel";
+export { default as KineticTitle } from "./KineticTitle";
+export { default as CountUp, parseBulletWithCounts } from "./CountUp";
+export { default as GlitchText } from "./GlitchText";
 

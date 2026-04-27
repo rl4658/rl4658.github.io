@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { SiReact, SiPython, SiTypescript, SiAmazon, SiDocker, SiPostgresql, SiNodedotjs, SiFastapi } from "react-icons/si";
-import { SkillsGlobe, ScrollReveal } from "@/components/animated";
+import { SkillsGlobe, ScrollReveal, TiltCard, KineticTitle } from "@/components/animated";
 import { skillCategories } from "@/data/profile";
+import { useScene } from "@/contexts/SceneContext";
 
 const techIcons = [
   { name: "React", icon: SiReact, color: "#61DAFB" },
@@ -18,6 +19,9 @@ const techIcons = [
 const SkillsSection = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const { registerSection } = useScene();
+
+  useEffect(() => registerSection("skills", sectionRef), [registerSection]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -39,15 +43,10 @@ const SkillsSection = () => {
   return (
     <section id="skills" ref={sectionRef} className="py-24 px-4 relative">
       <div className="container mx-auto max-w-6xl relative">
-        {/* Section Title */}
-        <motion.h2
-          initial={{ opacity: 0, y: 20, scale: 0.95, filter: "blur(10px)" }}
-          animate={isVisible ? { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" } : {}}
-          transition={{ duration: 0.6 }}
-          className="font-display text-3xl md:text-4xl font-bold mb-4 text-center text-gradient"
-        >
-          Skills & Technologies
-        </motion.h2>
+        {/* Section Title — kinetic word-by-word reveal. */}
+        <h2 className="font-display text-3xl md:text-4xl font-bold mb-4 text-center text-gradient">
+          <KineticTitle text="Skills & Technologies" />
+        </h2>
         <motion.p
           initial={{ opacity: 0 }}
           animate={isVisible ? { opacity: 1 } : {}}
@@ -79,6 +78,7 @@ const SkillsSection = () => {
               from={categoryIndex % 2 === 0 ? "left" : "right"}
               intensity={0.8}
             >
+              <TiltCard className="h-full">
               <motion.div
                 whileHover={{
                   y: -8,
@@ -114,6 +114,7 @@ const SkillsSection = () => {
                   ))}
                 </div>
               </motion.div>
+              </TiltCard>
             </ScrollReveal>
           ))}
           </div>

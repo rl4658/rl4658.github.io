@@ -1,10 +1,15 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { profile } from "@/data/profile";
-import { ScrollReveal } from "@/components/animated";
+import { ScrollReveal, TiltCard, KineticTitle } from "@/components/animated";
+import { useScene } from "@/contexts/SceneContext";
 
 const AboutSection = () => {
   const sectionRef = useRef<HTMLElement>(null);
+  const { registerSection } = useScene();
+
+  useEffect(() => registerSection("about", sectionRef), [registerSection]);
+
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"]
@@ -17,15 +22,16 @@ const AboutSection = () => {
     <section id="about" ref={sectionRef} className="py-32 px-4 relative">
       <motion.div style={{ y: parallaxY }} className="container mx-auto max-w-4xl">
         <ScrollReveal from="zoom" intensity={1}>
+        <TiltCard maxTilt={4}>
         <div className="glass-strong rounded-3xl p-8 md:p-12 relative overflow-hidden">
           {/* Subtle background glow that moves opposite to scroll */}
           <motion.div 
             style={{ y: useTransform(scrollYProgress, [0, 1], [-50, 50]) }}
             className="absolute -top-20 -right-20 w-64 h-64 bg-primary/20 rounded-full blur-[80px] pointer-events-none"
           />
-          {/* Section Title */}
+          {/* Section Title — kinetic word-by-word reveal. */}
           <h2 className="font-display text-3xl md:text-4xl font-bold mb-6 text-gradient">
-            About Me
+            <KineticTitle text="About Me" />
           </h2>
 
           {/* Bio */}
@@ -50,6 +56,7 @@ const AboutSection = () => {
             ))}
           </div>
         </div>
+        </TiltCard>
         </ScrollReveal>
       </motion.div>
     </section>

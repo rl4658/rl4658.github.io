@@ -1,24 +1,22 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { GraduationCap, Calendar, Award } from "lucide-react";
 import { education } from "@/data/profile";
-import { ScrollReveal } from "@/components/animated";
+import { ScrollReveal, TiltCard, KineticTitle } from "@/components/animated";
+import { useScene } from "@/contexts/SceneContext";
 
 const EducationSection = () => {
   const sectionRef = useRef<HTMLElement>(null);
+  const { registerSection } = useScene();
+
+  useEffect(() => registerSection("education", sectionRef), [registerSection]);
 
   return (
-    <section id="education" ref={sectionRef} className="py-24 px-4">
+    <section id="education" ref={sectionRef} className="py-24 px-4 relative">
       <div className="container mx-auto max-w-4xl">
-        <motion.h2
-          initial={{ opacity: 0, y: 20, scale: 0.95, filter: "blur(10px)" }}
-          whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
-          className="font-display text-3xl md:text-4xl font-bold mb-4 text-center text-gradient"
-        >
-          Education
-        </motion.h2>
+        <h2 className="font-display text-3xl md:text-4xl font-bold mb-4 text-center text-gradient">
+          <KineticTitle text="Education" />
+        </h2>
         <motion.p
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 0.6 }}
@@ -36,6 +34,7 @@ const EducationSection = () => {
               from={index % 2 === 0 ? "left" : "right"}
               intensity={1}
             >
+              <TiltCard>
               <motion.div
                 whileHover={{
                   y: -8,
@@ -82,6 +81,7 @@ const EducationSection = () => {
                   </ul>
                 )}
               </motion.div>
+              </TiltCard>
             </ScrollReveal>
           ))}
         </div>

@@ -1,11 +1,17 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Code, Trophy } from "lucide-react";
 import { projects, awards } from "@/data/profile";
-import { ScrollReveal } from "@/components/animated";
+import { ScrollReveal, TiltCard, KineticTitle } from "@/components/animated";
+import GlitchText from "@/components/animated/GlitchText";
+import { useScene } from "@/contexts/SceneContext";
 
 const ProjectsSection = () => {
   const sectionRef = useRef<HTMLElement>(null);
+  const { registerSection } = useScene();
+
+  useEffect(() => registerSection("projects", sectionRef), [registerSection]);
+
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
@@ -14,17 +20,11 @@ const ProjectsSection = () => {
   const y = useTransform(scrollYProgress, [0, 1], [50, -50]);
 
   return (
-    <section id="projects" ref={sectionRef} className="py-24 px-4">
+    <section id="projects" ref={sectionRef} className="py-24 px-4 relative">
       <motion.div style={{ y }} className="container mx-auto max-w-4xl">
-        <motion.h2
-          initial={{ opacity: 0, y: 20, scale: 0.95, filter: "blur(10px)" }}
-          whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
-          className="font-display text-3xl md:text-4xl font-bold mb-4 text-center text-gradient"
-        >
-          Projects & Awards
-        </motion.h2>
+        <h2 className="font-display text-3xl md:text-4xl font-bold mb-4 text-center text-gradient">
+          <KineticTitle text="Projects & Awards" />
+        </h2>
         <motion.p
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 0.6 }}
@@ -43,6 +43,7 @@ const ProjectsSection = () => {
               from={index % 2 === 0 ? "left" : "right"}
               intensity={1}
             >
+              <TiltCard className="h-full">
               <motion.div
                 whileHover={{
                   y: -8,
@@ -56,7 +57,7 @@ const ProjectsSection = () => {
                   <span className="font-mono font-medium text-sm">{project.tech}</span>
                 </div>
                 <h3 className="font-display text-xl md:text-2xl font-bold text-foreground mb-4">
-                  {project.name}
+                  <GlitchText text={project.name}>{project.name}</GlitchText>
                 </h3>
                 <ul className="space-y-3">
                   {project.bullets.map((bullet, bulletIndex) => (
@@ -70,6 +71,7 @@ const ProjectsSection = () => {
                   ))}
                 </ul>
               </motion.div>
+              </TiltCard>
             </ScrollReveal>
           ))}
 
@@ -78,6 +80,7 @@ const ProjectsSection = () => {
             from={projects.length % 2 === 0 ? "left" : "right"}
             intensity={1}
           >
+            <TiltCard className="h-full">
             <motion.div
               whileHover={{
                 y: -8,
@@ -102,6 +105,7 @@ const ProjectsSection = () => {
                 ))}
               </ul>
             </motion.div>
+            </TiltCard>
           </ScrollReveal>
         </div>
       </motion.div>

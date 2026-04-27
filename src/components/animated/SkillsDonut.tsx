@@ -1,26 +1,52 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useIntro, type IntroPhase } from "@/contexts/IntroContext";
+import { useScene, type Scene } from "@/contexts/SceneContext";
 import * as THREE from "three";
 
+/* ------------------------------------------------------------------------- */
+/* Scene marks for the donut.                                                 */
+/*                                                                            */
+/* Each scene defines a *target* transform. The donut lerps toward its scene  */
+/* mark every frame, so it visibly travels between marks as the user scrolls. */
+/* This replaces the old "rotation/position keyed to raw scrollY" behavior    */
+/* — which felt like noise — with intentional, choreographed motion.           */
+/* ------------------------------------------------------------------------- */
+interface DonutMark {
+  posX: number;
+  posY: number;
+  posZ: number;
+  scale: number;
+  velScale: number;       // multiplier on `rotationSpeed` for x/y rotation
+  emissive: number;       // material emissive intensity
+  opacity: number;        // material opacity
+  cameraZ: number;        // camera dolly target
+}
+
 /*
- * Module-level scrollY cache, kept up-to-date by a single passive listener.
- * Reading `window.scrollY` is generally cheap, but `useFrame` reads it 3× per
- * frame at 60fps — caching it once per actual scroll event removes any
- * chance of layout-read overhead and keeps the read deterministic.
+ * Marks are tuned so the donut reads as *ambient* rather than dominant — the
+ * original portfolio used opacity 0.18 and the user liked that ambient feel.
+ * We preserve that low-opacity ambient character while giving each scene its
+ * own position/scale signature so the donut visibly relocates between scenes.
+ *
+ * World-unit positions are capped at ±2.5 so the donut never clips entirely
+ * off-screen on portrait/mobile viewports (where horizontal half-extent at
+ * camera z≈10 is only ~2.3 units).
  */
-let cachedScrollY = typeof window !== "undefined" ? window.scrollY : 0;
-let scrollListenerInstalled = false;
-const installScrollListener = () => {
-  if (scrollListenerInstalled || typeof window === "undefined") return;
-  scrollListenerInstalled = true;
-  cachedScrollY = window.scrollY;
-  window.addEventListener(
-    "scroll",
-    () => { cachedScrollY = window.scrollY; },
-    { passive: true },
-  );
+const DONUT_MARKS: Record<Scene, DonutMark> = {
+  /* Hero: slightly right of center, ambient density (not foreground). */
+  hero:       { posX:  1.4, posY:  0.0, posZ:  0.0, scale: 1.00, velScale: 1.00, emissive: 0.10, opacity: 0.22, cameraZ:  9 },
+  /* About: drifts to upper-right, smaller — a "moon" you read next to. */
+  about:      { posX:  2.2, posY:  1.5, posZ: -1.0, scale: 0.55, velScale: 0.55, emissive: 0.10, opacity: 0.22, cameraZ: 10 },
+  /* Experience: slides to the left, mid-size — paces with the timeline draw. */
+  experience: { posX: -2.2, posY:  0.2, posZ: -0.8, scale: 0.70, velScale: 1.10, emissive: 0.12, opacity: 0.25, cameraZ: 10 },
+  /* Skills: fades almost to nothing — globe takes the stage. */
+  skills:     { posX:  0.0, posY: -2.0, posZ: -2.0, scale: 0.40, velScale: 0.40, emissive: 0.04, opacity: 0.06, cameraZ: 12 },
+  /* Education: returns to the lower-right, mirrored from About. */
+  education:  { posX:  2.2, posY: -1.5, posZ: -1.0, scale: 0.55, velScale: 0.55, emissive: 0.10, opacity: 0.22, cameraZ: 10 },
+  /* Projects: drifts back into the distance, like a planet receding. */
+  projects:   { posX: -0.6, posY:  0.0, posZ: -1.5, scale: 0.85, velScale: 0.80, emissive: 0.08, opacity: 0.16, cameraZ: 11 },
 };
 
 interface SkillsDonutProps {
@@ -32,11 +58,7 @@ const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 const SkillsDonut = ({ rotationSpeed = 0.003 }: SkillsDonutProps) => {
   const prefersReducedMotion = useReducedMotion();
   const { phase, diveProgressRef } = useIntro();
-
-  /* Install the passive scroll listener once, on first mount. */
-  useEffect(() => {
-    installScrollListener();
-  }, []);
+  const { activeSceneRef } = useScene();
 
   if (prefersReducedMotion) {
     /* No 3D at all for reduced-motion users. The intro is also skipped via context. */
@@ -72,6 +94,7 @@ const SkillsDonut = ({ rotationSpeed = 0.003 }: SkillsDonutProps) => {
           rotationSpeed={rotationSpeed}
           phase={phase}
           diveProgressRef={diveProgressRef}
+          activeSceneRef={activeSceneRef}
         />
         <ParticleField phase={phase} diveProgressRef={diveProgressRef} />
       </Canvas>
@@ -87,10 +110,12 @@ const DonutMesh = ({
   rotationSpeed,
   phase,
   diveProgressRef,
+  activeSceneRef,
 }: {
   rotationSpeed: number;
   phase: IntroPhase;
   diveProgressRef: React.MutableRefObject<number>;
+  activeSceneRef: React.MutableRefObject<Scene>;
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const matRef = useRef<THREE.MeshStandardMaterial>(null);
@@ -102,6 +127,13 @@ const DonutMesh = ({
    */
   const rot = useRef({ x: 0, y: 0 });
   const vel = useRef({ x: 0, y: 0 });
+
+  /*
+   * Live state lerped toward the active scene mark (ambient phase only).
+   * Initialized to the hero mark so the first frame after the dive is
+   * visually consistent with where the dive code left the donut sitting.
+   */
+  const live = useRef<DonutMark>({ ...DONUT_MARKS.hero });
 
   useFrame(({ camera }) => {
     if (!meshRef.current || !matRef.current) return;
@@ -124,12 +156,17 @@ const DonutMesh = ({
       targetVelX = rotationSpeed * 0.8 * spinBoost;
       targetVelY = rotationSpeed * 1.2 * spinBoost;
     } else {
-      // Ambient: gentle drift. The donut keeps living its life behind your text.
-      targetVelX = rotationSpeed * 0.25;
-      targetVelY = rotationSpeed * 0.4;
+      /*
+       * Ambient phase: spin velocity comes from the active scene mark.
+       * Multiplied by the base rotationSpeed so the spin "feels" consistent
+       * with the intro/dive scaling.
+       */
+      const mark = DONUT_MARKS[activeSceneRef.current];
+      targetVelX = rotationSpeed * 0.8 * mark.velScale;
+      targetVelY = rotationSpeed * 1.2 * mark.velScale;
     }
 
-    /* 2. Lerp velocity toward target — eliminates the snap when phase changes. */
+    /* 2. Lerp velocity toward target — eliminates the snap when phase or scene changes. */
     vel.current.x = lerp(vel.current.x, targetVelX, 0.06);
     vel.current.y = lerp(vel.current.y, targetVelY, 0.06);
 
@@ -137,19 +174,10 @@ const DonutMesh = ({
     rot.current.x += vel.current.x;
     rot.current.y += vel.current.y;
 
-    /* 4. In ambient phase, scroll modulates rotation *additively* — not exclusively. */
-    let scrollX = 0;
-    let scrollY = 0;
-    if (phase === "done") {
-      const sy = cachedScrollY;
-      scrollX = sy * 0.00035;
-      scrollY = sy * 0.0005;
-    }
+    meshRef.current.rotation.x = rot.current.x;
+    meshRef.current.rotation.y = rot.current.y;
 
-    meshRef.current.rotation.x = rot.current.x + scrollX;
-    meshRef.current.rotation.y = rot.current.y + scrollY;
-
-    /* 5. Phase-specific scale / position / camera / material. */
+    /* 4. Phase-specific scale / position / camera / material. */
     if (phase === "intro") {
       const breathe = 1.55 + Math.sin(performance.now() * 0.0008) * 0.05;
       meshRef.current.scale.setScalar(breathe);
@@ -157,6 +185,15 @@ const DonutMesh = ({
       camera.position.z = 7;
       matRef.current.emissiveIntensity = 0.65;
       matRef.current.opacity = 0.78;
+
+      /* Keep `live` in sync with the intro state so the first ambient frame is smooth. */
+      live.current.posX = 0;
+      live.current.posY = 0;
+      live.current.posZ = 0;
+      live.current.scale = breathe;
+      live.current.cameraZ = 7;
+      live.current.emissive = 0.65;
+      live.current.opacity = 0.78;
     } else if (phase === "diving") {
       /*
        * Dive curve:
@@ -187,15 +224,43 @@ const DonutMesh = ({
       camera.position.z = camZ;
       matRef.current.emissiveIntensity = emissive;
       matRef.current.opacity = opacity;
+
+      live.current.posX = 0;
+      live.current.posY = 0;
+      live.current.posZ = 0;
+      live.current.scale = scale;
+      live.current.cameraZ = camZ;
+      live.current.emissive = emissive;
+      live.current.opacity = opacity;
     } else {
-      /* Ambient: subtle scroll-driven breathing & vertical sway, low-key glow. */
-      const sy = cachedScrollY;
-      const breathe = 1 + Math.sin(sy * 0.005) * 0.18;
-      meshRef.current.scale.setScalar(breathe);
-      meshRef.current.position.y = Math.sin(sy * 0.002) * 1.6;
-      camera.position.z = 9;
-      matRef.current.emissiveIntensity = 0.05;
-      matRef.current.opacity = 0.18;
+      /*
+       * Ambient: lerp every transform component toward the active scene's mark.
+       * Different lerp rates per property so the journey feels orchestrated:
+       *  - position/scale lerp slowly (0.04) → the donut visibly travels.
+       *  - camera dollies even slower (0.03) → deliberate, cinematic feel.
+       *  - emissive/opacity catch up faster (0.07) → glow change reads instantly.
+       */
+      const mark = DONUT_MARKS[activeSceneRef.current];
+      const POS_LERP = 0.04;
+      const CAM_LERP = 0.03;
+      const MAT_LERP = 0.07;
+
+      live.current.posX = lerp(live.current.posX, mark.posX, POS_LERP);
+      live.current.posY = lerp(live.current.posY, mark.posY, POS_LERP);
+      live.current.posZ = lerp(live.current.posZ, mark.posZ, POS_LERP);
+      live.current.scale = lerp(live.current.scale, mark.scale, POS_LERP);
+      live.current.cameraZ = lerp(live.current.cameraZ, mark.cameraZ, CAM_LERP);
+      live.current.emissive = lerp(live.current.emissive, mark.emissive, MAT_LERP);
+      live.current.opacity = lerp(live.current.opacity, mark.opacity, MAT_LERP);
+
+      /* Tiny continuous breathe so the donut never reads as fully static. */
+      const breatheNudge = 1 + Math.sin(performance.now() * 0.0005) * 0.025;
+
+      meshRef.current.position.set(live.current.posX, live.current.posY, live.current.posZ);
+      meshRef.current.scale.setScalar(live.current.scale * breatheNudge);
+      camera.position.z = live.current.cameraZ;
+      matRef.current.emissiveIntensity = live.current.emissive;
+      matRef.current.opacity = live.current.opacity;
     }
 
     camera.lookAt(0, 0, 0);
