@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { motion, AnimatePresence } from "framer-motion";
@@ -7,8 +7,44 @@ import { GamesGlobe, TiltCard } from "@/components/animated";
 import { profile } from "@/data/profile";
 
 /* ------------------------------------------------------------------ */
-/* Typewriter — types out a string character by character, then calls  */
-/* onDone when complete. Speed is ms per character.                    */
+/* Falling Stars — CSS-only particles that rain down the background.  */
+/* Lightweight alternative to Three.js for the secondary page.        */
+/* ------------------------------------------------------------------ */
+const STAR_COUNT = 60;
+
+const FallingStars = () => {
+  const stars = useMemo(() => {
+    return Array.from({ length: STAR_COUNT }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      delay: Math.random() * 8,
+      duration: 4 + Math.random() * 6,
+      size: 1 + Math.random() * 2,
+      opacity: 0.15 + Math.random() * 0.4,
+    }));
+  }, []);
+
+  return (
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden>
+      {stars.map((s) => (
+        <div
+          key={s.id}
+          className="absolute rounded-full bg-cyan-300"
+          style={{
+            left: `${s.left}%`,
+            width: `${s.size}px`,
+            height: `${s.size}px`,
+            opacity: s.opacity,
+            animation: `starfall ${s.duration}s ${s.delay}s linear infinite`,
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
+/* ------------------------------------------------------------------ */
+/* Typewriter — types out a string character by character.             */
 /* ------------------------------------------------------------------ */
 const Typewriter = ({
   text,
@@ -54,36 +90,43 @@ const Typewriter = ({
 };
 
 /* ------------------------------------------------------------------ */
-/* Content blocks — each one appears sequentially after the previous  */
-/* finishes typing. This creates the "it's typing itself" feel.       */
+/* Content blocks                                                      */
 /* ------------------------------------------------------------------ */
 interface ContentBlock {
   id: string;
-  type: "text" | "heading" | "image" | "globe" | "spacer";
+  type: "text" | "heading" | "image" | "globe" | "spacer" | "divider";
   content?: string;
   src?: string;
   alt?: string;
 }
 
 const BLOCKS: ContentBlock[] = [
-  { id: "h1", type: "heading", content: "> beyond the code" },
+  { id: "h1", type: "heading", content: "beyond the code _" },
   { id: "spacer-0", type: "spacer" },
+  { id: "div-0", type: "divider" },
+  { id: "spacer-0b", type: "spacer" },
   { id: "p1", type: "text", content: "I'm pretty career-driven — I genuinely love building things and solving hard problems. But I also think the best engineers are the ones who actually log off sometimes." },
   { id: "spacer-1", type: "spacer" },
-  { id: "p2", type: "text", content: "Most days after work you'll find me at the gym or in the kitchen trying to make the perfect pasta. I'm weirdly competitive about both." },
+  { id: "p2", type: "text", content: "Most days after work you'll find me at the gym or in the kitchen trying to perfect my pasta. I'm weirdly competitive about both." },
   { id: "spacer-2", type: "spacer" },
-  { id: "h2", type: "heading", content: "> the gaming arc" },
+  { id: "div-1", type: "divider" },
   { id: "spacer-3", type: "spacer" },
-  { id: "p3", type: "text", content: "I used to be Diamond in League of Legends. That era of my life taught me more about tilt management and team communication than any standup ever has. I've since retired from ranked but the competitive brain never really turned off." },
+  { id: "h2", type: "heading", content: "the gaming arc _" },
   { id: "spacer-4", type: "spacer" },
-  { id: "p4", type: "text", content: "Recently finished Hollow Knight and it absolutely wrecked me (in a good way). Currently vibing with single-player stuff more — something about exploring at your own pace hits different after a long day of shipping code." },
+  { id: "p3", type: "text", content: "I used to be Diamond in League of Legends. That era taught me more about tilt management and team communication than any standup meeting ever has. I've retired from ranked but the competitive brain never really turned off." },
   { id: "spacer-5", type: "spacer" },
-  { id: "img1", type: "image", src: "/images/hollow_knight.png", alt: "Hollow Knight floating in space" },
+  { id: "p4", type: "text", content: "Recently finished Hollow Knight and it absolutely wrecked me (in a good way). Currently vibing with single-player stuff more — something about exploring at your own pace hits different." },
   { id: "spacer-6", type: "spacer" },
-  { id: "h3", type: "heading", content: "> games i've played" },
+  { id: "img1", type: "image", src: "/images/hollow_knight.png", alt: "Hollow Knight floating in space" },
   { id: "spacer-7", type: "spacer" },
-  { id: "globe", type: "globe" },
+  { id: "div-2", type: "divider" },
   { id: "spacer-8", type: "spacer" },
+  { id: "h3", type: "heading", content: "games i've played _" },
+  { id: "spacer-9", type: "spacer" },
+  { id: "globe", type: "globe" },
+  { id: "spacer-10", type: "spacer" },
+  { id: "div-3", type: "divider" },
+  { id: "spacer-11", type: "spacer" },
   { id: "p5", type: "text", content: "That's pretty much it. I like building cool stuff, lifting heavy things, cooking carbs, and playing games. Simple vibes." },
 ];
 
@@ -98,27 +141,31 @@ const Hobbies = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  /* When a text block finishes typing, reveal the next block */
+  /* When a text/heading block finishes typing, reveal the next block */
   const revealNext = useCallback(() => {
     setVisibleCount((c) => {
       const next = c + 1;
-      /* Auto-reveal spacers and non-text blocks immediately after the previous */
       const nextBlock = BLOCKS[next];
-      if (nextBlock && (nextBlock.type === "spacer" || nextBlock.type === "image" || nextBlock.type === "globe")) {
-        /* Chain: reveal this one, then schedule the next */
-        setTimeout(() => setVisibleCount((cc) => cc + 1), 100);
+      /* Auto-reveal spacers, dividers, images, globe immediately */
+      if (
+        nextBlock &&
+        (nextBlock.type === "spacer" ||
+          nextBlock.type === "divider" ||
+          nextBlock.type === "image" ||
+          nextBlock.type === "globe")
+      ) {
+        setTimeout(() => setVisibleCount((cc) => cc + 1), 80);
       }
       return next;
     });
   }, []);
 
-  /* Kick off the first block after a brief pause (arriving from warp) */
+  /* Kick off first block after a brief entrance pause */
   useEffect(() => {
-    const t = setTimeout(() => setVisibleCount(1), 600);
+    const t = setTimeout(() => setVisibleCount(1), 500);
     return () => clearTimeout(t);
   }, []);
 
-  /* Auto-advance headings (they type fast and should chain into the next block) */
   const handleBlockDone = useCallback(
     (block: ContentBlock) => {
       if (block.type === "heading" || block.type === "text") {
@@ -134,15 +181,50 @@ const Hobbies = () => {
         <title>Beyond the Code | {profile.name}</title>
       </Helmet>
 
+      {/* Starfall keyframe — injected once */}
+      <style>{`
+        @keyframes starfall {
+          0% { transform: translateY(-10vh); opacity: 0; }
+          10% { opacity: 1; }
+          90% { opacity: 1; }
+          100% { transform: translateY(110vh); opacity: 0; }
+        }
+      `}</style>
+
       <div className="relative min-h-screen bg-[#020617] overflow-x-hidden">
         <CursorGlow />
+        <FallingStars />
 
-        {/* Faint donut wireframe ring as a subtle background reminder */}
+        {/* Pixel world background — beautiful retro open-world scene */}
         <div
-          className="fixed inset-0 pointer-events-none"
+          className="fixed inset-0 z-0 pointer-events-none"
+          style={{
+            backgroundImage: "url('/images/pixel_world_bg.png')",
+            backgroundSize: "cover",
+            backgroundPosition: "center bottom",
+            backgroundRepeat: "no-repeat",
+            opacity: 0.12,
+            filter: "saturate(1.3)",
+          }}
+          aria-hidden
+        />
+
+        {/* Top gradient overlay — ensures content readability */}
+        <div
+          className="fixed inset-0 z-[1] pointer-events-none"
           style={{
             background:
-              "radial-gradient(ellipse at center, rgba(34,211,238,0.03) 0%, transparent 60%)",
+              "linear-gradient(to bottom, rgba(2,6,23,0.85) 0%, rgba(2,6,23,0.5) 30%, rgba(2,6,23,0.5) 70%, rgba(2,6,23,0.85) 100%)",
+          }}
+          aria-hidden
+        />
+
+        {/* Subtle radial glow at center */}
+        <div
+          className="fixed inset-0 z-[1] pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse at 50% 30%, rgba(34,211,238,0.06) 0%, transparent 60%)",
           }}
           aria-hidden
         />
@@ -151,9 +233,9 @@ const Hobbies = () => {
         <motion.button
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
+          transition={{ delay: 0.2 }}
           onClick={() => navigate("/")}
-          className="fixed top-6 left-6 md:top-10 md:left-10 z-50 group flex items-center gap-2 text-foreground/40 hover:text-primary transition-colors font-mono text-xs uppercase tracking-[0.2em]"
+          className="fixed top-6 left-6 md:top-8 md:left-10 z-50 group flex items-center gap-2 text-foreground/30 hover:text-primary transition-colors font-mono text-xs uppercase tracking-[0.2em]"
         >
           <span className="group-hover:-translate-x-1 transition-transform">
             ←
@@ -161,90 +243,105 @@ const Hobbies = () => {
           back
         </motion.button>
 
-        {/* Main content — top-left aligned, terminal-style */}
-        <main className="max-w-3xl px-8 md:px-16 pt-20 md:pt-28 pb-20 relative z-10">
-          <AnimatePresence>
-            {BLOCKS.slice(0, visibleCount).map((block, i) => (
-              <motion.div
-                key={block.id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
-              >
-                {block.type === "heading" && (
-                  <h2 className="font-mono text-primary/80 text-sm md:text-base tracking-wider mb-1">
-                    <Typewriter
-                      text={block.content!}
-                      speed={25}
-                      onDone={() => handleBlockDone(block)}
+        {/* Main content — centered, justified text */}
+        <main className="relative z-10 flex flex-col items-center pt-16 md:pt-24 pb-20 px-6">
+          <div className="w-full max-w-2xl text-justify">
+            <AnimatePresence>
+              {BLOCKS.slice(0, visibleCount).map((block) => (
+                <motion.div
+                  key={block.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, ease: "easeOut" }}
+                >
+                  {block.type === "heading" && (
+                    <h2 className="font-mono text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400 mb-2 text-center">
+                      <Typewriter
+                        text={block.content!}
+                        speed={30}
+                        onDone={() => handleBlockDone(block)}
+                      />
+                    </h2>
+                  )}
+
+                  {block.type === "text" && (
+                    <p className="text-foreground/65 text-base md:text-lg leading-relaxed font-light">
+                      <Typewriter
+                        text={block.content!}
+                        speed={10}
+                        onDone={() => handleBlockDone(block)}
+                      />
+                    </p>
+                  )}
+
+                  {block.type === "spacer" && <div className="h-5 md:h-6" />}
+
+                  {block.type === "divider" && (
+                    <motion.div
+                      initial={{ scaleX: 0 }}
+                      animate={{ scaleX: 1 }}
+                      transition={{ duration: 0.6, ease: "easeOut" }}
+                      className="h-px w-full bg-gradient-to-r from-transparent via-primary/30 to-transparent origin-left"
                     />
-                  </h2>
-                )}
+                  )}
 
-                {block.type === "text" && (
-                  <p className="text-foreground/70 text-base md:text-lg leading-relaxed font-light">
-                    <Typewriter
-                      text={block.content!}
-                      speed={12}
-                      onDone={() => handleBlockDone(block)}
-                    />
-                  </p>
-                )}
-
-                {block.type === "spacer" && <div className="h-6 md:h-8" />}
-
-                {block.type === "image" && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
-                    onAnimationComplete={() => revealNext()}
-                  >
-                    <TiltCard maxTilt={3}>
-                      <div className="rounded-2xl overflow-hidden border border-white/5 shadow-2xl relative group max-w-md">
-                        <img
-                          src={block.src}
-                          alt={block.alt}
-                          className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/80 to-transparent pointer-events-none" />
-                        <div className="absolute bottom-4 left-4">
-                          <span className="font-mono text-xs text-primary/70 tracking-wider uppercase">
-                            recently conquered hallownest
-                          </span>
+                  {block.type === "image" && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.92 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.7, ease: "easeOut" }}
+                      onAnimationComplete={() => revealNext()}
+                      className="flex justify-center"
+                    >
+                      <TiltCard maxTilt={4}>
+                        <div className="rounded-2xl overflow-hidden shadow-[0_0_60px_rgba(34,211,238,0.1)] relative group max-w-sm">
+                          <img
+                            src={block.src}
+                            alt={block.alt}
+                            className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/70 to-transparent pointer-events-none" />
+                          <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between">
+                            <span className="font-mono text-[10px] text-primary/60 tracking-[0.15em] uppercase">
+                              hallownest conquered
+                            </span>
+                            <span className="font-mono text-[10px] text-foreground/30">
+                              ♥ ♥ ♥
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    </TiltCard>
-                  </motion.div>
-                )}
+                      </TiltCard>
+                    </motion.div>
+                  )}
 
-                {block.type === "globe" && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.8 }}
-                    onAnimationComplete={() => revealNext()}
-                    className="w-full max-w-lg aspect-square rounded-2xl overflow-hidden border border-white/5 bg-[#020617]/50 relative"
-                  >
-                    <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,transparent_20%,#020617_100%)] z-10" />
-                    <GamesGlobe />
-                  </motion.div>
-                )}
+                  {block.type === "globe" && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.8 }}
+                      onAnimationComplete={() => revealNext()}
+                      className="w-full aspect-square md:aspect-[4/3] max-w-lg mx-auto rounded-2xl overflow-hidden bg-transparent relative"
+                    >
+                      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,transparent_30%,#020617_100%)] z-10" />
+                      <GamesGlobe />
+                    </motion.div>
+                  )}
+                </motion.div>
+              ))}
+            </AnimatePresence>
+
+            {/* Blinking terminal cursor at the end */}
+            {visibleCount >= BLOCKS.length && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="mt-6 flex justify-center"
+              >
+                <span className="inline-block w-3 h-5 bg-primary/50 animate-pulse rounded-sm" />
               </motion.div>
-            ))}
-          </AnimatePresence>
-
-          {/* Blinking cursor at the very end when all blocks are typed */}
-          {visibleCount >= BLOCKS.length && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="mt-4"
-            >
-              <span className="inline-block w-[8px] h-[18px] bg-primary/60 animate-pulse" />
-            </motion.div>
-          )}
+            )}
+          </div>
         </main>
       </div>
     </>

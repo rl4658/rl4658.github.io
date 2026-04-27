@@ -86,11 +86,11 @@ export const SceneProvider = ({ children }: { children: ReactNode }) => {
 
   const triggerWarp = useCallback((callback: () => void) => {
     setIsWarping(true);
-    // Give the hyperspace zoom 2s to fully play out
+    // Phase 1: spin-up 1.2s + Phase 2: zoom-through 1.8s = 3s total
     setTimeout(() => {
       callback();
       setTimeout(() => setIsWarping(false), 100);
-    }, 2000);
+    }, 3000);
   }, []);
 
   const recomputeActive = useCallback(() => {

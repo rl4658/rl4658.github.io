@@ -131,6 +131,14 @@ const DonutMesh = ({
    */
   const live = useRef<DonutMark>({ ...DONUT_MARKS.hero });
 
+  /* Track when the warp started so we can phase the animation */
+  const warpStart = useRef(0);
+
+  /* Reset warp timer when warp ends */
+  if (!isWarping && warpStart.current !== 0) {
+    warpStart.current = 0;
+  }
+
   useFrame(({ camera }) => {
     if (!meshRef.current || !matRef.current) return;
 
@@ -230,15 +238,46 @@ const DonutMesh = ({
       live.current.opacity = opacity;
     } else if (isWarping) {
       /*
-       * Warp hyperspace jump:
-       * Donut scales up massively, camera dollies to 0 (so we fly through the hole),
-       * and wireframe fades out to reveal the next page.
+       * Two-phase warp transition:
+       *   Phase 1 (0–1.2s): Donut centers, spins faster and faster, glows bright
+       *   Phase 2 (1.2s–end): Camera punches through the hole, wireframe fades
        */
-      live.current.scale = lerp(live.current.scale, 25, 0.04);
-      live.current.cameraZ = lerp(live.current.cameraZ, 0.5, 0.05);
-      live.current.opacity = lerp(live.current.opacity, 0, 0.08);
-      
-      /* Keep centered */
+      if (warpStart.current === 0) warpStart.current = performance.now();
+      const elapsed = (performance.now() - warpStart.current) / 1000; // seconds
+
+      /* Phase 1: Spin-up — center the donut, accelerate rotation, increase glow */
+      if (elapsed < 1.2) {
+        const k = elapsed / 1.2; // 0→1 over 1.2s
+        const spinMultiplier = 1 + k * k * 20; // exponential spin acceleration
+
+        /* Override velocity directly for dramatic spin-up */
+        vel.current.x = rotationSpeed * 0.8 * spinMultiplier;
+        vel.current.y = rotationSpeed * 1.2 * spinMultiplier;
+
+        /* Center the donut and hold at hero size */
+        live.current.posX = lerp(live.current.posX, 0, 0.1);
+        live.current.posY = lerp(live.current.posY, 0, 0.1);
+        live.current.posZ = lerp(live.current.posZ, 0, 0.1);
+        live.current.scale = lerp(live.current.scale, 1.2, 0.06);
+        live.current.cameraZ = lerp(live.current.cameraZ, 7, 0.06);
+
+        /* Glow brighter as it spins faster */
+        live.current.emissive = lerp(live.current.emissive, 1.2, 0.08);
+        live.current.opacity = lerp(live.current.opacity, 0.9, 0.08);
+      } else {
+        /* Phase 2: Zoom through — scale up massively, camera to 0, wireframe fades */
+        const zoomK = Math.min((elapsed - 1.2) / 1.3, 1); // 0→1 over remaining 1.3s
+
+        live.current.scale = lerp(live.current.scale, 30, 0.06);
+        live.current.cameraZ = lerp(live.current.cameraZ, 0.2, 0.07);
+        live.current.opacity = lerp(live.current.opacity, 0, 0.06);
+        live.current.emissive = lerp(live.current.emissive, 2.0, 0.05);
+
+        /* Spin continues at max speed */
+        vel.current.x = rotationSpeed * 25;
+        vel.current.y = rotationSpeed * 35;
+      }
+
       meshRef.current.position.set(live.current.posX, live.current.posY, live.current.posZ);
       meshRef.current.scale.setScalar(live.current.scale);
       camera.position.z = live.current.cameraZ;
