@@ -86,6 +86,9 @@ const SkillsDonut = ({ rotationSpeed = 0.003 }: SkillsDonutProps) => {
         dpr={[1, 1.75]}
         gl={{ antialias: true, alpha: true }}
       >
+        {/* Deep space fog for depth */}
+        <fog attach="fog" args={['#020617', 12, 28]} />
+
         <ambientLight intensity={0.18} />
         <pointLight position={[10, 10, 10]} intensity={0.8} color="#22d3ee" />
         <pointLight position={[-10, -8, 4]} intensity={0.5} color="#10b981" />
@@ -97,6 +100,7 @@ const SkillsDonut = ({ rotationSpeed = 0.003 }: SkillsDonutProps) => {
           activeSceneRef={activeSceneRef}
         />
         <ParticleField phase={phase} diveProgressRef={diveProgressRef} />
+        <NebulaField phase={phase} />
       </Canvas>
     </div>
   );
@@ -284,10 +288,12 @@ const DonutMesh = ({
 };
 
 /* ------------------------------------------------------------------------- */
-/* Particle field — drifts during intro, streaks radially during dive.       */
+/* Particle field — drifts during intro, streaks during dive, persists as    */
+/* ambient starfield in the "done" phase so the donut feels like it's        */
+/* floating in space.                                                        */
 /* ------------------------------------------------------------------------- */
 
-const PARTICLE_COUNT = 320;
+const PARTICLE_COUNT = 500;
 
 const ParticleField = ({
   phase,
@@ -297,13 +303,14 @@ const ParticleField = ({
   diveProgressRef: React.MutableRefObject<number>;
 }) => {
   const pointsRef = useRef<THREE.Points>(null);
+  const matRef = useRef<THREE.PointsMaterial>(null);
 
   /* Pre-compute base positions on a hollow sphere shell + per-point streak vectors. */
   const { basePositions, streakDirs } = useMemo(() => {
     const base = new Float32Array(PARTICLE_COUNT * 3);
     const dirs = new Float32Array(PARTICLE_COUNT * 3);
     for (let i = 0; i < PARTICLE_COUNT; i++) {
-      const r = 5 + Math.random() * 12;
+      const r = 4 + Math.random() * 16;
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(2 * Math.random() - 1);
 
@@ -331,17 +338,13 @@ const ParticleField = ({
   }, [basePositions]);
 
   useFrame(() => {
-    if (!pointsRef.current) return;
+    if (!pointsRef.current || !matRef.current) return;
     const dp = diveProgressRef.current;
-
-    /* Slow group-level rotation — gives a subtle parallax during intro. */
-    if (phase !== "done") {
-      pointsRef.current.rotation.y += 0.0007;
-      pointsRef.current.rotation.x -= 0.00035;
-    }
 
     if (phase === "diving") {
       /* Push every particle along its outward direction; magnitude = dp. */
+      pointsRef.current.rotation.y += 0.0007;
+      pointsRef.current.rotation.x -= 0.00035;
       const posAttr = geometry.attributes.position as THREE.BufferAttribute;
       const arr = posAttr.array as Float32Array;
       const stretch = dp * 25;
@@ -352,20 +355,37 @@ const ParticleField = ({
         arr[idx + 2] = basePositions[idx + 2] + streakDirs[idx + 2] * stretch;
       }
       posAttr.needsUpdate = true;
+      matRef.current.opacity = 0.85;
+      matRef.current.size = 0.07;
     } else if (phase === "intro") {
-      /* Reset to base positions if we ever come back from a dive (replay path). */
+      /* Drift slowly + reset to base positions on replay */
+      pointsRef.current.rotation.y += 0.0007;
+      pointsRef.current.rotation.x -= 0.00035;
       const posAttr = geometry.attributes.position as THREE.BufferAttribute;
       posAttr.array.set(basePositions);
       posAttr.needsUpdate = true;
+      matRef.current.opacity = 0.85;
+      matRef.current.size = 0.07;
+    } else {
+      /*
+       * AMBIENT STARFIELD — the key "space vibes" change.
+       * Particles drift very slowly, breathing opacity creates a twinkling
+       * effect, and the field feels like a living cosmos around the donut.
+       */
+      pointsRef.current.rotation.y += 0.00015;
+      pointsRef.current.rotation.x -= 0.00008;
+
+      /* Gentle breathing opacity for twinkling starfield effect */
+      const t = performance.now() * 0.0003;
+      matRef.current.opacity = 0.25 + Math.sin(t) * 0.08;
+      matRef.current.size = 0.05 + Math.sin(t * 1.3) * 0.01;
     }
   });
-
-  /* Don't bother rendering particles in ambient phase — would be noise behind text. */
-  if (phase === "done") return null;
 
   return (
     <points ref={pointsRef} geometry={geometry}>
       <pointsMaterial
+        ref={matRef}
         size={0.07}
         color="#67e8f9"
         transparent
@@ -375,6 +395,102 @@ const ParticleField = ({
         blending={THREE.AdditiveBlending}
       />
     </points>
+  );
+};
+
+/* ------------------------------------------------------------------------- */
+/* Nebula clouds — soft volumetric glow that drifts behind the donut.        */
+/* Creates depth and makes the scene feel like deep space rather than void.  */
+/* ------------------------------------------------------------------------- */
+
+const NEBULA_COUNT = 6;
+
+const NebulaField = ({ phase }: { phase: IntroPhase }) => {
+  const groupRef = useRef<THREE.Group>(null);
+
+  const nebulae = useMemo(() => {
+    const meshes: Array<{
+      position: [number, number, number];
+      scale: number;
+      color: string;
+      speed: number;
+      offset: number;
+    }> = [];
+
+    const colors = ["#06b6d4", "#10b981", "#6366f1", "#22d3ee", "#0ea5e9", "#14b8a6"];
+
+    for (let i = 0; i < NEBULA_COUNT; i++) {
+      const angle = (i / NEBULA_COUNT) * Math.PI * 2;
+      const r = 6 + Math.random() * 8;
+      meshes.push({
+        position: [
+          Math.cos(angle) * r,
+          (Math.random() - 0.5) * 8,
+          -3 + Math.random() * -6,
+        ],
+        scale: 2 + Math.random() * 3,
+        color: colors[i % colors.length],
+        speed: 0.0002 + Math.random() * 0.0003,
+        offset: Math.random() * Math.PI * 2,
+      });
+    }
+    return meshes;
+  }, []);
+
+  useFrame(() => {
+    if (!groupRef.current) return;
+    /* Very slow orbit — the nebulae drift around the scene center */
+    groupRef.current.rotation.y += 0.00008;
+  });
+
+  /* During intro/diving, nebulae are hidden (particles + donut take the stage). */
+  if (phase !== "done") return null;
+
+  return (
+    <group ref={groupRef}>
+      {nebulae.map((n, i) => (
+        <NebulaCloud key={i} {...n} />
+      ))}
+    </group>
+  );
+};
+
+const NebulaCloud = ({
+  position,
+  scale,
+  color,
+  speed,
+  offset,
+}: {
+  position: [number, number, number];
+  scale: number;
+  color: string;
+  speed: number;
+  offset: number;
+}) => {
+  const meshRef = useRef<THREE.Mesh>(null);
+
+  useFrame(() => {
+    if (!meshRef.current) return;
+    const t = performance.now() * speed + offset;
+    /* Gentle breathing scale */
+    const s = scale * (1 + Math.sin(t) * 0.15);
+    meshRef.current.scale.setScalar(s);
+    /* Slow drift */
+    meshRef.current.position.y = position[1] + Math.sin(t * 0.7) * 0.5;
+  });
+
+  return (
+    <mesh ref={meshRef} position={position}>
+      <sphereGeometry args={[1, 16, 16]} />
+      <meshBasicMaterial
+        color={color}
+        transparent
+        opacity={0.04}
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+      />
+    </mesh>
   );
 };
 

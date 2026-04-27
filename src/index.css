@@ -247,6 +247,23 @@
     animation-delay: -14s;
   }
 
+  /* Extra deep-space nebula blobs */
+  .aurora-blob-4 {
+    @apply w-[400px] h-[400px] top-2/3 -left-16;
+    background: radial-gradient(circle, hsl(180 80% 40%) 0%, transparent 70%);
+    animation-delay: -5s;
+    animation-duration: 30s;
+    opacity: 0.12;
+  }
+
+  .aurora-blob-5 {
+    @apply w-[900px] h-[900px] top-1/4 right-0;
+    background: radial-gradient(circle, hsl(260 70% 35%) 0%, transparent 65%);
+    animation-delay: -18s;
+    animation-duration: 50s;
+    opacity: 0.08;
+  }
+
   @keyframes aurora-float {
     0%, 100% { transform: translate(0, 0) scale(1); }
     25%      { transform: translate(50px, -30px) scale(1.1); }
