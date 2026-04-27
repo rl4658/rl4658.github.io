@@ -25,28 +25,17 @@ interface DonutMark {
 }
 
 /*
- * Marks are tuned so the donut reads as *ambient* rather than dominant — the
- * original portfolio used opacity 0.18 and the user liked that ambient feel.
- * We preserve that low-opacity ambient character while giving each scene its
- * own position/scale signature so the donut visibly relocates between scenes.
- *
- * World-unit positions are capped at ±2.5 so the donut never clips entirely
- * off-screen on portrait/mobile viewports (where horizontal half-extent at
- * camera z≈10 is only ~2.3 units).
+ * Donut stays centered and same-sized as the hero for every section.
+ * Only the skills section makes it transparent so the globe takes the stage.
+ * This keeps the donut spinning in the middle of the screen at all times.
  */
 const DONUT_MARKS: Record<Scene, DonutMark> = {
-  /* Hero: slightly right of center, ambient density (not foreground). */
-  hero:       { posX:  1.4, posY:  0.0, posZ:  0.0, scale: 1.00, velScale: 1.00, emissive: 0.10, opacity: 0.22, cameraZ:  9 },
-  /* About: drifts to upper-right, smaller — a "moon" you read next to. */
-  about:      { posX:  2.2, posY:  1.5, posZ: -1.0, scale: 0.55, velScale: 0.55, emissive: 0.10, opacity: 0.22, cameraZ: 10 },
-  /* Experience: slides to the left, mid-size — paces with the timeline draw. */
-  experience: { posX: -2.2, posY:  0.2, posZ: -0.8, scale: 0.70, velScale: 1.10, emissive: 0.12, opacity: 0.25, cameraZ: 10 },
-  /* Skills: fades almost to nothing — globe takes the stage. */
-  skills:     { posX:  0.0, posY: -2.0, posZ: -2.0, scale: 0.40, velScale: 0.40, emissive: 0.04, opacity: 0.06, cameraZ: 12 },
-  /* Education: returns to the lower-right, mirrored from About. */
-  education:  { posX:  2.2, posY: -1.5, posZ: -1.0, scale: 0.55, velScale: 0.55, emissive: 0.10, opacity: 0.22, cameraZ: 10 },
-  /* Projects: drifts back into the distance, like a planet receding. */
-  projects:   { posX: -0.6, posY:  0.0, posZ: -1.5, scale: 0.85, velScale: 0.80, emissive: 0.08, opacity: 0.16, cameraZ: 11 },
+  hero:       { posX: 0, posY: 0, posZ: 0, scale: 1.00, velScale: 1.00, emissive: 0.12, opacity: 0.22, cameraZ: 9 },
+  about:      { posX: 0, posY: 0, posZ: 0, scale: 1.00, velScale: 0.80, emissive: 0.10, opacity: 0.20, cameraZ: 9 },
+  experience: { posX: 0, posY: 0, posZ: 0, scale: 1.00, velScale: 1.00, emissive: 0.12, opacity: 0.22, cameraZ: 9 },
+  skills:     { posX: 0, posY: 0, posZ: 0, scale: 0.60, velScale: 0.40, emissive: 0.03, opacity: 0.05, cameraZ: 9 },
+  education:  { posX: 0, posY: 0, posZ: 0, scale: 1.00, velScale: 0.80, emissive: 0.10, opacity: 0.20, cameraZ: 9 },
+  projects:   { posX: 0, posY: 0, posZ: 0, scale: 1.00, velScale: 0.90, emissive: 0.10, opacity: 0.18, cameraZ: 9 },
 };
 
 interface SkillsDonutProps {
@@ -288,12 +277,15 @@ const DonutMesh = ({
 };
 
 /* ------------------------------------------------------------------------- */
-/* Particle field — drifts during intro, streaks during dive, persists as    */
-/* ambient starfield in the "done" phase so the donut feels like it's        */
-/* floating in space.                                                        */
+/* Particle field — drifts during intro, streaks during dive.                */
+/* During ambient, becomes a falling-star rain of particles drifting down.   */
 /* ------------------------------------------------------------------------- */
 
-const PARTICLE_COUNT = 500;
+const PARTICLE_COUNT = 400;
+
+/* Separate ambient star count — these are the "falling" stars visible
+   during normal scrolling. Placed in a tall slab so they rain down. */
+const AMBIENT_STAR_COUNT = 300;
 
 const ParticleField = ({
   phase,
@@ -305,7 +297,7 @@ const ParticleField = ({
   const pointsRef = useRef<THREE.Points>(null);
   const matRef = useRef<THREE.PointsMaterial>(null);
 
-  /* Pre-compute base positions on a hollow sphere shell + per-point streak vectors. */
+  /* ---- Intro/Dive sphere shell ---- */
   const { basePositions, streakDirs } = useMemo(() => {
     const base = new Float32Array(PARTICLE_COUNT * 3);
     const dirs = new Float32Array(PARTICLE_COUNT * 3);
@@ -313,16 +305,12 @@ const ParticleField = ({
       const r = 4 + Math.random() * 16;
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(2 * Math.random() - 1);
-
       const sx = Math.sin(phi) * Math.cos(theta);
       const sy = Math.sin(phi) * Math.sin(theta);
       const sz = Math.cos(phi);
-
       base[i * 3]     = sx * r;
       base[i * 3 + 1] = sy * r;
       base[i * 3 + 2] = sz * r;
-
-      /* Outward radial direction — what we extrapolate along during dive. */
       dirs[i * 3]     = sx;
       dirs[i * 3 + 1] = sy;
       dirs[i * 3 + 2] = sz;
@@ -330,71 +318,130 @@ const ParticleField = ({
     return { basePositions: base, streakDirs: dirs };
   }, []);
 
-  /* Geometry holds a *live* position attribute we mutate each frame. */
   const geometry = useMemo(() => {
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.BufferAttribute(basePositions.slice(), 3));
     return g;
   }, [basePositions]);
 
+  /* ---- Ambient falling stars ---- */
+  const fallingRef = useRef<THREE.Points>(null);
+  const fallingMatRef = useRef<THREE.PointsMaterial>(null);
+
+  /* Each star has: x (spread), y (start height), z (depth), speed (fall rate) */
+  const fallingData = useMemo(() => {
+    const positions = new Float32Array(AMBIENT_STAR_COUNT * 3);
+    const speeds = new Float32Array(AMBIENT_STAR_COUNT);
+    const spreadX = 30; // wide horizontal spread
+    const spreadZ = 20; // depth spread
+    const height = 20;  // vertical range
+
+    for (let i = 0; i < AMBIENT_STAR_COUNT; i++) {
+      positions[i * 3]     = (Math.random() - 0.5) * spreadX;
+      positions[i * 3 + 1] = Math.random() * height - height * 0.3; // start scattered vertically
+      positions[i * 3 + 2] = (Math.random() - 0.5) * spreadZ - 3;   // behind the donut
+      speeds[i] = 0.005 + Math.random() * 0.015; // varying fall speeds
+    }
+    return { positions, speeds };
+  }, []);
+
+  const fallingGeometry = useMemo(() => {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(fallingData.positions.slice(), 3));
+    return g;
+  }, [fallingData]);
+
   useFrame(() => {
-    if (!pointsRef.current || !matRef.current) return;
-    const dp = diveProgressRef.current;
+    /* ---- Intro / Dive particles ---- */
+    if (pointsRef.current && matRef.current) {
+      const dp = diveProgressRef.current;
 
-    if (phase === "diving") {
-      /* Push every particle along its outward direction; magnitude = dp. */
-      pointsRef.current.rotation.y += 0.0007;
-      pointsRef.current.rotation.x -= 0.00035;
-      const posAttr = geometry.attributes.position as THREE.BufferAttribute;
-      const arr = posAttr.array as Float32Array;
-      const stretch = dp * 25;
-      for (let i = 0; i < PARTICLE_COUNT; i++) {
-        const idx = i * 3;
-        arr[idx]     = basePositions[idx]     + streakDirs[idx]     * stretch;
-        arr[idx + 1] = basePositions[idx + 1] + streakDirs[idx + 1] * stretch;
-        arr[idx + 2] = basePositions[idx + 2] + streakDirs[idx + 2] * stretch;
+      if (phase === "diving") {
+        pointsRef.current.rotation.y += 0.0007;
+        pointsRef.current.rotation.x -= 0.00035;
+        const posAttr = geometry.attributes.position as THREE.BufferAttribute;
+        const arr = posAttr.array as Float32Array;
+        const stretch = dp * 25;
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+          const idx = i * 3;
+          arr[idx]     = basePositions[idx]     + streakDirs[idx]     * stretch;
+          arr[idx + 1] = basePositions[idx + 1] + streakDirs[idx + 1] * stretch;
+          arr[idx + 2] = basePositions[idx + 2] + streakDirs[idx + 2] * stretch;
+        }
+        posAttr.needsUpdate = true;
+        matRef.current.opacity = 0.85;
+      } else if (phase === "intro") {
+        pointsRef.current.rotation.y += 0.0007;
+        pointsRef.current.rotation.x -= 0.00035;
+        const posAttr = geometry.attributes.position as THREE.BufferAttribute;
+        posAttr.array.set(basePositions);
+        posAttr.needsUpdate = true;
+        matRef.current.opacity = 0.85;
+      } else {
+        /* Ambient: hide intro particles */
+        matRef.current.opacity = 0;
       }
-      posAttr.needsUpdate = true;
-      matRef.current.opacity = 0.85;
-      matRef.current.size = 0.07;
-    } else if (phase === "intro") {
-      /* Drift slowly + reset to base positions on replay */
-      pointsRef.current.rotation.y += 0.0007;
-      pointsRef.current.rotation.x -= 0.00035;
-      const posAttr = geometry.attributes.position as THREE.BufferAttribute;
-      posAttr.array.set(basePositions);
-      posAttr.needsUpdate = true;
-      matRef.current.opacity = 0.85;
-      matRef.current.size = 0.07;
-    } else {
-      /*
-       * AMBIENT STARFIELD — the key "space vibes" change.
-       * Particles drift very slowly, breathing opacity creates a twinkling
-       * effect, and the field feels like a living cosmos around the donut.
-       */
-      pointsRef.current.rotation.y += 0.00015;
-      pointsRef.current.rotation.x -= 0.00008;
+    }
 
-      /* Gentle breathing opacity for twinkling starfield effect */
-      const t = performance.now() * 0.0003;
-      matRef.current.opacity = 0.25 + Math.sin(t) * 0.08;
-      matRef.current.size = 0.05 + Math.sin(t * 1.3) * 0.01;
+    /* ---- Ambient falling stars ---- */
+    if (fallingRef.current && fallingMatRef.current) {
+      if (phase === "done") {
+        fallingMatRef.current.opacity = 0.55;
+        const posAttr = fallingGeometry.attributes.position as THREE.BufferAttribute;
+        const arr = posAttr.array as Float32Array;
+        const topY = 14;   // respawn ceiling
+        const botY = -14;  // despawn floor
+
+        for (let i = 0; i < AMBIENT_STAR_COUNT; i++) {
+          const yIdx = i * 3 + 1;
+          arr[yIdx] -= fallingData.speeds[i]; // fall downward
+
+          // Also drift very slightly sideways for organic feel
+          arr[i * 3] += Math.sin(performance.now() * 0.0001 + i) * 0.001;
+
+          // Respawn at top when past bottom
+          if (arr[yIdx] < botY) {
+            arr[yIdx] = topY + Math.random() * 2;
+            arr[i * 3] = (Math.random() - 0.5) * 30;
+          }
+        }
+        posAttr.needsUpdate = true;
+      } else {
+        fallingMatRef.current.opacity = 0;
+      }
     }
   });
 
   return (
-    <points ref={pointsRef} geometry={geometry}>
-      <pointsMaterial
-        ref={matRef}
-        size={0.07}
-        color="#67e8f9"
-        transparent
-        opacity={0.85}
-        sizeAttenuation
-        depthWrite={false}
-        blending={THREE.AdditiveBlending}
-      />
-    </points>
+    <>
+      {/* Intro/Dive sphere particles */}
+      <points ref={pointsRef} geometry={geometry}>
+        <pointsMaterial
+          ref={matRef}
+          size={0.07}
+          color="#67e8f9"
+          transparent
+          opacity={0.85}
+          sizeAttenuation
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+        />
+      </points>
+
+      {/* Ambient falling stars — visible rain of particles */}
+      <points ref={fallingRef} geometry={fallingGeometry}>
+        <pointsMaterial
+          ref={fallingMatRef}
+          size={0.06}
+          color="#a5f3fc"
+          transparent
+          opacity={0}
+          sizeAttenuation
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+        />
+      </points>
+    </>
   );
 };
 
