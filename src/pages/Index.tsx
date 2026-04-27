@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
+import { AnimatePresence, motion } from "framer-motion";
 import AuroraBackground from "@/components/AuroraBackground";
-import { GeometricAmbience, CodeParticles, ScrollProgress } from "@/components/animated";
+import { GeometricAmbience, CodeParticles, ScrollProgress, SkillsDonut } from "@/components/animated";
 import NavBar from "@/components/NavBar";
 import HeroSection from "@/components/sections/HeroSection";
 import AboutSection from "@/components/sections/AboutSection";
@@ -12,10 +13,34 @@ import ProjectsSection from "@/components/sections/ProjectsSection";
 import Footer from "@/components/Footer";
 import ResumeModal from "@/components/ResumeModal";
 import BackToTop from "@/components/BackToTop";
+import IntroOverlay from "@/components/intro/IntroOverlay";
+import { IntroProvider, useIntro } from "@/contexts/IntroContext";
 import { profile } from "@/data/profile";
 
 const Index = () => {
+  return (
+    <IntroProvider>
+      <IndexInner />
+    </IntroProvider>
+  );
+};
+
+const IndexInner = () => {
   const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
+  const { phase, replayIntro } = useIntro();
+
+  /* Body content fades in once the dive completes — synced with overlay's fade-out. */
+  const bodyVisible = phase === "done";
+
+  /*
+   * Force-close the resume modal whenever we leave the "done" phase.
+   * Without this, replaying the intro with the modal open would unmount the
+   * modal but preserve `isResumeModalOpen=true`, causing it to pop open again
+   * the moment the body re-mounts — jarring and unintentional.
+   */
+  useEffect(() => {
+    if (phase !== "done") setIsResumeModalOpen(false);
+  }, [phase]);
 
   return (
     <>
@@ -42,42 +67,67 @@ const Index = () => {
       </Helmet>
 
       <div className="relative min-h-screen">
-        {/* Scroll Progress Indicator */}
-        <ScrollProgress />
+        {/* Donut canvas — persistent across intro/ambient. Reads phase from context. */}
+        <SkillsDonut rotationSpeed={0.003} />
 
-        {/* Animated Background */}
-        <AuroraBackground />
-        <GeometricAmbience shapeCount={10} colorPalette={["cyan", "purple", "pink"]} />
+        {/* Intro overlay — only renders during intro/diving phases. */}
+        <IntroOverlay />
 
-        {/* Navigation */}
-        <NavBar onResumeClick={() => setIsResumeModalOpen(true)} />
+        {/*
+          Body content is *conditionally mounted* when the dive completes.
+          Each child therefore runs its entry animation at the exact moment
+          the user sees it — no more "animations fired while invisible".
+        */}
+        {/*
+          `initial={false}` on AnimatePresence: skips the body fade-in for
+          returning visitors who land directly with phase="done". Their cinematic
+          hero reveal still plays (those animations live inside the body), but
+          the body wrapper itself doesn't flash from opacity 0.
+          `exit` ensures replay-from-nav unmounts gracefully instead of vanishing.
+        */}
+        <AnimatePresence initial={false}>
+          {bodyVisible && (
+            <motion.div
+              key="portfolio-body"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <ScrollProgress />
+              <AuroraBackground />
+              <GeometricAmbience shapeCount={10} colorPalette={["cyan", "purple", "pink"]} />
 
-        {/* Main Content */}
-        <main>
-          <HeroSection onResumeClick={() => setIsResumeModalOpen(true)} />
-          <CodeParticles count={3} area="section" />
-          <AboutSection />
-          <CodeParticles count={3} area="section" />
-          <ExperienceSection />
-          <CodeParticles count={3} area="section" />
-          <SkillsSection />
-          <CodeParticles count={3} area="section" />
-          <EducationSection />
-          <CodeParticles count={3} area="section" />
-          <ProjectsSection />
-        </main>
+              <NavBar
+                onResumeClick={() => setIsResumeModalOpen(true)}
+                onLogoClick={replayIntro}
+              />
 
-        {/* Footer */}
-        <Footer />
+              <main>
+                <HeroSection onResumeClick={() => setIsResumeModalOpen(true)} />
+                <CodeParticles count={3} area="section" />
+                <AboutSection />
+                <CodeParticles count={3} area="section" />
+                <ExperienceSection />
+                <CodeParticles count={3} area="section" />
+                <SkillsSection />
+                <CodeParticles count={3} area="section" />
+                <EducationSection />
+                <CodeParticles count={3} area="section" />
+                <ProjectsSection />
+              </main>
 
-        {/* Resume Modal */}
-        <ResumeModal
-          isOpen={isResumeModalOpen}
-          onClose={() => setIsResumeModalOpen(false)}
-        />
+              <Footer />
 
-        {/* Back to Top */}
-        <BackToTop />
+              <ResumeModal
+                isOpen={isResumeModalOpen}
+                onClose={() => setIsResumeModalOpen(false)}
+              />
+
+              <BackToTop />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </>
   );

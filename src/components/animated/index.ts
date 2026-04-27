@@ -4,3 +4,6 @@ export { default as TechOrbit } from "./TechOrbit";
 export { default as GeometricAmbience } from "./GeometricAmbience";
 export { default as SkillsDonut } from "./SkillsDonut";
 export { default as ScrollProgress } from "./ScrollProgress";
+export { default as SkillsGlobe } from "./SkillsGlobe";
+export { default as ScrollReveal } from "./ScrollReveal";
+

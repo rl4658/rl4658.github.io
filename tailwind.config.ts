@@ -53,6 +53,9 @@ export default {
         },
         aurora: {
           cyan: "hsl(var(--gradient-aurora-1))",
+          indigo: "hsl(var(--gradient-aurora-2))",
+          emerald: "hsl(var(--gradient-aurora-3))",
+          /* Backwards-compat aliases for components still using old names */
           purple: "hsl(var(--gradient-aurora-2))",
           pink: "hsl(var(--gradient-aurora-3))",
         },

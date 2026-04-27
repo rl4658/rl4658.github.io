@@ -5,9 +5,10 @@ import { motion, AnimatePresence } from "framer-motion";
 
 interface NavBarProps {
   onResumeClick: () => void;
+  onLogoClick?: () => void;
 }
 
-const NavBar = ({ onResumeClick }: NavBarProps) => {
+const NavBar = ({ onResumeClick, onLogoClick }: NavBarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("");
@@ -59,9 +60,16 @@ const NavBar = ({ onResumeClick }: NavBarProps) => {
 
   return (
     <motion.nav
-      initial={{ y: -100, opacity: 0 }}
+      /* Cinematic spring drop — first element to land after the dive. */
+      initial={{ y: -140, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      transition={{
+        type: "spring",
+        stiffness: 90,
+        damping: 16,
+        mass: 1,
+        delay: 0.1,
+      }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         isScrolled ? "py-3" : "py-5"
       }`}
@@ -72,18 +80,25 @@ const NavBar = ({ onResumeClick }: NavBarProps) => {
             isScrolled ? "shadow-lg" : ""
           }`}
         >
-          {/* Logo */}
-          <a
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              window.scrollTo({ top: 0, behavior: "smooth" });
+          {/* Logo — click to replay intro (or scroll to top if no replay handler). */}
+          <button
+            type="button"
+            onClick={() => {
+              if (onLogoClick) {
+                onLogoClick();
+              } else {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }
             }}
-            className="font-display font-bold text-xl text-gradient"
+            className="font-display font-bold text-xl text-gradient relative group"
+            title="Replay intro"
+            aria-label="Replay intro"
           >
             {profile.name.split(" ")[0]}
             <span className="text-foreground/60">.dev</span>
-          </a>
+            {/* Subtle hint underline that reveals on hover */}
+            <span className="absolute -bottom-0.5 left-0 right-0 h-px scale-x-0 group-hover:scale-x-100 transition-transform origin-left bg-gradient-to-r from-primary to-accent" />
+          </button>
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-1">

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { SiReact, SiPython, SiTypescript, SiAmazon, SiDocker, SiPostgresql, SiNodedotjs, SiFastapi } from "react-icons/si";
-import { TechOrbit } from "@/components/animated";
+import { SkillsGlobe, ScrollReveal } from "@/components/animated";
 import { skillCategories } from "@/data/profile";
 
 const techIcons = [
@@ -38,63 +38,85 @@ const SkillsSection = () => {
 
   return (
     <section id="skills" ref={sectionRef} className="py-24 px-4 relative">
-      <div className="container mx-auto max-w-4xl relative">
-        {/* Tech Orbit - Behind content */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[400px] hidden lg:block pointer-events-none opacity-80" style={{ zIndex: 0 }}>
-          <TechOrbit icons={techIcons} orbitRadius={{ x: 200, y: 150 }} duration={45} />
-        </div>
-
+      <div className="container mx-auto max-w-6xl relative">
         {/* Section Title */}
         <motion.h2
           initial={{ opacity: 0, y: 20, scale: 0.95, filter: "blur(10px)" }}
           animate={isVisible ? { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" } : {}}
           transition={{ duration: 0.6 }}
-          className="font-display text-3xl md:text-4xl font-bold mb-12 text-center text-gradient"
+          className="font-display text-3xl md:text-4xl font-bold mb-4 text-center text-gradient"
         >
           Skills & Technologies
         </motion.h2>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={isVisible ? { opacity: 1 } : {}}
+          transition={{ duration: 0.6, delay: 0.15 }}
+          className="text-center text-foreground/60 font-mono text-sm mb-12"
+        >
+          {"// click & drag the globe to explore the stack"}
+        </motion.p>
 
-        {/* Skills Grid */}
-        <div className="grid md:grid-cols-2 gap-6">
+        {/* Globe + Categories — side by side on lg, stacked on mobile.
+            Globe is a peer of the grid now (not a faint background), so it
+            actually reads as a feature instead of getting blurred out by glass. */}
+        <div className="grid lg:grid-cols-5 gap-8 items-center mb-12">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={isVisible ? { opacity: 1, scale: 1 } : {}}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="lg:col-span-2 h-[400px] md:h-[500px] relative"
+          >
+            <SkillsGlobe />
+            {/* Soft cyan/emerald glow underneath the canvas */}
+            <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,hsl(189_94%_50%/0.18),transparent_60%)]" />
+          </motion.div>
+
+          <div className="lg:col-span-3 grid sm:grid-cols-2 gap-6">
           {skillCategories.map((category, categoryIndex) => (
-            <motion.div
+            <ScrollReveal
               key={category.name}
-              initial={{ opacity: 0, y: 30, scale: 0.95, filter: "blur(10px)" }}
-              animate={isVisible ? { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" } : {}}
-              whileHover={{
-                y: -8,
-                boxShadow: "0 20px 60px rgba(11, 165, 236, 0.15)",
-              }}
-              transition={{ duration: 0.6, delay: 0.1 * categoryIndex }}
-              className="glass rounded-3xl p-6 md:p-8"
+              from={categoryIndex % 2 === 0 ? "left" : "right"}
+              intensity={0.8}
             >
-              <h3 className="font-display text-lg font-semibold mb-4 text-primary">
-                {category.name}
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {category.skills.map((skill, skillIndex) => (
-                  <motion.span
-                    key={skill}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={isVisible ? { opacity: 1, scale: 1 } : {}}
-                    whileHover={{
-                      scale: 1.05,
-                      boxShadow: "0 0 20px rgba(11, 165, 236, 0.5)",
-                      backgroundColor: "rgba(11, 165, 236, 0.1)",
-                    }}
-                    whileTap={{ scale: 0.95 }}
-                    transition={{
-                      duration: 0.3,
-                      delay: 0.1 * categoryIndex + 0.02 * skillIndex,
-                    }}
-                    className="pill text-xs md:text-sm cursor-pointer"
-                  >
-                    {skill}
-                  </motion.span>
-                ))}
-              </div>
-            </motion.div>
+              <motion.div
+                whileHover={{
+                  y: -8,
+                  boxShadow: "0 20px 60px rgba(6, 182, 212, 0.18)",
+                }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className="glass-strong rounded-2xl p-5 md:p-6 h-full"
+              >
+                <h3 className="font-display text-lg font-semibold mb-4 text-primary flex items-center gap-2">
+                  <span className="font-mono text-accent text-sm">{`{`}</span>
+                  {category.name}
+                  <span className="font-mono text-accent text-sm">{`}`}</span>
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {category.skills.map((skill, skillIndex) => (
+                    <motion.span
+                      key={skill}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={isVisible ? { opacity: 1, scale: 1 } : {}}
+                      whileHover={{
+                        scale: 1.05,
+                        boxShadow: "0 0 18px rgba(6, 182, 212, 0.45)",
+                      }}
+                      whileTap={{ scale: 0.95 }}
+                      transition={{
+                        duration: 0.3,
+                        delay: 0.1 * categoryIndex + 0.02 * skillIndex,
+                      }}
+                      className="pill text-xs md:text-sm cursor-pointer"
+                    >
+                      {skill}
+                    </motion.span>
+                  ))}
+                </div>
+              </motion.div>
+            </ScrollReveal>
           ))}
+          </div>
         </div>
       </div>
     </section>
