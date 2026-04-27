@@ -48,6 +48,10 @@ interface SceneContextValue {
   sceneProgressRef: MutableRefObject<number>;
   /** Sections call this in a useEffect to register themselves with the director. */
   registerSection: (id: Scene, ref: RefObject<HTMLElement>) => () => void;
+  /** Global warp state for cinematic transitions out of the main page */
+  isWarping: boolean;
+  /** Trigger the warp transition and execute a callback (e.g. navigate) after animation */
+  triggerWarp: (callback: () => void) => void;
 }
 
 const SceneContext = createContext<SceneContextValue | null>(null);
@@ -76,6 +80,19 @@ export const SceneProvider = ({ children }: { children: ReactNode }) => {
   const elementToSceneRef = useRef<Map<Element, Scene>>(new Map());
   /* Last-seen intersection ratio per scene — IO updates incrementally, we pick the max. */
   const ratioMapRef = useRef<Map<Scene, number>>(new Map());
+
+  /* Warp transition state */
+  const [isWarping, setIsWarping] = useState(false);
+
+  const triggerWarp = useCallback((callback: () => void) => {
+    setIsWarping(true);
+    // The hyperspace animation takes about 1.2s to feel impactful
+    setTimeout(() => {
+      callback();
+      // Reset after navigation so the main page is normal if they return
+      setTimeout(() => setIsWarping(false), 100);
+    }, 1200);
+  }, []);
 
   const recomputeActive = useCallback(() => {
     let bestScene: Scene | null = null;
@@ -205,8 +222,10 @@ export const SceneProvider = ({ children }: { children: ReactNode }) => {
       activeSceneRef,
       sceneProgressRef,
       registerSection,
+      isWarping,
+      triggerWarp,
     }),
-    [activeScene, registerSection],
+    [activeScene, registerSection, isWarping, triggerWarp],
   );
 
   return <SceneContext.Provider value={value}>{children}</SceneContext.Provider>;

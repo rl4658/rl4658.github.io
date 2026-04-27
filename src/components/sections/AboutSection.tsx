@@ -1,12 +1,14 @@
 import { useEffect, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { profile } from "@/data/profile";
 import { ScrollReveal, TiltCard, KineticTitle } from "@/components/animated";
 import { useScene } from "@/contexts/SceneContext";
 
 const AboutSection = () => {
   const sectionRef = useRef<HTMLElement>(null);
-  const { registerSection } = useScene();
+  const { registerSection, triggerWarp } = useScene();
+  const navigate = useNavigate();
 
   useEffect(() => registerSection("about", sectionRef), [registerSection]);
 
@@ -40,22 +42,39 @@ const AboutSection = () => {
           </p>
 
           {/* Highlight Chips */}
-          <div className="flex flex-wrap gap-3">
-            {profile.about.highlights.map((highlight, index) => (
+            <div className="flex flex-wrap gap-3 mb-10">
+              {profile.about.highlights.map((highlight, index) => (
+                <motion.span
+                  key={highlight}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  whileHover={{ scale: 1.1, backgroundColor: "rgba(11, 165, 236, 0.2)" }}
+                  transition={{ duration: 0.4, delay: 0.1 * index }}
+                  className="pill bg-primary/10 text-primary border-primary/20 cursor-default"
+                >
+                  {highlight}
+                </motion.span>
+              ))}
+            </div>
+
+            {/* Warp Button */}
+            <motion.button
+              onClick={() => triggerWarp(() => navigate('/hobbies'))}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="group relative inline-flex items-center justify-center gap-2 px-8 py-4 font-display font-bold text-white bg-primary/20 hover:bg-primary/30 border border-primary/50 rounded-full overflow-hidden transition-colors"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/30 to-primary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out" />
+              <span>Explore My World</span>
               <motion.span
-                key={highlight}
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true, margin: "-50px" }}
-                whileHover={{ scale: 1.1, backgroundColor: "rgba(11, 165, 236, 0.2)" }}
-                transition={{ duration: 0.4, delay: 0.1 * index }}
-                className="pill bg-primary/10 text-primary border-primary/20 cursor-default"
+                animate={{ x: [0, 5, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
               >
-                {highlight}
+                →
               </motion.span>
-            ))}
+            </motion.button>
           </div>
-        </div>
         </TiltCard>
         </ScrollReveal>
       </motion.div>

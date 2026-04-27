@@ -13,4 +13,5 @@ export { default as SectionCutSentinel } from "./SectionCutSentinel";
 export { default as KineticTitle } from "./KineticTitle";
 export { default as CountUp, parseBulletWithCounts } from "./CountUp";
 export { default as GlitchText } from "./GlitchText";
+export { default as GamesGlobe } from "./GamesGlobe";
 

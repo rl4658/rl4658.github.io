@@ -30,12 +30,12 @@ interface DonutMark {
  * This keeps the donut spinning in the middle of the screen at all times.
  */
 const DONUT_MARKS: Record<Scene, DonutMark> = {
-  hero:       { posX: 0, posY: 0, posZ: 0, scale: 1.00, velScale: 1.00, emissive: 0.12, opacity: 0.22, cameraZ: 9 },
-  about:      { posX: 0, posY: 0, posZ: 0, scale: 1.00, velScale: 0.80, emissive: 0.10, opacity: 0.20, cameraZ: 9 },
-  experience: { posX: 0, posY: 0, posZ: 0, scale: 1.00, velScale: 1.00, emissive: 0.12, opacity: 0.22, cameraZ: 9 },
-  skills:     { posX: 0, posY: 0, posZ: 0, scale: 0.60, velScale: 0.40, emissive: 0.03, opacity: 0.05, cameraZ: 9 },
-  education:  { posX: 0, posY: 0, posZ: 0, scale: 1.00, velScale: 0.80, emissive: 0.10, opacity: 0.20, cameraZ: 9 },
-  projects:   { posX: 0, posY: 0, posZ: 0, scale: 1.00, velScale: 0.90, emissive: 0.10, opacity: 0.18, cameraZ: 9 },
+  hero:       { posX: 1.8, posY: 0, posZ: 0, scale: 1.00, velScale: 1.00, emissive: 0.12, opacity: 0.22, cameraZ: 9 },
+  about:      { posX: 0,   posY: 0, posZ: 0, scale: 1.00, velScale: 0.80, emissive: 0.10, opacity: 0.20, cameraZ: 9 },
+  experience: { posX: 0,   posY: 0, posZ: 0, scale: 1.00, velScale: 1.00, emissive: 0.12, opacity: 0.22, cameraZ: 9 },
+  skills:     { posX: 0,   posY: 0, posZ: 0, scale: 0.60, velScale: 0.40, emissive: 0.03, opacity: 0.05, cameraZ: 9 },
+  education:  { posX: 0,   posY: 0, posZ: 0, scale: 1.00, velScale: 0.80, emissive: 0.10, opacity: 0.20, cameraZ: 9 },
+  projects:   { posX: 0,   posY: 0, posZ: 0, scale: 1.00, velScale: 0.90, emissive: 0.10, opacity: 0.18, cameraZ: 9 },
 };
 
 interface SkillsDonutProps {
@@ -47,7 +47,7 @@ const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 const SkillsDonut = ({ rotationSpeed = 0.003 }: SkillsDonutProps) => {
   const prefersReducedMotion = useReducedMotion();
   const { phase, diveProgressRef } = useIntro();
-  const { activeSceneRef } = useScene();
+  const { activeSceneRef, isWarping } = useScene();
 
   if (prefersReducedMotion) {
     /* No 3D at all for reduced-motion users. The intro is also skipped via context. */
@@ -87,8 +87,9 @@ const SkillsDonut = ({ rotationSpeed = 0.003 }: SkillsDonutProps) => {
           phase={phase}
           diveProgressRef={diveProgressRef}
           activeSceneRef={activeSceneRef}
+          isWarping={isWarping}
         />
-        <ParticleField phase={phase} diveProgressRef={diveProgressRef} />
+        <ParticleField phase={phase} diveProgressRef={diveProgressRef} isWarping={isWarping} />
         <NebulaField phase={phase} />
       </Canvas>
     </div>
@@ -104,11 +105,13 @@ const DonutMesh = ({
   phase,
   diveProgressRef,
   activeSceneRef,
+  isWarping,
 }: {
   rotationSpeed: number;
   phase: IntroPhase;
   diveProgressRef: React.MutableRefObject<number>;
   activeSceneRef: React.MutableRefObject<Scene>;
+  isWarping: boolean;
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const matRef = useRef<THREE.MeshStandardMaterial>(null);
@@ -225,6 +228,22 @@ const DonutMesh = ({
       live.current.cameraZ = camZ;
       live.current.emissive = emissive;
       live.current.opacity = opacity;
+    } else if (isWarping) {
+      /*
+       * Warp hyperspace jump:
+       * Donut scales up massively, camera dollies to 0 (so we fly through the hole),
+       * and wireframe fades out to reveal the next page.
+       */
+      live.current.scale = lerp(live.current.scale, 25, 0.04);
+      live.current.cameraZ = lerp(live.current.cameraZ, 0.5, 0.05);
+      live.current.opacity = lerp(live.current.opacity, 0, 0.08);
+      
+      /* Keep centered */
+      meshRef.current.position.set(live.current.posX, live.current.posY, live.current.posZ);
+      meshRef.current.scale.setScalar(live.current.scale);
+      camera.position.z = live.current.cameraZ;
+      matRef.current.emissiveIntensity = live.current.emissive;
+      matRef.current.opacity = live.current.opacity;
     } else {
       /*
        * Ambient: lerp every transform component toward the active scene's mark.
@@ -290,9 +309,11 @@ const AMBIENT_STAR_COUNT = 300;
 const ParticleField = ({
   phase,
   diveProgressRef,
+  isWarping,
 }: {
   phase: IntroPhase;
   diveProgressRef: React.MutableRefObject<number>;
+  isWarping: boolean;
 }) => {
   const pointsRef = useRef<THREE.Points>(null);
   const matRef = useRef<THREE.PointsMaterial>(null);
@@ -378,14 +399,33 @@ const ParticleField = ({
         posAttr.needsUpdate = true;
         matRef.current.opacity = 0.85;
       } else {
-        /* Ambient: hide intro particles */
-        matRef.current.opacity = 0;
+        /* Ambient: hide intro particles unless warping */
+        if (isWarping) {
+          // If warping, streak particles outward to simulate hyperspace
+          pointsRef.current.rotation.y += 0.002;
+          const posAttr = geometry.attributes.position as THREE.BufferAttribute;
+          const arr = posAttr.array as Float32Array;
+          // Ramp up stretch based on how long we've been warping
+          // We'll use a hacky increment since we don't have a time value
+          const stretch = 15; 
+          for (let i = 0; i < PARTICLE_COUNT; i++) {
+            const idx = i * 3;
+            // Lerp outward
+            arr[idx]     = lerp(arr[idx],     basePositions[idx]     + streakDirs[idx]     * stretch, 0.05);
+            arr[idx + 1] = lerp(arr[idx + 1], basePositions[idx + 1] + streakDirs[idx + 1] * stretch, 0.05);
+            arr[idx + 2] = lerp(arr[idx + 2], basePositions[idx + 2] + streakDirs[idx + 2] * stretch, 0.05);
+          }
+          posAttr.needsUpdate = true;
+          matRef.current.opacity = lerp(matRef.current.opacity, 0.85, 0.1);
+        } else {
+          matRef.current.opacity = 0;
+        }
       }
     }
 
     /* ---- Ambient falling stars ---- */
     if (fallingRef.current && fallingMatRef.current) {
-      if (phase === "done") {
+      if (phase === "done" && !isWarping) {
         fallingMatRef.current.opacity = 0.55;
         const posAttr = fallingGeometry.attributes.position as THREE.BufferAttribute;
         const arr = posAttr.array as Float32Array;
@@ -406,6 +446,9 @@ const ParticleField = ({
           }
         }
         posAttr.needsUpdate = true;
+      } else if (isWarping) {
+        // Fade out falling stars during warp
+        fallingMatRef.current.opacity = lerp(fallingMatRef.current.opacity, 0, 0.1);
       } else {
         fallingMatRef.current.opacity = 0;
       }
