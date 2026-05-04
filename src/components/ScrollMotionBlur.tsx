@@ -30,9 +30,9 @@ const ScrollMotionBlur = () => {
       const velocity = Math.abs(currentY - lastScrollY.current) / dt; // px/ms
       lastScrollY.current = currentY;
 
-      // Map velocity to blur: 0 at slow scroll, max 2px at fast scroll
-      // Typical fast scroll is ~2-5 px/ms, so we scale accordingly
-      const targetBlur = Math.min(velocity * 0.6, 2.0);
+      // Map velocity to blur: 0 at slow scroll, max 1px at fast scroll
+      // Halving the max blur radius drastically reduces GPU convolution overhead
+      const targetBlur = Math.min(velocity * 0.3, 1.0);
 
       // Smooth interpolation: attack faster than decay for a natural feel
       if (targetBlur > currentBlur.current) {

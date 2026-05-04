@@ -76,17 +76,28 @@ const ExperienceSection = () => {
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
                   >
                     {/* Header */}
-                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-4">
-                      <div>
-                        <h3 className="font-display text-xl md:text-2xl font-bold text-foreground mb-1">
-                          {exp.role}
-                        </h3>
-                        <div className="flex items-center gap-2 text-primary font-medium">
-                          <Briefcase size={16} />
-                          {exp.company}
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
+                      <div className="flex items-start gap-4">
+                        <img 
+                          src={exp.logoUrl} 
+                          alt={`${exp.company} logo`} 
+                          className="w-12 h-12 md:w-14 md:h-14 rounded-xl border border-white/10 shadow-lg object-contain bg-white/95 shrink-0 p-1.5"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(exp.company)}&background=random&color=fff&bold=true`;
+                          }}
+                        />
+                        <div>
+                          <h3 className="font-display text-xl md:text-2xl font-bold text-foreground mb-1">
+                            {exp.role}
+                          </h3>
+                          <div className="flex items-center gap-2 text-primary font-medium">
+                            <Briefcase size={16} />
+                            {exp.company}
+                          </div>
                         </div>
                       </div>
-                      <div className="flex flex-col items-start md:items-end gap-1 text-sm text-foreground/70">
+                      <div className="flex flex-col items-start md:items-end gap-1 text-sm text-foreground/70 shrink-0">
                         <div className="flex items-center gap-1.5">
                           <Calendar size={14} className="text-accent" />
                           <span className="font-mono text-xs tracking-wide">{exp.period}</span>
@@ -98,20 +109,22 @@ const ExperienceSection = () => {
                       </div>
                     </div>
 
-                    {/* Bullets */}
-                    <ul className="space-y-3">
-                      {exp.bullets.map((bullet, bulletIndex) => (
-                        <li
-                          key={bulletIndex}
-                          className="flex items-start gap-3 text-foreground/90"
+                    {/* Summary */}
+                    <div className="text-foreground/80 leading-relaxed text-sm md:text-base mb-6">
+                      {parseBulletWithCounts(exp.summary)}
+                    </div>
+
+                    {/* Skills */}
+                    <div className="flex flex-wrap gap-2 mt-auto pt-4 border-t border-white/5">
+                      {exp.skills.map((skill, skillIndex) => (
+                        <span 
+                          key={skillIndex} 
+                          className="px-3 py-1.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-xs font-medium tracking-wide hover:bg-cyan-500/20 transition-colors cursor-default"
                         >
-                          <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0 shadow-[0_0_10px_hsl(var(--primary))]" />
-                          <span className="text-sm md:text-base leading-relaxed">
-                            {parseBulletWithCounts(bullet)}
-                          </span>
-                        </li>
+                          {skill}
+                        </span>
                       ))}
-                    </ul>
+                    </div>
                   </motion.div>
                   </TiltCard>
                 </div>

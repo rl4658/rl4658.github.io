@@ -33,7 +33,7 @@ const CursorGlow = () => {
       if (rafId === null) {
         rafId = requestAnimationFrame(() => {
           if (el) {
-            el.style.transform = `translate(${cx - 120}px, ${cy - 120}px)`;
+            el.style.transform = `translate3d(${cx - 120}px, ${cy - 120}px, 0)`;
             el.style.opacity = "1";
           }
           rafId = null;

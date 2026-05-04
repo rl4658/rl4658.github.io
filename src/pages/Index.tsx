@@ -52,7 +52,7 @@ const IndexInner = () => {
   return (
     <>
       <Helmet>
-        <title>{profile.name} | {profile.tagline}</title>
+        <title>Raymond's Portfolio</title>
         <meta
           name="description"
           content={`${profile.name} - ${profile.tagline}. ${profile.about.bio.substring(0, 150)}...`}

@@ -1,179 +1,64 @@
-import { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import CursorGlow from "@/components/CursorGlow";
-import { GamesGlobe, TiltCard } from "@/components/animated";
+import AuroraBackground from "@/components/AuroraBackground";
+import { GeometricAmbience, GamesGlobe } from "@/components/animated";
 import { profile } from "@/data/profile";
+import { Dumbbell, UtensilsCrossed, Gamepad2, Trophy, ArrowLeft } from "lucide-react";
 
-/* ------------------------------------------------------------------ */
-/* Falling Stars — CSS-only particles that rain down the background.  */
-/* Lightweight alternative to Three.js for the secondary page.        */
-/* ------------------------------------------------------------------ */
-const STAR_COUNT = 60;
+/* ------------------------------------------------------------------------- */
+/* BentoCard — A glassmorphic container with mouse-tracking hover spotlight  */
+/* ------------------------------------------------------------------------- */
+function BentoCard({ children, className = "", delay = 0 }: { children: React.ReactNode, className?: string, delay?: number }) {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
 
-const FallingStars = () => {
-  const stars = useMemo(() => {
-    return Array.from({ length: STAR_COUNT }, (_, i) => ({
-      id: i,
-      left: Math.random() * 100,
-      delay: Math.random() * 8,
-      duration: 4 + Math.random() * 6,
-      size: 1 + Math.random() * 2,
-      opacity: 0.15 + Math.random() * 0.4,
-    }));
-  }, []);
+  function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
+    const { left, top } = currentTarget.getBoundingClientRect();
+    mouseX.set(clientX - left);
+    mouseY.set(clientY - top);
+  }
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden>
-      {stars.map((s) => (
-        <div
-          key={s.id}
-          className="absolute rounded-full bg-cyan-300"
-          style={{
-            left: `${s.left}%`,
-            width: `${s.size}px`,
-            height: `${s.size}px`,
-            opacity: s.opacity,
-            animation: `starfall ${s.duration}s ${s.delay}s linear infinite`,
-          }}
-        />
-      ))}
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] }}
+      onMouseMove={handleMouseMove}
+      className={`group relative rounded-3xl border border-white/10 bg-white/5 overflow-hidden backdrop-blur-md shadow-2xl ${className}`}
+    >
+      {/* Spotlight Effect */}
+      <motion.div
+        className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 transition duration-500 group-hover:opacity-100 z-0"
+        style={{
+          background: useMotionTemplate`
+            radial-gradient(
+              600px circle at ${mouseX}px ${mouseY}px,
+              rgba(34, 211, 238, 0.12),
+              transparent 80%
+            )
+          `,
+        }}
+      />
+      {/* Content Container */}
+      <div className="relative h-full z-10 flex flex-col">
+        {children}
+      </div>
+    </motion.div>
   );
-};
-
-/* ------------------------------------------------------------------ */
-/* Typewriter — types out a string character by character.             */
-/* ------------------------------------------------------------------ */
-const Typewriter = ({
-  text,
-  speed = 18,
-  delay = 0,
-  onDone,
-  className = "",
-}: {
-  text: string;
-  speed?: number;
-  delay?: number;
-  onDone?: () => void;
-  className?: string;
-}) => {
-  const [displayed, setDisplayed] = useState("");
-  const idx = useRef(0);
-  const started = useRef(false);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      started.current = true;
-      const interval = setInterval(() => {
-        idx.current++;
-        setDisplayed(text.slice(0, idx.current));
-        if (idx.current >= text.length) {
-          clearInterval(interval);
-          onDone?.();
-        }
-      }, speed);
-      return () => clearInterval(interval);
-    }, delay);
-    return () => clearTimeout(timeout);
-  }, [text, speed, delay, onDone]);
-
-  return (
-    <span className={className}>
-      {displayed}
-      {started.current && displayed.length < text.length && (
-        <span className="inline-block w-[2px] h-[1em] bg-primary ml-0.5 animate-pulse" />
-      )}
-    </span>
-  );
-};
-
-/* ------------------------------------------------------------------ */
-/* Content blocks                                                      */
-/* ------------------------------------------------------------------ */
-interface ContentBlock {
-  id: string;
-  type: "text" | "heading" | "image" | "globe" | "spacer" | "divider";
-  content?: string;
-  src?: string;
-  alt?: string;
 }
 
-const BLOCKS: ContentBlock[] = [
-  { id: "h1", type: "heading", content: "beyond the code _" },
-  { id: "spacer-0", type: "spacer" },
-  { id: "div-0", type: "divider" },
-  { id: "spacer-0b", type: "spacer" },
-  { id: "p1", type: "text", content: "I'm pretty career-driven — I genuinely love building things and solving hard problems. But I also think the best engineers are the ones who actually log off sometimes." },
-  { id: "spacer-1", type: "spacer" },
-  { id: "p2", type: "text", content: "Most days after work you'll find me at the gym or in the kitchen trying to perfect my pasta. I'm weirdly competitive about both." },
-  { id: "spacer-2", type: "spacer" },
-  { id: "div-1", type: "divider" },
-  { id: "spacer-3", type: "spacer" },
-  { id: "h2", type: "heading", content: "the gaming arc _" },
-  { id: "spacer-4", type: "spacer" },
-  { id: "p3", type: "text", content: "I used to be Diamond in League of Legends. That era taught me more about tilt management and team communication than any standup meeting ever has. I've retired from ranked but the competitive brain never really turned off." },
-  { id: "spacer-5", type: "spacer" },
-  { id: "p4", type: "text", content: "Recently finished Hollow Knight and it absolutely wrecked me (in a good way). Currently vibing with single-player stuff more — something about exploring at your own pace hits different." },
-  { id: "spacer-6", type: "spacer" },
-  { id: "img1", type: "image", src: "/images/hollow_knight.png", alt: "Hollow Knight floating in space" },
-  { id: "spacer-7", type: "spacer" },
-  { id: "div-2", type: "divider" },
-  { id: "spacer-8", type: "spacer" },
-  { id: "h3", type: "heading", content: "games i've played _" },
-  { id: "spacer-9", type: "spacer" },
-  { id: "globe", type: "globe" },
-  { id: "spacer-10", type: "spacer" },
-  { id: "div-3", type: "divider" },
-  { id: "spacer-11", type: "spacer" },
-  { id: "p5", type: "text", content: "That's pretty much it. I like building cool stuff, lifting heavy things, cooking carbs, and playing games. Simple vibes." },
-];
-
-/* ------------------------------------------------------------------ */
-/* Page                                                                */
-/* ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------------- */
+/* Hobbies Page — Premium Bento Box Layout                                   */
+/* ------------------------------------------------------------------------- */
 const Hobbies = () => {
   const navigate = useNavigate();
-  const [visibleCount, setVisibleCount] = useState(0);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
-  /* When a text/heading block finishes typing, reveal the next block */
-  const revealNext = useCallback(() => {
-    setVisibleCount((c) => {
-      const next = c + 1;
-      const nextBlock = BLOCKS[next];
-      /* Auto-reveal spacers, dividers, images, globe immediately */
-      if (
-        nextBlock &&
-        (nextBlock.type === "spacer" ||
-          nextBlock.type === "divider" ||
-          nextBlock.type === "image" ||
-          nextBlock.type === "globe")
-      ) {
-        setTimeout(() => setVisibleCount((cc) => cc + 1), 80);
-      }
-      return next;
-    });
-  }, []);
-
-  /* Kick off first block after a brief entrance pause */
-  useEffect(() => {
-    const t = setTimeout(() => setVisibleCount(1), 500);
-    return () => clearTimeout(t);
-  }, []);
-
-  const handleBlockDone = useCallback(
-    (block: ContentBlock) => {
-      if (block.type === "heading" || block.type === "text") {
-        revealNext();
-      }
-    },
-    [revealNext],
-  );
 
   return (
     <>
@@ -181,166 +66,167 @@ const Hobbies = () => {
         <title>Beyond the Code | {profile.name}</title>
       </Helmet>
 
-      {/* Starfall keyframe — injected once */}
-      <style>{`
-        @keyframes starfall {
-          0% { transform: translateY(-10vh); opacity: 0; }
-          10% { opacity: 1; }
-          90% { opacity: 1; }
-          100% { transform: translateY(110vh); opacity: 0; }
-        }
-      `}</style>
-
-      <div className="relative min-h-screen bg-[#020617] overflow-x-hidden">
+      <div className="relative min-h-screen bg-[#020617] overflow-x-hidden text-foreground">
+        {/* Background Effects */}
         <CursorGlow />
-        <FallingStars />
+        <AuroraBackground />
+        <GeometricAmbience shapeCount={8} colorPalette={["cyan", "emerald", "purple"]} />
 
-        {/* Pixel world background — beautiful retro open-world scene */}
-        <div
-          className="fixed inset-0 z-0 pointer-events-none"
-          style={{
-            backgroundImage: "url('/images/pixel_world_bg.png')",
-            backgroundSize: "cover",
-            backgroundPosition: "center bottom",
-            backgroundRepeat: "no-repeat",
-            opacity: 0.12,
-            filter: "saturate(1.3)",
-          }}
-          aria-hidden
-        />
-
-        {/* Top gradient overlay — ensures content readability */}
-        <div
-          className="fixed inset-0 z-[1] pointer-events-none"
-          style={{
-            background:
-              "linear-gradient(to bottom, rgba(2,6,23,0.85) 0%, rgba(2,6,23,0.5) 30%, rgba(2,6,23,0.5) 70%, rgba(2,6,23,0.85) 100%)",
-          }}
-          aria-hidden
-        />
-
-        {/* Subtle radial glow at center */}
-        <div
-          className="fixed inset-0 z-[1] pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse at 50% 30%, rgba(34,211,238,0.06) 0%, transparent 60%)",
-          }}
-          aria-hidden
-        />
-
-        {/* Back button */}
+        {/* Floating Back Button */}
         <motion.button
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
           onClick={() => navigate("/")}
-          className="fixed top-6 left-6 md:top-8 md:left-10 z-50 group flex items-center gap-2 text-foreground/30 hover:text-primary transition-colors font-mono text-xs uppercase tracking-[0.2em]"
+          className="fixed top-6 left-6 md:top-8 md:left-10 z-50 group flex items-center gap-2 text-foreground/50 hover:text-cyan-400 transition-colors font-mono text-sm uppercase tracking-widest bg-black/20 px-5 py-2.5 rounded-full backdrop-blur-lg border border-white/5 shadow-lg"
         >
-          <span className="group-hover:-translate-x-1 transition-transform">
-            ←
-          </span>
-          back
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          Back
         </motion.button>
 
-        {/* Main content — centered, justified text */}
-        <main className="relative z-10 flex flex-col items-center pt-16 md:pt-24 pb-20 px-6">
-          <div className="w-full max-w-2xl text-justify">
-            <AnimatePresence>
-              {BLOCKS.slice(0, visibleCount).map((block) => (
-                <motion.div
-                  key={block.id}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.35, ease: "easeOut" }}
-                >
-                  {block.type === "heading" && (
-                    <h2 className="font-mono text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400 mb-2 text-center">
-                      <Typewriter
-                        text={block.content!}
-                        speed={30}
-                        onDone={() => handleBlockDone(block)}
-                      />
-                    </h2>
-                  )}
+        {/* Main Content */}
+        <main className="relative z-10 flex flex-col items-center pt-32 pb-24 px-4 md:px-8 max-w-6xl mx-auto">
+          
+          {/* Header */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="w-full mb-14 text-center md:text-left pl-2"
+          >
+            <h1 className="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400 tracking-tight pb-2">
+              Beyond the Code
+            </h1>
+            <p className="mt-6 text-lg md:text-xl text-foreground/60 max-w-2xl font-light leading-relaxed">
+              Because the best engineers are the ones who actually log off sometimes. Here's what I do when I'm not staring at an IDE.
+            </p>
+          </motion.div>
 
-                  {block.type === "text" && (
-                    <p className="text-foreground/65 text-base md:text-lg leading-relaxed font-light">
-                      <Typewriter
-                        text={block.content!}
-                        speed={10}
-                        onDone={() => handleBlockDone(block)}
-                      />
-                    </p>
-                  )}
+          {/* Bento Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 w-full auto-rows-[minmax(320px,auto)]">
+            
+            {/* Fitness Card */}
+            <BentoCard delay={0.1} className="md:col-span-5 p-8 flex justify-between group/card">
+              <div className="flex-1">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="p-3.5 bg-cyan-500/10 rounded-2xl text-cyan-400 border border-cyan-500/20 shadow-[0_0_20px_rgba(34,211,238,0.1)]">
+                    <Dumbbell className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-2xl font-bold tracking-wide">Fitness</h3>
+                </div>
+                <p className="text-foreground/70 leading-relaxed text-lg">
+                  Most days after work you'll find me at the gym. It's the ultimate physical counter-balance to sitting at a desk all day building software.
+                </p>
+              </div>
+              
+              <div className="mt-10 flex items-end justify-between w-full">
+                <div className="space-y-2">
+                  <div className="text-xs uppercase tracking-[0.2em] text-foreground/40 font-mono">Status</div>
+                  <div className="flex items-center gap-2 bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
+                    <span className="font-medium text-emerald-400 text-sm">Active Daily</span>
+                  </div>
+                </div>
+                <div className="text-7xl font-black text-white/5 transform group-hover/card:scale-110 group-hover/card:text-cyan-500/10 transition-all duration-700 ease-out origin-bottom-right">
+                  GYM
+                </div>
+              </div>
+            </BentoCard>
 
-                  {block.type === "spacer" && <div className="h-5 md:h-6" />}
+            {/* Culinary Card */}
+            <BentoCard delay={0.2} className="md:col-span-7 p-8 overflow-hidden relative">
+              <div className="relative z-10 flex flex-col h-full justify-between">
+                <div>
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="p-3.5 bg-orange-500/10 rounded-2xl text-orange-400 border border-orange-500/20 shadow-[0_0_20px_rgba(249,115,22,0.1)]">
+                      <UtensilsCrossed className="w-6 h-6" />
+                    </div>
+                    <h3 className="text-2xl font-bold tracking-wide">Culinary Arts</h3>
+                  </div>
+                  <p className="text-foreground/70 leading-relaxed text-lg max-w-lg">
+                    I'm weirdly competitive about perfecting my pasta. Cooking is basically just chemistry and algorithms, but you get to eat the compiled result.
+                  </p>
+                </div>
+                
+                <div className="mt-10 flex gap-3 flex-wrap">
+                  {['Carbonara', 'Cacio e Pepe', 'Aglio e Olio', 'Ragu'].map((dish, i) => (
+                    <span key={i} className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium text-foreground/80 hover:bg-orange-500/10 hover:text-orange-300 transition-colors cursor-default">
+                      {dish}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Abstract decorative shapes */}
+              <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-orange-500/10 blur-[80px] rounded-full pointer-events-none transition-transform duration-1000 group-hover:scale-110" />
+            </BentoCard>
 
-                  {block.type === "divider" && (
-                    <motion.div
-                      initial={{ scaleX: 0 }}
-                      animate={{ scaleX: 1 }}
-                      transition={{ duration: 0.6, ease: "easeOut" }}
-                      className="h-px w-full bg-gradient-to-r from-transparent via-primary/30 to-transparent origin-left"
-                    />
-                  )}
+            {/* Globe Card */}
+            <BentoCard delay={0.3} className="md:col-span-8 min-h-[450px] relative p-0 overflow-hidden">
+               <div className="absolute top-8 left-8 z-20">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3.5 bg-indigo-500/10 rounded-2xl text-indigo-400 border border-indigo-500/20 shadow-[0_0_20px_rgba(99,102,241,0.1)]">
+                      <Gamepad2 className="w-6 h-6" />
+                    </div>
+                    <h3 className="text-2xl font-bold tracking-wide">World of Gaming</h3>
+                  </div>
+               </div>
+               <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(2,6,23,0.8)_100%)] z-10" />
+               <div className="w-full h-full pt-16 flex items-center justify-center">
+                 <GamesGlobe />
+               </div>
+            </BentoCard>
 
-                  {block.type === "image" && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.92 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.7, ease: "easeOut" }}
-                      onAnimationComplete={() => revealNext()}
-                      className="flex justify-center"
-                    >
-                      <TiltCard maxTilt={4}>
-                        <div className="rounded-2xl overflow-hidden shadow-[0_0_60px_rgba(34,211,238,0.1)] relative group max-w-sm">
-                          <img
-                            src={block.src}
-                            alt={block.alt}
-                            className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/70 to-transparent pointer-events-none" />
-                          <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between">
-                            <span className="font-mono text-[10px] text-primary/60 tracking-[0.15em] uppercase">
-                              hallownest conquered
-                            </span>
-                            <span className="font-mono text-[10px] text-foreground/30">
-                              ♥ ♥ ♥
-                            </span>
-                          </div>
-                        </div>
-                      </TiltCard>
-                    </motion.div>
-                  )}
+            {/* Hollow Knight Card */}
+            <BentoCard delay={0.4} className="md:col-span-4 p-0 overflow-hidden relative group/hk">
+              <img 
+                src="/images/hollow_knight.png" 
+                alt="Hollow Knight" 
+                className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover/hk:scale-110 group-hover/hk:opacity-80 transition-all duration-1000 ease-out"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-[#020617]/60 to-transparent" />
+              <div className="absolute inset-0 p-8 flex flex-col justify-end z-10">
+                <h4 className="text-3xl font-bold text-white mb-3">Hollow Knight</h4>
+                <p className="text-white/70 text-base leading-relaxed">
+                  Recently finished this masterpiece. It absolutely wrecked me. Vibing heavily with single-player experiences right now.
+                </p>
+                <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-5">
+                  <span className="font-mono text-[11px] text-emerald-400/80 tracking-[0.2em] uppercase">
+                    Hallownest Conquered
+                  </span>
+                  <span className="font-mono text-sm text-white/40">
+                    ♥ ♥ ♥
+                  </span>
+                </div>
+              </div>
+            </BentoCard>
 
-                  {block.type === "globe" && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.8 }}
-                      onAnimationComplete={() => revealNext()}
-                      className="w-full aspect-square md:aspect-[4/3] max-w-lg mx-auto rounded-2xl overflow-hidden bg-transparent relative"
-                    >
-                      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,transparent_30%,#020617_100%)] z-10" />
-                      <GamesGlobe />
-                    </motion.div>
-                  )}
-                </motion.div>
-              ))}
-            </AnimatePresence>
+            {/* League of Legends Card */}
+            <BentoCard delay={0.5} className="md:col-span-12 p-8 md:p-10 relative overflow-hidden bg-gradient-to-br from-blue-900/10 to-purple-900/10 border-blue-500/20">
+              <div 
+                className="absolute right-0 top-0 w-full md:w-2/3 h-full bg-[url('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80')] bg-cover bg-center opacity-[0.07] mix-blend-screen pointer-events-none" 
+                style={{ maskImage: "linear-gradient(to right, transparent, black 80%)", WebkitMaskImage: "linear-gradient(to right, transparent, black 80%)" }}
+              />
+              
+              <div className="absolute -left-40 -top-40 w-96 h-96 bg-blue-500/10 blur-[100px] rounded-full pointer-events-none" />
+              
+              <div className="relative z-10 md:w-2/3">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="p-3.5 bg-blue-500/10 rounded-2xl text-blue-400 border border-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.1)]">
+                    <Trophy className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-2xl font-bold tracking-wide">The Ranked Era</h3>
+                </div>
+                <p className="text-foreground/70 leading-relaxed text-lg md:text-xl mb-8">
+                  I used to be Diamond in League of Legends. That era taught me more about tilt management, mental fortitude, and team communication than any corporate standup meeting ever has. I've officially retired from ranked, but the competitive brain never really turns off.
+                </p>
+                <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-sm font-medium text-blue-300">
+                  <span className="w-2.5 h-2.5 rounded-full bg-blue-400 shadow-[0_0_12px_rgba(96,165,250,0.8)] animate-pulse" />
+                  Diamond Peak (Retired)
+                </div>
+              </div>
+            </BentoCard>
 
-            {/* Blinking terminal cursor at the end */}
-            {visibleCount >= BLOCKS.length && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="mt-6 flex justify-center"
-              >
-                <span className="inline-block w-3 h-5 bg-primary/50 animate-pulse rounded-sm" />
-              </motion.div>
-            )}
           </div>
         </main>
       </div>

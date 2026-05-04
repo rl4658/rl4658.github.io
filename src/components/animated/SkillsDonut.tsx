@@ -72,7 +72,7 @@ const SkillsDonut = ({ rotationSpeed = 0.003 }: SkillsDonutProps) => {
     >
       <Canvas
         camera={{ position: [0, 0, 9], fov: 50 }}
-        dpr={[1, 1.75]}
+        dpr={[1, 1.25]}
         gl={{ antialias: true, alpha: true }}
       >
         {/* Deep space fog for depth */}

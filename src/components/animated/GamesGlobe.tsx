@@ -113,8 +113,8 @@ const GamesGlobe = () => {
     <div className="w-full h-full min-h-[400px] md:min-h-[500px] cursor-grab active:cursor-grabbing">
       <Canvas
         camera={{ position: [0, 0, 14], fov: 60 }}
-        dpr={[1, 2]}
-        gl={{ antialias: true, alpha: true }}
+        dpr={[1, 1]}
+        gl={{ antialias: false, alpha: true }}
       >
         <ambientLight intensity={0.6} />
         <pointLight position={[10, 10, 10]} intensity={0.8} color="#ec4899" />

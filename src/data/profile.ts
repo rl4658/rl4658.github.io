@@ -3,7 +3,9 @@ export interface Experience {
   location: string;
   role: string;
   period: string;
-  bullets: string[];
+  logoUrl: string;
+  summary: string;
+  skills: string[];
 }
 
 export interface Education {
@@ -57,61 +59,58 @@ export const profile = {
 
 export const experiences: Experience[] = [
   {
+    company: "Oracle",
+    location: "Redwood City, CA",
+    role: "Software Engineer Intern",
+    period: "Jul 2026 – Sep 2026",
+    logoUrl: "/images/oracle.png",
+    summary: "Incoming Software Engineer intern for the Summer of 2026.",
+    skills: ["Software Engineering", "Enterprise Systems"],
+  },
+  {
     company: "Woyage AI",
     location: "San Francisco, CA",
     role: "Software Engineer",
     period: "July 2025 – Present",
-    bullets: [
-      "Built AI mock-interview platform (team of 5); launched paid beta to 500+ users generating $100K+ in month 1",
-      "Containerized video workflows into Docker + AWS ECR pipelines; reduced deployment effort by 75%",
-      "Fault-tolerant video services w/ automated health checks; decreased production failure by 90%",
-      "Optimized LLM scoring pipelines via fine-tuning + async Python I/O; hours→minutes (65% throughput increase)",
-      "Architected scalable GPU rendering infra on AWS Batch; increased weekly capacity by 50%",
-    ],
+    logoUrl: "/images/woyageai.png",
+    summary: "Spearheaded the development of a highly scalable AI mock-interview platform by architecting fault-tolerant video rendering pipelines on AWS Batch and optimizing async Python LLM scoring systems.",
+    skills: ["Python", "AWS Batch", "Docker", "AWS ECR", "LLMs"],
   },
   {
     company: "WisdomQ",
     location: "Palo Alto, CA",
     role: "Data & AI Engineer Intern",
     period: "Oct 2025 – Present",
-    bullets: [
-      "Optimized ranking engine architecture; reduced latency by 55% and doubled throughput via Node.js parallelization + prompt optimizations",
-      "Automated onboarding parsing LinkedIn data; cut manual entry by 70% for 100+ users",
-      "Built Supabase/PostgreSQL APIs for 10K+ monthly requests; strict Zod validation",
-      "Built AI Agent interface using Model Context Protocol for 100+ beta users to browse/book services in chat",
-    ],
+    logoUrl: "/images/wisdomq.png",
+    summary: "Optimized ranking engine architectures for high-throughput AI services and built scalable Supabase APIs alongside a conversational Agent interface using the Model Context Protocol.",
+    skills: ["Node.js", "Supabase", "PostgreSQL", "AI Agents", "Zod"],
   },
   {
     company: "AXENTRA OS",
     location: "London, ON",
     role: "Software Engineer Intern",
     period: "Mar 2025 – Jun 2025",
-    bullets: [
-      "Integrated AI transcription as Django ingestion layer; boosted backend efficiency by 60%",
-      "In-memory index for 5K+ transcripts; sub-second lookups and 45% faster analytics",
-      "Secure REST/GraphQL clients w/ RBAC; internal dev-tools for token rotation",
-      "Semantic search over 10K+ docs with LangChain RAG; cut query latency by 50%",
-    ],
+    logoUrl: "/images/axentra.png",
+    summary: "Developed robust Django backends with in-memory indexing and secure GraphQL clients, while integrating LangChain RAG for blazing-fast semantic search over thousands of documents.",
+    skills: ["Django", "Python", "GraphQL", "REST APIs", "LangChain"],
   },
   {
     company: "Vale Base Metals",
     location: "Toronto, ON",
     role: "Data Analyst Intern",
     period: "May 2024 – Feb 2025",
-    bullets: [
-      "End-to-end ETL ingesting 500K+ records into SQL; cut reporting latency by 60%",
-      "Python batch-update tool for 1,000+ documents; eliminated 90% manual effort via AI automations",
-    ],
+    logoUrl: "/images/vale.png",
+    summary: "Engineered end-to-end ETL data pipelines processing hundreds of thousands of records into SQL databases, alongside creating AI-automated Python batch-update tools to eliminate manual effort.",
+    skills: ["Python", "SQL", "ETL", "Data Pipelines", "Automation"],
   },
   {
     company: "Robarts Research Institute",
     location: "London, ON",
     role: "Software Engineer Intern",
     period: "May 2023 – May 2024",
-    bullets: [
-      "Automated image-processing CI with 20+ Python scripts; improved diagnostic accuracy by 10%",
-      "Co-developed $10 diagnostic microscope; co-authored C++ firmware on Raspberry Pi",
-    ],
+    logoUrl: "/images/robarts.png",
+    summary: "Co-developed an affordable diagnostic microscope by writing C++ firmware for Raspberry Pi, and automated critical image-processing CI workflows with Python.",
+    skills: ["Python", "C++", "Raspberry Pi", "Image Processing", "CI/CD"],
   },
 ];
 
