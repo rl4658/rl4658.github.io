@@ -1,76 +1,62 @@
-# Raymond Li - 3D Interactive Portfolio Website
+# Raymond Li — Portfolio
 
-A highly interactive, 3D scroll-driven personal portfolio website built with React, Three.js (@react-three/fiber), Framer Motion, and Tailwind CSS. Designed with a sleek, modern Software Engineer aesthetic featuring deep dark slate backgrounds, high-contrast neon accents, and heavy use of glassmorphism.
+Interactive, scroll-driven personal portfolio built with React 18, Vite, TypeScript, Tailwind CSS, Framer Motion and three.js (`@react-three/fiber`). Live at [rl4658.github.io](https://rl4658.github.io).
 
-## ✨ Features
+## Features
 
-- **Interactive 3D Elements**: Uses Three.js for a globally persistent, scroll-tied 3D background (Donut) and an interactive 3D Skills Globe.
-- **Scroll-Driven Parallax**: Heavy use of Framer Motion's `useScroll` and `useTransform` to create fluid, physics-based scroll animations for all sections.
-- **Software Engineer Aesthetic**: A sleek, dark theme inspired by modern IDEs (like VS Code) with high-contrast cyan/emerald accents.
-- **AI Video Integration Ready**: Includes a custom `<ScrollVideo />` component designed to scrub AI-generated videos backward and forward naturally based on your scroll position.
-- **Glassmorphism Design**: Translucent cards, backdrop blur, subtle highlights, and soft gradients.
-- **Fully Responsive**: Optimized for all device sizes, ensuring 3D elements and scroll effects scale perfectly.
+- **Scroll-linked shader backdrop** — a GLSL nebula that flows and shifts colour as you move through the page (one draw call, no CSS blur).
+- **Persistent 3D donut** that travels between sections and powers the intro "dive" and the warp into the Hobbies page.
+- **Experience deck** — sticky stacking cards; click any role for an in-depth case study (what was built, impact metrics, stack, company link). Deep-linkable via `/?exp=<slug>`.
+- **Scene wipe** transition, **decrypting** section titles, glitch hover, count-up metrics, tilt cards.
+- **Certifications**, publication link, resume viewer/download.
+- Google Analytics 4 / Tag Manager / Search Console ready via environment variables.
+- Honors `prefers-reduced-motion` (no WebGL, static fallbacks).
 
-## 🚀 Getting Started
+## Getting started
 
-### Prerequisites
-
-- Node.js 18+ or Bun
-- npm or bun package manager
-
-### Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/rl4658/rl4658.github.io.git
-cd rl4658.github.io
-```
-
-2. Install dependencies:
 ```bash
 npm install
+npm run dev        # http://localhost:8080
+npm run build      # production build → dist/
+npm run lint
 ```
 
-3. Start the development server:
-```bash
-npm run dev
+## Updating content
+
+Everything textual is in `src/data/profile.ts` (experiences, skills, education, certifications, projects, awards, nav). Replace `public/resume.pdf` to update the resume.
+
+## Analytics & search
+
+Copy `.env.example` to `.env.local` and set any of:
+
+| Variable | Effect |
+|---|---|
+| `VITE_GA_MEASUREMENT_ID` | Loads gtag.js and reports SPA page views |
+| `VITE_GTM_ID` | Loads Google Tag Manager instead (configure GA4 inside GTM) |
+| `VITE_GOOGLE_SITE_VERIFICATION` | Adds the Search Console `<meta>` verification tag |
+
+For GitHub Pages, add the same names as repository **Variables** (Settings → Secrets and variables → Actions → Variables); the deploy workflow passes them into the build.
+
+## Project structure
+
+```
+public/            resume.pdf, images/, sitemap.xml, robots.txt
+src/
+  components/
+    animated/      ShaderBackdrop, SkillsDonut, SceneWipe, DecryptTitle, ScrollReveal, ...
+    sections/      Hero, About, Experience, Skills, Education, Projects
+    ExperienceDetail.tsx   full-screen case-study view
+  contexts/        IntroContext, SceneContext
+  data/profile.ts  all content
+  lib/analytics.ts GA4 / GTM bootstrap
+  pages/           Index, Hobbies, NotFound
+  index.css        design tokens + glass utilities
 ```
 
-4. Open [http://localhost:8080](http://localhost:8080) (or the port Vite provides) in your browser.
+## Deployment
 
-## 📁 Project Structure
+Push to `master` → GitHub Actions builds and deploys `dist/` to GitHub Pages. `dist/404.html` is a copy of the SPA shell so client-side routes work on direct load.
 
-```
-├── public/
-│   ├── resume.pdf          # Your resume PDF
-│   └── favicon.ico         # Site favicon
-├── src/
-│   ├── components/
-│   │   ├── animated/       # 3D and animated components (SkillsGlobe, SkillsDonut)
-│   │   ├── sections/       # Scroll-driven page sections
-│   │   ├── ScrollVideo.tsx # AI Video scroll-scrubbing wrapper
-│   │   ├── NavBar.tsx      # Glass navigation bar
-│   │   └── ...
-│   ├── data/
-│   │   └── profile.ts      # All portfolio content
-│   ├── pages/
-│   │   └── Index.tsx       # Main page
-│   └── index.css           # Design system & glass effects
-└── tailwind.config.ts      # Tailwind configuration
-```
+## License
 
-## 📱 Tech Stack
-
-- **React 18 & Vite** - Next-gen build tool & UI framework
-- **Three.js & @react-three/fiber** - 3D rendering and components
-- **Framer Motion** - Scroll-driven animations and physics
-- **TailwindCSS** - Utility-first CSS styling
-- **TypeScript** - Type safety
-
-## 📜 License
-
-MIT License - feel free to use this template for your own portfolio!
-
----
-
-Built with ❤️ by Raymond Li
+MIT

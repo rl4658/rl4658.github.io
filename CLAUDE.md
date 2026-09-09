@@ -4,102 +4,56 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Personal portfolio website built with Vite, React 18, TypeScript, and TailwindCSS featuring iOS 26-inspired glassmorphism design with animated aurora backgrounds.
+Personal portfolio website built with Vite, React 18, TypeScript, TailwindCSS, Framer Motion and a single persistent three.js (@react-three/fiber) scene. Dark "software engineer" theme: deep slate, cyan/emerald accents, glassmorphism cards, a wireframe donut that travels between sections, and a scroll-linked GLSL nebula backdrop.
 
 ## Development Commands
 
-**Development:**
 ```bash
-npm run dev          # Start dev server on localhost:8080
-npm install          # Install dependencies
+npm run dev          # Dev server on localhost:8080
+npm run build        # Production build → dist/ (also writes dist/404.html for SPA routing)
+npm run lint         # ESLint
+npm run preview      # Preview the production build
+npx tsc --noEmit -p tsconfig.app.json   # Type-check only
 ```
 
-**Build & Lint:**
-```bash
-npm run build        # Production build (outputs to dist/)
-npm run build:dev    # Development build
-npm run lint         # Run ESLint
-npm run preview      # Preview production build
-```
-
-**Deployment:**
-- Push to `master` branch triggers automatic GitHub Pages deployment via `.github/workflows/deploy.yml`
-- Site deploys from `dist/` folder after build
+**Deployment:** pushing to `master` runs `.github/workflows/deploy.yml` → GitHub Pages from `dist/`. Analytics / verification IDs are read from repository *Variables* (`VITE_GA_MEASUREMENT_ID`, `VITE_GTM_ID`, `VITE_GOOGLE_SITE_VERIFICATION`); see `.env.example`.
 
 ## Architecture
 
-### Component Structure
+### Pages
+- `src/pages/Index.tsx` — main page. Owns intro/scene providers, the resume modal, and the **experience detail view** (URL-driven: `/?exp=<slug>`; opening pushes history so Back closes it).
+- `src/pages/Hobbies.tsx` — "Beyond the Code" bento page, lazy-loaded; reached via the warp transition from About.
+- `src/pages/NotFound.tsx` — 404 fallback. Add routes in `src/App.tsx` above the `*` route.
 
-**Main Entry:** `src/pages/Index.tsx` orchestrates all sections and manages resume modal state.
+### Contexts
+- `IntroContext` — intro → diving → done phases (skipped for returning visitors / reduced motion).
+- `SceneContext` — one IntersectionObserver decides the active scene (`hero|about|experience|skills|education|projects`); exposes `activeScene`, `activeSceneRef`, `pageProgressRef` (0..1 page scroll, read per-frame by the shader) and the warp state.
 
-**Page Sections** (in `src/components/sections/`):
-- `HeroSection.tsx` - Landing with name/tagline
-- `AboutSection.tsx` - Bio and highlights
-- `ExperienceSection.tsx` - Work experience timeline
-- `SkillsSection.tsx` - Tech stack organized by category
-- `EducationSection.tsx` - Academic background
-- `ProjectsSection.tsx` - Featured projects and awards
+### Sections (`src/components/sections/`)
+Hero (typewriter + pills), About (bio, chips, warp button), Experience (sticky **stacking deck** of clickable cards → `ExperienceDetail`), Skills (lazy 3D word globe, paused when off-screen), Education (degrees + certifications card), Projects (projects + awards).
 
-**Layout Components:**
-- `NavBar.tsx` - Glassmorphism navigation with scroll spy
-- `Footer.tsx` - Footer with social links
-- `AuroraBackground.tsx` - Animated gradient blobs
-- `BackToTop.tsx` - Floating scroll-to-top button
-- `ResumeModal.tsx` - PDF viewer modal for `public/resume.pdf`
+### Animated / effects (`src/components/animated/`)
+- `SkillsDonut` — the persistent full-screen Canvas: `ShaderBackdrop` (scroll-linked nebula), donut mesh, particle fields. dpr 1, no MSAA.
+- `SceneWipe` — scanline sweep on scene change (replaced the old expanding ring).
+- `DecryptTitle` — section titles decode from glyphs on first view.
+- `ScrollReveal`, `TiltCard`, `CountUp`/`parseBulletWithCounts`, `GlitchText`, `ChapterStrip`, `SectionCutSentinel`, `CodeParticles`.
+- `SkillsGlobe`, `GamesGlobe` — separate Canvases, always imported with `React.lazy`.
 
-**UI Library:** shadcn/ui components in `src/components/ui/` (Radix UI primitives with Tailwind styling)
+### Data
+**All content lives in `src/data/profile.ts`.** `experiences[]` entries carry `slug`, `website`, `stack`, `overview`, `highlights`, `impact` (used by both the card and the detail view). Also `certifications`, `education`, `projects`, `awards`, `skillCategories`, `navLinks`. The resume PDF is `public/resume.pdf`.
 
-### Data Management
+### Analytics / SEO
+`src/lib/analytics.ts` injects GTM or gtag only when an ID is configured; `App.tsx`'s `RouteTracker` reports SPA page views; `trackEvent()` for interactions. `public/sitemap.xml` + `robots.txt` exist; `index.html` holds the static meta tags.
 
-**All portfolio content** lives in `src/data/profile.ts` as typed exports:
-- `profile` - Name, tagline, contact info, bio
-- `experiences: Experience[]` - Work history
-- `skillCategories: SkillCategory[]` - Tech skills grouped by type
-- `education: Education[]` - Academic credentials
-- `projects: Project[]` - Side projects
-- `awards: Award[]` - Achievements
-- `navLinks` - Navigation menu items
+## Performance rules (the site was rebuilt to fix scroll lag — keep these)
+- Never put `filter:` (blur etc.) or `mix-blend-mode` on large, animated or full-screen elements. Use the shader, opacity, or transform instead.
+- No `background-attachment: fixed`; fixed decorative layers are their own elements/pseudo-elements.
+- Keep `backdrop-filter` blur ≤ 18px (`.glass`, `.glass-strong` in `src/index.css`).
+- Per-frame work goes through refs/MotionValues, not React state.
+- Extra WebGL canvases: lazy import, mount when near, `frameloop="never"` when off-screen.
+- Honor `prefers-reduced-motion` in every new effect (`useReducedMotion`).
 
-**To update content:** Edit `src/data/profile.ts` only. Components automatically consume these exports.
+## Design tokens
+`src/index.css`: `--glass-*`, `--gradient-aurora-1/2/3`, `.glass`, `.glass-strong`, `.pill`, `.text-gradient`, `.deck-card`, `.scene-beam`. Fonts: Inter (body), Outfit (headings), JetBrains Mono (mono) loaded from `index.html`.
 
-### Design System
-
-**iOS 26 Glassmorphism** defined in `src/index.css`:
-- CSS custom properties for glass effects (`--glass-bg`, `--glass-border`, `--glass-blur`)
-- Gradient tokens for aurora (`--gradient-aurora-1/2/3`)
-- Transition timing functions (`--transition-smooth`, `--transition-spring`)
-
-**Utility classes:**
-- `.glass` - Glassmorphism card effect with backdrop blur
-- `.pill` - Chip/badge style
-- `.text-gradient` - Gradient text using aurora colors
-- `.hover-lift` - Card hover elevation
-- `.section-fade` - Fade-in-on-scroll animation (triggered by Intersection Observer)
-- `.timeline-line` / `.timeline-dot` - Experience timeline styling
-
-**Fonts:**
-- Inter (body text)
-- Outfit (headings)
-
-### Routing
-
-React Router with single-page layout:
-- `/` → `Index.tsx` (main portfolio)
-- `*` → `NotFound.tsx` (404 fallback)
-
-Add new routes in `src/App.tsx` **above** the catch-all `*` route.
-
-### Path Aliases
-
-`@/` resolves to `src/` (configured in `vite.config.ts` and `tsconfig.json`)
-
-Example: `import { profile } from "@/data/profile"`
-
-## Key Technical Details
-
-- **Vite config:** Custom server runs on port 8080, React SWC plugin for fast refresh
-- **ESLint:** Flat config (`eslint.config.js`) with React Hooks and React Refresh plugins
-- **Tailwind:** Extended theme with aurora colors, glass effect utilities, and custom animations
-- **SEO:** React Helmet for meta tags (title, description, Open Graph, Twitter Card)
-- **Animations:** Framer Motion + CSS keyframes for aurora blobs and section fade-ins
-- **Icons:** Lucide React (UI icons), React Icons (brand logos)
+`@/` resolves to `src/`.
