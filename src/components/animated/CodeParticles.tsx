@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, type MotionValue } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 interface CodeParticle {
@@ -115,7 +115,7 @@ const Particle = ({
   particle: CodeParticle;
   colorClass: string;
   animationName: string;
-  scrollYProgress: any;
+  scrollYProgress: MotionValue<number>;
 }) => {
   // Create parallax effect using scroll
   const y = useTransform(
