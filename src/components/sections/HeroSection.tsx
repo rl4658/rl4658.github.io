@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useMotionValue, useScroll, useTransform } from "framer-motion";
-import { MapPin, Download, ChevronDown } from "lucide-react";
+import { MapPin, Download, ChevronDown, Globe2 } from "lucide-react";
 import { SiGithub, SiLinkedin } from "react-icons/si";
 import { HiOutlineMail } from "react-icons/hi";
 import { CodeParticles } from "@/components/animated";
@@ -209,21 +209,37 @@ const HeroSection = ({ onResumeClick }: HeroSectionProps) => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* LEFT: Hero Content */}
           <div className="text-center lg:text-left">
-            {/* Stage 1: Location pill */}
-            <motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.85 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{
-                type: "spring",
-                stiffness: 320,
-                damping: 18,
-                delay: STAGE.pill,
-              }}
-              className="inline-flex items-center gap-2 pill mb-8"
-            >
-              <MapPin size={14} className="text-primary" />
-              <span className="text-sm text-foreground/80">{profile.region}</span>
-            </motion.div>
+            {/* Stage 1: Location + citizenship pills */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mb-8">
+              <motion.div
+                initial={{ opacity: 0, y: 20, scale: 0.85 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 320,
+                  damping: 18,
+                  delay: STAGE.pill,
+                }}
+                className="inline-flex items-center gap-2 pill"
+              >
+                <MapPin size={14} className="text-primary" />
+                <span className="text-sm text-foreground/80">{profile.region}</span>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 20, scale: 0.85 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 320,
+                  damping: 18,
+                  delay: STAGE.pill + 0.12,
+                }}
+                className="inline-flex items-center gap-2 pill"
+              >
+                <Globe2 size={14} className="text-accent" />
+                <span className="text-sm text-foreground/80">{profile.citizenship}</span>
+              </motion.div>
+            </div>
 
             {/* Stage 2: Mono prompt + Typewriter name */}
             <motion.div

@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet";
 import { AnimatePresence, motion } from "framer-motion";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import AuroraBackground from "@/components/AuroraBackground";
 import CursorGlow from "@/components/CursorGlow";
-import ScrollMotionBlur from "@/components/ScrollMotionBlur";
-import { GeometricAmbience, ChapterStrip, SceneCutLine, SectionCutSentinel, SkillsDonut } from "@/components/animated";
+import { ChapterStrip, SceneWipe, SectionCutSentinel, SkillsDonut } from "@/components/animated";
 import NavBar from "@/components/NavBar";
 import HeroSection from "@/components/sections/HeroSection";
 import AboutSection from "@/components/sections/AboutSection";
@@ -14,11 +14,16 @@ import EducationSection from "@/components/sections/EducationSection";
 import ProjectsSection from "@/components/sections/ProjectsSection";
 import Footer from "@/components/Footer";
 import ResumeModal from "@/components/ResumeModal";
+import ExperienceDetail from "@/components/ExperienceDetail";
 import BackToTop from "@/components/BackToTop";
 import IntroOverlay from "@/components/intro/IntroOverlay";
 import { IntroProvider, useIntro } from "@/contexts/IntroContext";
 import { SceneProvider, useScene } from "@/contexts/SceneContext";
-import { profile } from "@/data/profile";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { trackEvent } from "@/lib/analytics";
+import { profile, experiences } from "@/data/profile";
+
+const SITE_VERIFICATION = (import.meta.env.VITE_GOOGLE_SITE_VERIFICATION as string | undefined)?.trim();
 
 const Index = () => {
   return (
@@ -34,20 +39,58 @@ const IndexInner = () => {
   const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
   const { phase, replayIntro } = useIntro();
   const { isWarping } = useScene();
+  const prefersReducedMotion = useReducedMotion();
 
-  /* Body content fades in once the dive completes — synced with overlay's fade-out. */
-  /* Body hides during warp so only the donut is visible */
+  /* Body content fades in once the dive completes and hides during the warp. */
   const bodyVisible = phase === "done" && !isWarping;
 
-  /*
-   * Force-close the resume modal whenever we leave the "done" phase.
-   * Without this, replaying the intro with the modal open would unmount the
-   * modal but preserve `isResumeModalOpen=true`, causing it to pop open again
-   * the moment the body re-mounts — jarring and unintentional.
-   */
+  /* Force-close the resume modal whenever we leave the "done" phase. */
   useEffect(() => {
     if (phase !== "done") setIsResumeModalOpen(false);
   }, [phase]);
+
+  /* ---------------------------------------------------------------------- */
+  /* Experience detail view — URL is the source of truth (?exp=<slug>).      */
+  /* Opening pushes a history entry so the browser Back button closes it;   */
+  /* closing via the UI pops that entry instead of pushing another one.      */
+  /* ---------------------------------------------------------------------- */
+  const [params, setParams] = useSearchParams();
+  const navigate = useNavigate();
+  const openedViaUiRef = useRef(false);
+
+  const activeSlug = params.get("exp");
+  const activeIndex = activeSlug ? experiences.findIndex((e) => e.slug === activeSlug) : -1;
+  const activeExperience = activeIndex >= 0 ? experiences[activeIndex] : null;
+
+  const openExperience = useCallback(
+    (slug: string) => {
+      openedViaUiRef.current = true;
+      setParams({ exp: slug });
+      trackEvent("experience_open", { slug });
+    },
+    [setParams],
+  );
+
+  const closeExperience = useCallback(() => {
+    if (openedViaUiRef.current) {
+      openedViaUiRef.current = false;
+      navigate(-1);
+    } else {
+      setParams({}, { replace: true });
+    }
+  }, [navigate, setParams]);
+
+  const stepExperience = useCallback(
+    (delta: number) => {
+      if (activeIndex < 0) return;
+      const next = (activeIndex + delta + experiences.length) % experiences.length;
+      setParams({ exp: experiences[next].slug }, { replace: true });
+      trackEvent("experience_open", { slug: experiences[next].slug, via: "arrow" });
+    },
+    [activeIndex, setParams],
+  );
+  const prevExperience = useCallback(() => stepExperience(-1), [stepExperience]);
+  const nextExperience = useCallback(() => stepExperience(1), [stepExperience]);
 
   return (
     <>
@@ -57,45 +100,27 @@ const IndexInner = () => {
           name="description"
           content={`${profile.name} - ${profile.tagline}. ${profile.about.bio.substring(0, 150)}...`}
         />
+        {SITE_VERIFICATION && <meta name="google-site-verification" content={SITE_VERIFICATION} />}
         <meta property="og:title" content={`${profile.name} | ${profile.tagline}`} />
-        <meta
-          property="og:description"
-          content={profile.about.bio.substring(0, 150)}
-        />
+        <meta property="og:description" content={profile.about.bio.substring(0, 150)} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={profile.contact.website} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={`${profile.name} | ${profile.tagline}`} />
-        <meta
-          name="twitter:description"
-          content={profile.about.bio.substring(0, 150)}
-        />
+        <meta name="twitter:description" content={profile.about.bio.substring(0, 150)} />
         <link rel="canonical" href={profile.contact.website} />
       </Helmet>
 
       <div className="relative min-h-screen">
-        {/* Feature A: Cursor glow halo — always on */}
         <CursorGlow />
-        {/* Feature C: Scroll-velocity motion blur — writes --scroll-blur CSS var */}
-        <ScrollMotionBlur />
-        {/* Donut canvas — persistent across intro/ambient. Reads phase from context. */}
-        <SkillsDonut rotationSpeed={0.003} />
 
-        {/* Intro overlay — only renders during intro/diving phases. */}
+        {/* Persistent WebGL layer: shader backdrop + donut + stars. Null for reduced motion. */}
+        <SkillsDonut rotationSpeed={0.003} />
+        {/* Reduced-motion users get the cheap CSS aurora instead of the shader. */}
+        {prefersReducedMotion && <AuroraBackground />}
+
         <IntroOverlay />
 
-        {/*
-          Body content is *conditionally mounted* when the dive completes.
-          Each child therefore runs its entry animation at the exact moment
-          the user sees it — no more "animations fired while invisible".
-        */}
-        {/*
-          `initial={false}` on AnimatePresence: skips the body fade-in for
-          returning visitors who land directly with phase="done". Their cinematic
-          hero reveal still plays (those animations live inside the body), but
-          the body wrapper itself doesn't flash from opacity 0.
-          `exit` ensures replay-from-nav unmounts gracefully instead of vanishing.
-        */}
         <AnimatePresence initial={false}>
           {bodyVisible && (
             <motion.div
@@ -106,9 +131,7 @@ const IndexInner = () => {
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             >
               <ChapterStrip />
-              <SceneCutLine />
-              <AuroraBackground />
-              <GeometricAmbience shapeCount={10} colorPalette={["cyan", "purple", "pink"]} />
+              <SceneWipe />
 
               <NavBar
                 onResumeClick={() => setIsResumeModalOpen(true)}
@@ -120,7 +143,7 @@ const IndexInner = () => {
                 <SectionCutSentinel />
                 <AboutSection />
                 <SectionCutSentinel />
-                <ExperienceSection />
+                <ExperienceSection onOpen={openExperience} />
                 <SectionCutSentinel />
                 <SkillsSection />
                 <SectionCutSentinel />
@@ -135,6 +158,20 @@ const IndexInner = () => {
                 isOpen={isResumeModalOpen}
                 onClose={() => setIsResumeModalOpen(false)}
               />
+
+              <AnimatePresence>
+                {activeExperience && (
+                  <ExperienceDetail
+                    key={activeExperience.slug}
+                    experience={activeExperience}
+                    index={activeIndex}
+                    total={experiences.length}
+                    onClose={closeExperience}
+                    onPrev={prevExperience}
+                    onNext={nextExperience}
+                  />
+                )}
+              </AnimatePresence>
 
               <BackToTop />
             </motion.div>

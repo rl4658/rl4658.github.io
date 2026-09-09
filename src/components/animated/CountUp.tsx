@@ -77,7 +77,8 @@ const CountUp = ({ end, suffix = "", prefix = "", durationMs = 1200 }: CountUpPr
 /* "90%", etc. and replaces them with <CountUp> components. Returns a          */
 /* ReactNode array suitable for rendering inline.                              */
 /* -------------------------------------------------------------------------- */
-const NUMBER_PATTERN = /(\$?\d[\d,]*\.?\d*)\s*(%|K\+|\+|x)?/g;
+/* No `\s*` before the suffix: consuming the space after "3 workstreams" glued the words together. */
+const NUMBER_PATTERN = /(\$?\d[\d,]*\.?\d*)(%|K\+|\+|x)?/g;
 
 export const parseBulletWithCounts = (bullet: string): ReactNode[] => {
   const parts: ReactNode[] = [];

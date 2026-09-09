@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Code, Trophy } from "lucide-react";
 import { projects, awards } from "@/data/profile";
-import { ScrollReveal, TiltCard, KineticTitle } from "@/components/animated";
+import { ScrollReveal, TiltCard, DecryptTitle } from "@/components/animated";
 import GlitchText from "@/components/animated/GlitchText";
 import { useScene } from "@/contexts/SceneContext";
 
@@ -23,7 +23,7 @@ const ProjectsSection = () => {
     <section id="projects" ref={sectionRef} className="py-24 px-4 relative">
       <motion.div style={{ y }} className="container mx-auto max-w-4xl">
         <h2 className="font-display text-3xl md:text-4xl font-bold mb-4 text-center text-gradient">
-          <KineticTitle text="Projects & Awards" />
+          <DecryptTitle text="Projects & Awards" />
         </h2>
         <motion.p
           initial={{ opacity: 0 }}
@@ -99,6 +99,9 @@ const ProjectsSection = () => {
                     <span className="w-2 h-2 rounded-full bg-accent mt-2 shrink-0 shadow-[0_0_10px_hsl(var(--accent))]" />
                     <div>
                       <p className="font-medium text-foreground">{award.title}</p>
+                      {award.tech && (
+                        <p className="text-xs text-foreground/50 mt-0.5">{award.tech}</p>
+                      )}
                       <p className="text-sm text-foreground/60 font-mono">{award.date}</p>
                     </div>
                   </li>

@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { profile } from "@/data/profile";
-import { ScrollReveal, TiltCard, KineticTitle } from "@/components/animated";
+import { ScrollReveal, TiltCard, DecryptTitle } from "@/components/animated";
 import { useScene } from "@/contexts/SceneContext";
 
 const AboutSection = () => {
@@ -33,7 +33,7 @@ const AboutSection = () => {
           />
           {/* Section Title — kinetic word-by-word reveal. */}
           <h2 className="font-display text-3xl md:text-4xl font-bold mb-6 text-gradient">
-            <KineticTitle text="About Me" />
+            <DecryptTitle text="About Me" />
           </h2>
 
           {/* Bio */}
