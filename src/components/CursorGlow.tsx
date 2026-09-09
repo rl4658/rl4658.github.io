@@ -2,15 +2,12 @@ import { useEffect, useRef } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 /* -------------------------------------------------------------------------- */
-/* CursorGlow — Idea A                                                        */
+/* CursorGlow — soft cyan halo that follows the pointer.                       */
 /*                                                                             */
-/* Soft ~200px cyan halo follows the cursor across the entire page.            */
-/* Fixed-position, low opacity, additive blend. Gives the page a luminous,     */
-/* "alive surface" feel without being distracting.                             */
-/*                                                                             */
-/* Implementation: single fixed div + pointer-move listener, no React state    */
-/* in the hot path — all updates go through ref.current.style to avoid         */
-/* React re-render overhead at 60fps.                                          */
+/* Single fixed element moved with translate3d from a rAF-coalesced pointer    */
+/* listener. No React state in the hot path and no blend mode: a plain         */
+/* low-opacity radial gradient is composited for free, whereas                 */
+/* `mix-blend-mode: screen` forced a blend pass over the whole page.           */
 /* -------------------------------------------------------------------------- */
 const CursorGlow = () => {
   const glowRef = useRef<HTMLDivElement>(null);
@@ -18,6 +15,8 @@ const CursorGlow = () => {
 
   useEffect(() => {
     if (prefersReducedMotion) return;
+    /* Touch devices have no hover cursor — skip the listener entirely. */
+    if (window.matchMedia?.("(hover: none)").matches) return;
 
     const el = glowRef.current;
     if (!el) return;
@@ -29,20 +28,17 @@ const CursorGlow = () => {
     const handlePointerMove = (e: PointerEvent) => {
       cx = e.clientX;
       cy = e.clientY;
-
       if (rafId === null) {
         rafId = requestAnimationFrame(() => {
-          if (el) {
-            el.style.transform = `translate3d(${cx - 120}px, ${cy - 120}px, 0)`;
-            el.style.opacity = "1";
-          }
+          el.style.transform = `translate3d(${cx - 120}px, ${cy - 120}px, 0)`;
+          el.style.opacity = "1";
           rafId = null;
         });
       }
     };
 
     const handlePointerLeave = () => {
-      if (el) el.style.opacity = "0";
+      el.style.opacity = "0";
     };
 
     window.addEventListener("pointermove", handlePointerMove, { passive: true });
@@ -61,17 +57,16 @@ const CursorGlow = () => {
     <div
       ref={glowRef}
       aria-hidden
-      className="pointer-events-none fixed top-0 left-0 z-[9999]"
+      className="pointer-events-none fixed top-0 left-0 z-[9999] hidden md:block"
       style={{
         width: 240,
         height: 240,
         borderRadius: "50%",
         background:
-          "radial-gradient(circle, hsl(189 94% 50% / 0.12) 0%, hsl(189 94% 50% / 0.04) 40%, transparent 70%)",
+          "radial-gradient(circle, hsl(189 94% 50% / 0.14) 0%, hsl(189 94% 50% / 0.05) 40%, transparent 70%)",
         opacity: 0,
         transition: "opacity 0.35s ease-out",
         willChange: "transform",
-        mixBlendMode: "screen",
       }}
     />
   );

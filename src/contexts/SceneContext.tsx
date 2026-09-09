@@ -46,6 +46,8 @@ interface SceneContextValue {
   activeSceneRef: MutableRefObject<Scene>;
   /** 0..1 progress of the active section relative to the viewport center. */
   sceneProgressRef: MutableRefObject<number>;
+  /** 0..1 progress through the whole document. Read per-frame by the shader backdrop. */
+  pageProgressRef: MutableRefObject<number>;
   /** Sections call this in a useEffect to register themselves with the director. */
   registerSection: (id: Scene, ref: RefObject<HTMLElement>) => () => void;
   /** Global warp state for cinematic transitions out of the main page */
@@ -71,8 +73,9 @@ export const SceneProvider = ({ children }: { children: ReactNode }) => {
   /* Hot-path values — read every frame by useFrame in SkillsDonut. */
   const activeSceneRef = useRef<Scene>("hero");
   const sceneProgressRef = useRef<number>(0);
+  const pageProgressRef = useRef<number>(0);
 
-  /* Tree-subscriber state — drives NavBar/ChapterStrip/SceneCutLine re-renders. */
+  /* Tree-subscriber state — drives NavBar/ChapterStrip/SceneWipe re-renders. */
   const [activeScene, setActiveScene] = useState<Scene>("hero");
 
   /* Single shared IO — populated lazily so registrations before the effect runs aren't lost. */
@@ -180,6 +183,9 @@ export const SceneProvider = ({ children }: { children: ReactNode }) => {
     let rafPending = false;
     const compute = () => {
       rafPending = false;
+      const doc = document.documentElement;
+      const maxScroll = doc.scrollHeight - window.innerHeight;
+      pageProgressRef.current = maxScroll > 0 ? clamp01(window.scrollY / maxScroll) : 0;
       const scene = activeSceneRef.current;
       const el = sectionsRef.current.get(scene)?.current;
       if (!el) {
@@ -220,6 +226,7 @@ export const SceneProvider = ({ children }: { children: ReactNode }) => {
       activeScene,
       activeSceneRef,
       sceneProgressRef,
+      pageProgressRef,
       registerSection,
       isWarping,
       triggerWarp,

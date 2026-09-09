@@ -7,7 +7,7 @@ const SKILLS = [
   "Python", "JavaScript", "TypeScript", "React", "Node.js", "AWS",
   "Docker", "PostgreSQL", "FastAPI", "C/C++", "Java", "SQL",
   "Next.js", "Django", "GraphQL", "Tailwind", "Three.js", "MongoDB",
-  "Linux", "Kubernetes", "PyTorch", "Redis",
+  "Linux", "Kubernetes", "PyTorch", "Oracle Fusion",
 ];
 
 /* Cyan ↔ emerald gradient across the sphere. Position-based so it's stable per word. */
@@ -25,9 +25,8 @@ const Word = ({
   const ref = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
 
-  /* Mix cyan→emerald based on Y so the cloud has a subtle vertical gradient. */
   const baseColor = useMemo(() => {
-    const t = (position.y / 6 + 1) / 2; // 0..1
+    const t = (position.y / 6 + 1) / 2;
     return new THREE.Color().lerpColors(EMERALD, CYAN, t);
   }, [position]);
 
@@ -66,13 +65,7 @@ const Word = ({
   );
 };
 
-const Cloud = ({
-  radius = 5,
-  skills,
-}: {
-  radius?: number;
-  skills: string[];
-}) => {
+const Cloud = ({ radius = 5, skills }: { radius?: number; skills: string[] }) => {
   const groupRef = useRef<THREE.Group>(null);
 
   /* Fibonacci sphere — even distribution of points on a unit sphere. */
@@ -84,10 +77,7 @@ const Cloud = ({
       const theta = phi * i;
       const x = Math.cos(theta) * radiusAtY;
       const z = Math.sin(theta) * radiusAtY;
-      return {
-        position: new THREE.Vector3(x * radius, y * radius, z * radius),
-        word,
-      };
+      return { position: new THREE.Vector3(x * radius, y * radius, z * radius), word };
     });
   }, [skills, radius]);
 
@@ -108,15 +98,21 @@ const Cloud = ({
   );
 };
 
-const SkillsGlobe = () => {
+interface SkillsGlobeProps {
+  /** When false the render loop is paused (section off-screen) — the WebGL context is kept. */
+  active?: boolean;
+}
+
+const SkillsGlobe = ({ active = true }: SkillsGlobeProps) => {
   return (
     <div className="w-full h-full min-h-[400px] md:min-h-[500px] cursor-grab active:cursor-grabbing">
       <Canvas
         camera={{ position: [0, 0, 14], fov: 60 }}
-        dpr={[1, 2]}
-        gl={{ antialias: true, alpha: true }}
+        /* Text is SDF-rendered, so it stays crisp without MSAA or a 2x buffer. */
+        dpr={[1, 1.5]}
+        gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
+        frameloop={active ? "always" : "never"}
       >
-        {/* Brighter scene than the donut — this one is meant to be seen. */}
         <ambientLight intensity={0.6} />
         <pointLight position={[10, 10, 10]} intensity={0.8} color="#22d3ee" />
         <pointLight position={[-10, -10, -10]} intensity={0.4} color="#10b981" />

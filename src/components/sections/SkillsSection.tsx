@@ -1,7 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { SiReact, SiPython, SiTypescript, SiAmazon, SiDocker, SiPostgresql, SiNodedotjs, SiFastapi } from "react-icons/si";
-import { SkillsGlobe, ScrollReveal, TiltCard, KineticTitle } from "@/components/animated";
+import { ScrollReveal, TiltCard, DecryptTitle } from "@/components/animated";
+
+/* three + drei load only when this section is first approached. */
+const SkillsGlobe = lazy(() => import("@/components/animated/SkillsGlobe"));
 import { skillCategories } from "@/data/profile";
 import { useScene } from "@/contexts/SceneContext";
 
@@ -19,25 +22,38 @@ const techIcons = [
 const SkillsSection = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+  /* hasBeenNear: mount the globe once (WebGL context creation is expensive).
+     inView: keep rendering only while the section is actually on screen. */
+  const [hasBeenNear, setHasBeenNear] = useState(false);
+  const [inView, setInView] = useState(false);
   const { registerSection } = useScene();
 
   useEffect(() => registerSection("skills", sectionRef), [registerSection]);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const reveal = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-        }
+        if (entry.isIntersecting) setIsVisible(true);
       },
-      { threshold: 0.2 }
+      { threshold: 0.2 },
+    );
+    const near = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setHasBeenNear(true);
+        setInView(entry.isIntersecting);
+      },
+      { rootMargin: "400px 0px 400px 0px" },
     );
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => observer.disconnect();
+    reveal.observe(el);
+    near.observe(el);
+    return () => {
+      reveal.disconnect();
+      near.disconnect();
+    };
   }, []);
 
   return (
@@ -45,7 +61,7 @@ const SkillsSection = () => {
       <div className="container mx-auto max-w-6xl relative">
         {/* Section Title — kinetic word-by-word reveal. */}
         <h2 className="font-display text-3xl md:text-4xl font-bold mb-4 text-center text-gradient">
-          <KineticTitle text="Skills & Technologies" />
+          <DecryptTitle text="Skills & Technologies" />
         </h2>
         <motion.p
           initial={{ opacity: 0 }}
@@ -66,7 +82,9 @@ const SkillsSection = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="lg:col-span-2 h-[400px] md:h-[500px] relative"
           >
-            <SkillsGlobe />
+            <Suspense fallback={null}>
+              {hasBeenNear && <SkillsGlobe active={inView} />}
+            </Suspense>
             {/* Soft cyan/emerald glow underneath the canvas */}
             <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,hsl(189_94%_50%/0.18),transparent_60%)]" />
           </motion.div>

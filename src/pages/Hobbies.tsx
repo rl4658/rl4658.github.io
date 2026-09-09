@@ -1,10 +1,11 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import CursorGlow from "@/components/CursorGlow";
 import AuroraBackground from "@/components/AuroraBackground";
-import { GeometricAmbience, GamesGlobe } from "@/components/animated";
+/* Second three.js scene — loaded on demand so it never touches the main bundle. */
+const GamesGlobe = lazy(() => import("@/components/animated/GamesGlobe"));
 import { profile } from "@/data/profile";
 import { Dumbbell, UtensilsCrossed, Gamepad2, Trophy, ArrowLeft } from "lucide-react";
 
@@ -70,7 +71,6 @@ const Hobbies = () => {
         {/* Background Effects */}
         <CursorGlow />
         <AuroraBackground />
-        <GeometricAmbience shapeCount={8} colorPalette={["cyan", "emerald", "purple"]} />
 
         {/* Floating Back Button */}
         <motion.button
@@ -173,7 +173,9 @@ const Hobbies = () => {
                </div>
                <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(2,6,23,0.8)_100%)] z-10" />
                <div className="w-full h-full pt-16 flex items-center justify-center">
-                 <GamesGlobe />
+                 <Suspense fallback={null}>
+                   <GamesGlobe />
+                 </Suspense>
                </div>
             </BentoCard>
 
