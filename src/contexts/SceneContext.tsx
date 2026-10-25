@@ -28,6 +28,7 @@ export type Scene =
   | "experience"
   | "skills"
   | "education"
+  | "publication"
   | "projects";
 
 export const SCENE_ORDER: readonly Scene[] = [
@@ -36,6 +37,7 @@ export const SCENE_ORDER: readonly Scene[] = [
   "experience",
   "skills",
   "education",
+  "publication",
   "projects",
 ] as const;
 

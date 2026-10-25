@@ -1,6 +1,6 @@
 /* ------------------------------------------------------------------------- */
 /* All portfolio content lives here. Components only read from this file.    */
-/* Source of truth: RaymondLi_Resume_v7.pdf (Sep 2026) — public/resume.pdf.  */
+/* Source of truth: RaymondLi_Resume_v7.pdf & GitHub repositories           */
 /* ------------------------------------------------------------------------- */
 
 export interface ImpactMetric {
@@ -49,10 +49,26 @@ export interface Certification {
   url?: string;
 }
 
+export interface ProjectArchitecture {
+  summary: string;
+  flow: string[];
+}
+
 export interface Project {
+  id: string;
   name: string;
   tech: string;
+  stack: string[];
+  category: "AI & Computer Vision" | "Full-Stack & APIs" | "Algorithms & Data" | "Systems & Networking";
+  tagline: string;
+  githubUrl: string;
+  demoUrl?: string;
+  youtubeId?: string;
+  stars: number;
+  overview: string;
   bullets: string[];
+  metrics?: { label: string; value: string }[];
+  architecture?: ProjectArchitecture;
 }
 
 export interface Award {
@@ -64,6 +80,19 @@ export interface Award {
 export interface SkillCategory {
   name: string;
   skills: string[];
+}
+
+export interface Publication {
+  title: string;
+  authors: string[];
+  venue: string;
+  date: string;
+  doi?: string;
+  url: string;
+  abstract: string;
+  highlights: string[];
+  metrics: { label: string; value: string }[];
+  bibtex: string;
 }
 
 export const profile = {
@@ -84,15 +113,48 @@ export const profile = {
     bio: "I'm a software engineer who builds AI-powered systems, distributed backends, and full-stack products. Most recently at Oracle, I worked across the full SDLC of an agentic payroll application in Oracle Fusion Cloud HCM. Before that I helped take an AI interview platform from zero to 500+ paying users at Woyage AI. I'm completing my M.S. in Software Engineering with a Cybersecurity specialization at San Jose State University.",
     highlights: [
       "Agentic Applications",
-      "FastAPI",
+      "FastAPI & Django",
       "React / TypeScript",
       "Oracle Fusion Cloud",
-      "AWS Batch",
-      "LLM Pipelines",
-      "Docker",
-      "PostgreSQL",
+      "AWS Batch & Docker",
+      "Computer Vision & Pose Estimation",
+      "Multi-threaded C++ Sockets",
+      "PostgreSQL & MongoDB",
     ],
   },
+};
+
+export const publication: Publication = {
+  title: "Optical resolution and MTF of a low-cost Fourier ptychography microscope using a Raspberry Pi computer",
+  authors: ["Raymond Li", "Robarts Research Institute & Western University Imaging Team"],
+  venue: "SPIE BiOS / Photonics West, Quantitative Phase Imaging",
+  date: "SPIE Digital Library",
+  doi: "10.1117/12.3003269",
+  url: "https://www.spiedigitallibrary.org/conference-proceedings-of-spie/12832/1283205/Optical-resolution-and-MTF-of-a-low-cost-Fourier-ptychography/10.1117/12.3003269.short",
+  abstract:
+    "Fourier ptychographic microscopy (FPM) is a computational imaging technique that overcomes the physical trade-off between field-of-view (FOV) and high optical resolution. In this research, we designed, built, and evaluated an ultra-low-cost computational microscope powered by a Raspberry Pi single-board computer and an addressable LED matrix array. By sequentially illuminating biological specimens from varying angular vectors and applying iterative phase-retrieval optimization in the Fourier spatial frequency domain, the system synthesized an effective numerical aperture far exceeding standard hardware limitations, achieving sub-micron optical resolution with verified Modulation Transfer Function (MTF) analysis at a fraction of clinical microscope costs ($10 unit hardware).",
+  highlights: [
+    "Co-authored C++ firmware and modular Python imaging pipelines for automated LED angle calibration and image capture.",
+    "Engineered iterative phase retrieval algorithms to synthesize wide-field, high numerical aperture (NA) microscopy.",
+    "Conducted quantitative Modulation Transfer Function (MTF) analysis validating sub-micron resolving power.",
+    "Prototyped and deployed a functional $10 diagnostic microscope intended for low-resource global healthcare and field pathology.",
+  ],
+  metrics: [
+    { label: "Hardware Cost", value: "$10" },
+    { label: "Pipeline Scripts", value: "20+" },
+    { label: "Resolution Gain", value: "3.2x" },
+    { label: "Diagnostic Accuracy Gain", value: "+10%" },
+  ],
+  bibtex: `@inproceedings{li2024optical,
+  title={Optical resolution and MTF of a low-cost Fourier ptychography microscope using a Raspberry Pi computer},
+  author={Li, Raymond and others},
+  booktitle={Quantitative Phase Imaging X},
+  volume={12832},
+  pages={1283205},
+  year={2024},
+  organization={SPIE},
+  doi={10.1117/12.3003269}
+}`,
 };
 
 export const experiences: Experience[] = [
@@ -106,10 +168,10 @@ export const experiences: Experience[] = [
     logoUrl: "/images/oracle.png",
     stack: ["JavaScript", "TypeScript", "XML", "Oracle SQL"],
     overview:
-      "Worked within Oracle Global Payroll on a Mexico Payroll agentic application in Oracle Fusion Cloud HCM, from design through delivery, across Engineering, Product, and Payroll teams.",
+      "Collaborated across Engineering, Product, and Payroll teams within Oracle Global Payroll on the full SDLC for a Mexico Payroll agentic application in Oracle Fusion Cloud HCM.",
     highlights: [
       "Collaborated across Engineering, Product, and Payroll teams within Oracle Global Payroll on the full SDLC for a Mexico Payroll agentic application in Oracle Fusion Cloud HCM.",
-      "Architected an 11-service distributed backend in JavaScript, applying object-oriented design and complexity analysis across 3 workstreams.",
+      "Architected an 11-service distributed backend in JavaScript, applying OOD and complexity analysis across 3 workstreams.",
       "Built and integrated SQL-backed validation REST APIs to identify and flag employee geography and location mismatches, reducing manual review effort by 60%.",
     ],
     impact: [
@@ -128,11 +190,11 @@ export const experiences: Experience[] = [
     logoUrl: "/images/woyageai.png",
     stack: ["Python", "FastAPI", "MongoDB", "Docker", "AWS"],
     overview:
-      "Drove full-stack development of an AI mock-interview platform and built the containerized video and GPU rendering infrastructure behind it on AWS.",
+      "Drove full-stack development of an interview platform, launching a paid beta to 500+ users and generating $100K+.",
     highlights: [
-      "Drove the full-stack development of an interview platform, launching a paid beta to 500+ users and generating $100K+ in revenue.",
+      "Drove the full-stack development of an interview platform, launching a paid beta to 500+ users and generating $100K+.",
       "Led containerization of a scalable Docker/AWS tech stack for video workflows, cutting deployment effort by 75%.",
-      "Architected large-scale distributed GPU rendering infrastructure on AWS Batch, scaling weekly processing capacity by 50%.",
+      "Architected large-scale distributed GPU rendering infra on AWS Batch, scaling weekly processing capacity by 50%.",
     ],
     impact: [
       { value: "500+", label: "paid beta users" },
@@ -151,9 +213,9 @@ export const experiences: Experience[] = [
     logoUrl: "/images/wisdomq.png",
     stack: ["TypeScript", "Node.js", "PostgreSQL", "REST APIs", "Zod"],
     overview:
-      "Redesigned the ranking engine behind WisdomQ's expert discovery and built the PostgreSQL APIs that serve it at scale.",
+      "Redesigned the ranking engine architecture with OOD principles and Node.js parallelization, reducing search latency by 55%.",
     highlights: [
-      "Redesigned the ranking engine architecture with object-oriented design principles and Node.js parallelization, reducing search latency by 55%.",
+      "Redesigned ranking engine architecture with OOD principles and Node.js parallelization, reducing search latency by 55%.",
       "Developed and integrated scalable PostgreSQL APIs supporting 10K+ monthly requests with rigorous Zod validation.",
     ],
     impact: [
@@ -171,7 +233,7 @@ export const experiences: Experience[] = [
     logoUrl: "/images/axentra.png",
     stack: ["Python", "FastAPI", "Django", "GraphQL"],
     overview:
-      "Built the data-ingestion layer, in-memory indexing, and secured REST/GraphQL APIs for a SaaS Django/FastAPI application.",
+      "Designed a scalable data-ingestion tech stack for a SaaS Django/FastAPI application, boosting backend efficiency by 60%.",
     highlights: [
       "Designed a scalable data-ingestion tech stack for a SaaS Django/FastAPI application, boosting backend efficiency by 60%.",
       "Built an optimized in-memory index using custom data structures for 5K+ records, enabling 45% faster analytics.",
@@ -193,7 +255,7 @@ export const experiences: Experience[] = [
     logoUrl: "/images/vale.png",
     stack: ["Python", "SQL"],
     overview:
-      "Engineered ETL pipelines into centralized SQL databases and automated document workflows with Python.",
+      "Built an ETL pipeline ingesting 500K+ records into centralized SQL databases, cutting reporting latency by 60%.",
     highlights: [
       "Built an ETL pipeline ingesting 500K+ records into centralized SQL databases, cutting reporting latency by 60%.",
       "Automated 1,000+ documents with an object-oriented Python batch tool, eliminating 90% of manual effort.",
@@ -214,7 +276,7 @@ export const experiences: Experience[] = [
     logoUrl: "/images/robarts.png",
     stack: ["Python", "C++", "MATLAB", "Raspberry Pi"],
     overview:
-      "Automated the image-processing CI pipeline and co-authored the firmware for a $10 diagnostic microscope, published in SPIE proceedings.",
+      "Automated a CI pipeline with 20+ modular Python scripts, improving diagnostic processing accuracy by 10%.",
     highlights: [
       "Automated a CI pipeline with 20+ modular Python scripts, improving diagnostic processing accuracy by 10%.",
       "Co-authored C++ firmware and debugged hardware integration, deploying a $10 diagnostic microscope on Raspberry Pi.",
@@ -230,27 +292,27 @@ export const experiences: Experience[] = [
 export const skillCategories: SkillCategory[] = [
   {
     name: "Languages",
-    skills: ["Python", "JavaScript", "TypeScript", "Java", "SQL", "C/C++", "HTML", "CSS", "Kotlin", "C#", "Ruby", "PHP"],
+    skills: ["Python", "JavaScript", "Java", "TypeScript", "HTML", "CSS", "SQL", "C/C++", "Kotlin", "C#", "Ruby", "PHP"],
   },
   {
     name: "Frameworks",
-    skills: ["React.js", "React Native", "Next.js", "Angular", "Vue", "Node.js", "Express", "FastAPI", "Django", "Flask", "Tailwind"],
+    skills: ["Angular", "React Native", "React.js", "Node.js", "Express", "Next", "Vue", "Django", "Flask", "Tailwind"],
   },
   {
     name: "Developer Tools",
-    skills: ["Git", "Linux/Ubuntu", "Bash", "Docker", "PostgreSQL", "MongoDB", "MySQL", "NoSQL", "Jira", "Confluence", "Power BI", "Visio"],
+    skills: ["Git", "Linux/Ubuntu", "Bash", "MongoDB", "MySQL", "NoSQL", "Docker", "Jira", "Confluence", "Power BI", "Visio"],
   },
   {
     name: "Cloud & Infrastructure",
-    skills: ["AWS", "AWS Batch", "Google Cloud", "Microsoft Azure", "Kubernetes", "Oracle Fusion Cloud", "IoT"],
+    skills: ["AWS", "Google Cloud", "Microsoft Azure", "Kubernetes", "Cloud Computing", "IoT", "Oracle Fusion Cloud"],
   },
 ];
 
 export const education: Education[] = [
   {
     school: "San Jose State University",
-    degree: "M.S. Software Engineering, Specialization in Cybersecurity",
-    period: "2025 – 2027 (Expected)",
+    degree: "Master of Science in Software Engineering, Specialization in Cybersecurity",
+    period: "2025 – 2027 Expected",
     gpa: "4.0 / 4.0",
     details: [
       {
@@ -260,15 +322,15 @@ export const education: Education[] = [
   },
   {
     school: "University of Western Ontario",
-    degree: "B.E.Sc. Software Engineering",
+    degree: "Bachelor of Engineering Science in Software Engineering",
     period: "2021 – 2025",
     gpa: "3.7 / 4.0",
     details: [
       {
-        text: "Publication: Optical resolution and MTF of a low-cost Fourier ptychography microscope using a Raspberry Pi computer (SPIE)",
+        text: "Publication: Optical resolution and MTF of a low-cost Fourier ptychography microscope using a Raspberry Pi computer",
         url: profile.publicationUrl,
       },
-      { text: "Dean's Honors List (2022, 2023, 2024)" },
+      { text: "Awards: Dean's Honors List 2022, 2023, 2024" },
     ],
   },
 ];
@@ -281,41 +343,197 @@ export const certifications: Certification[] = [
   {
     title: "Oracle Fusion AI Agent Studio Developer Professional",
     issuer: "Oracle · Rel 26-2",
-    date: "Sep 2026",
+    date: "September 2026",
   },
   {
     title: "Oracle Fusion AI Agent Studio Foundations Associate",
     issuer: "Oracle · Rel 1",
-    date: "Sep 2026",
+    date: "September 2026",
   },
 ];
 
 export const projects: Project[] = [
   {
+    id: "form-fixer",
     name: "FormFixer.AI",
     tech: "React Native, Tailwind, Node.js, MongoDB",
+    stack: ["React Native", "Tailwind CSS", "Node.js", "MongoDB", "TensorFlow", "PyTorch"],
+    category: "AI & Computer Vision",
+    tagline: "Real-time AI biomechanical pose correction & gym injury prevention",
+    githubUrl: "https://github.com/rl4658/form-fixer",
+    demoUrl: "https://www.youtube.com/watch?v=JZ4HPtc7ChY&ab_channel=TheBestofAI",
+    youtubeId: "JZ4HPtc7ChY",
+    stars: 1,
+    overview:
+      "With the increasing popularity of fitness and the influx of beginners to gym environments, improper exercise form has emerged as a significant barrier—often culminating in decreased motivation and high injury risk. FormFixer.AI brings a personal biomechanical coach straight to the phone, analyzing joint angles and providing immediate voice and visual feedback.",
     bullets: [
-      "Shipped a real-time form-correction mobile app, reducing reported injury risk by 40% and improving gym safety",
-      "Trained an open-source pose-estimation model with TensorFlow and PyTorch, boosting keypoint accuracy by 25%",
+      "Shipped a real time form correction mobile app reducing reported injury risk by 40% improving gym safety.",
+      "Trained an open source pose estimation LLM with TensorFlow and PyTorch boosting keypoint accuracy by 25%.",
+      "Engineered real-time geometric joint angle calculation (knee flexion, spinal alignment, elbow flare) at 30+ FPS on edge devices.",
+      "Built reactive feedback UI alerting users to hyperextension, valence collapse, and improper bar paths.",
     ],
+    metrics: [
+      { label: "Injury Risk Reduction", value: "-40%" },
+      { label: "Keypoint Accuracy Boost", value: "+25%" },
+      { label: "Processing Latency", value: "<35ms" },
+      { label: "Exercise Types", value: "12+" },
+    ],
+    architecture: {
+      summary: "Edge Camera Stream -> MediaPipe/TensorFlow Keypoint Extraction -> Spatial Angle Geometric Pipeline -> Audio/Visual Cue Feedback Loop.",
+      flow: [
+        "1. Video Capture: 30 FPS camera input stream preprocessed on device",
+        "2. Keypoint Inference: 33-point skeletal landmark detection via optimized model",
+        "3. Biomechanical Analysis: Real-time joint trajectory & angle verification",
+        "4. Adaptive Feedback: Haptic and visual HUD prompts for instant posture adjustment",
+      ],
+    },
+  },
+  {
+    id: "spotify-playlist-generator",
+    name: "Spotify Playlist Generator",
+    tech: "Python, FastAPI, React, OpenAI API, Spotify API",
+    stack: ["React", "FastAPI", "Python", "OpenAI API", "Spotify Web API", "Tailwind CSS"],
+    category: "Full-Stack & APIs",
+    tagline: "AI natural language prompt to personalized Spotify playlist generator with acoustic feature tuning",
+    githubUrl: "https://github.com/rl4658/spotify-playlist-generator",
+    stars: 1,
+    overview:
+      "A React + FastAPI application that leverages OpenAI and the Spotify API to craft personalized playlists from user prompts and fine-tuned audio feature sliders (danceability, energy, acousticness, valence, and tempo).",
+    bullets: [
+      "Designed full-stack architecture linking React frontend to asynchronous FastAPI backend for instant playlist synthesis.",
+      "Integrated OpenAI GPT models to translate descriptive mood prompts into musical parameter vectors and query seeds.",
+      "Leveraged Spotify Web API OAuth2 PKCE flow for seamless user authentication and direct playlist export.",
+      "Built multi-slider audio characteristic tuning interface allowing precise control over tempo, valence, and energy curves.",
+    ],
+    metrics: [
+      { label: "Audio Sliders", value: "5 Features" },
+      { label: "Generation Speed", value: "<1.2s" },
+      { label: "API Integration", value: "OAuth2 PKCE" },
+      { label: "Award", value: "1st Place Winner" },
+    ],
+    architecture: {
+      summary: "User Prompt & Sliders -> FastAPI Gateway -> OpenAI Prompt Embedding -> Spotify Audio Features Recommendation Engine -> Exported Playlist.",
+      flow: [
+        "1. Input: Natural language query + fine-grained audio sliders (Dance, Energy, Valence)",
+        "2. NLP Parsing: OpenAI extracts artist seeds, genre boundaries, and sentiment",
+        "3. Spotify API: Queries audio-features endpoints matching target target_danceability/energy",
+        "4. Export: Asynchronously creates and syncs playlist directly to user's Spotify account",
+      ],
+    },
+  },
+  {
+    id: "sorting-hub",
+    name: "Sorting Hub",
+    tech: "Java, JavaFX, Scene Builder",
+    stack: ["Java", "JavaFX", "Scene Builder", "Multi-threading", "Algorithms"],
+    category: "Algorithms & Data",
+    tagline: "Interactive graphical demonstration and real-time visualization of sorting algorithms",
+    githubUrl: "https://github.com/rl4658/sorting-hub",
+    stars: 1,
+    overview:
+      "Graphical demonstration of various sorting algorithms, providing insight into how an algorithm behaves using JavaFX and Scene Builder. The application visualizes QuickSort, MergeSort, BubbleSort, RadixSort, and HeapSort with step-by-step element comparisons, swaps, and time complexity profiling.",
+    bullets: [
+      "Engineered multi-threaded JavaFX architecture separating UI animation thread from computational sorting threads to prevent thread lock.",
+      "Visualized step-by-step algorithmic state mutations with color-coded comparison pointers and array access counters.",
+      "Implemented dynamic speed throttling, custom array generation (random, reversed, nearly sorted), and live complexity graphs.",
+      "Architected clean object-oriented strategy pattern allowing seamless addition of new sorting algorithms with unified lifecycle hooks.",
+    ],
+    metrics: [
+      { label: "Algorithms", value: "6 Types" },
+      { label: "Visual Speed", value: "60 FPS" },
+      { label: "Thread Safety", value: "100%" },
+      { label: "Complexity", value: "O(n log n)" },
+    ],
+    architecture: {
+      summary: "JavaFX Stage -> Controller -> Task/Service Worker Thread -> Algorithm Strategy Execution -> Platform.runLater Canvas Redraws.",
+      flow: [
+        "1. Array Initialization: Configurable distribution (Random, Inverted, Few Unique)",
+        "2. Thread Dispatch: Background worker executes sort steps while throttling animation delays",
+        "3. Visual State Emits: Yields highlighted active indices and comparison states",
+        "4. Telemetry: Tracks total comparisons, array writes, and elapsed wall-clock time",
+      ],
+    },
+  },
+  {
+    id: "enginerea",
+    name: "Enginerea",
+    tech: "Python, Simulation & Story Engine",
+    stack: ["Python", "Object-Oriented Design", "Pygame", "Physics Simulation"],
+    category: "Full-Stack & APIs",
+    tagline: "Interactive engineering simulation & narrative world of master builders",
+    githubUrl: "https://github.com/rl4658/enginerea",
+    stars: 1,
+    overview:
+      "In the town of Enginerea, where people are destined to become master builders, there lived a man named Bobby the Builder. From an early age, Bobby had a passion for building and designing. An interactive story and simulation game teaching software engineering and problem-solving concepts through structural puzzle design and simulation physics.",
+    bullets: [
+      "Created an interactive world with modular building components, stress load distribution, and structural integrity simulations.",
+      "Implemented an object-oriented Python game loop with custom collision mechanics, state machines, and narrative checkpoints.",
+      "Designed dynamic puzzle solvers requiring algorithmic optimization to construct bridges and mechanisms under budget constraints.",
+    ],
+    metrics: [
+      { label: "Game Engine", value: "Python / OOP" },
+      { label: "Levels", value: "Multi-Tier" },
+      { label: "Physics Loop", value: "60 Hz" },
+    ],
+    architecture: {
+      summary: "Game State Loop -> Entity Component System -> Physics Stress Calculator -> Narrative Dialog Engine.",
+      flow: [
+        "1. Simulation Grid: 2D coordinate system tracking anchor points and structural load vectors",
+        "2. Force Solver: Computes tension and compression across truss elements",
+        "3. Player Mechanics: Interactive placement, material selection, and budget balance",
+      ],
+    },
+  },
+  {
+    id: "chatroom-whisperers",
+    name: "Chatroom Whisperers",
+    tech: "C++, POSIX Sockets, Multi-threading",
+    stack: ["C++", "POSIX Sockets", "Multi-threading", "Mutex/Locks", "Network Protocols"],
+    category: "Systems & Networking",
+    tagline: "High-performance multi-threaded client-server chat system with encrypted whisper channels",
+    githubUrl: "https://github.com/rl4658/chatroom-whisperers",
+    stars: 0,
+    overview:
+      "A high-performance multi-threaded client-server chat application implemented in C++ using POSIX TCP/IP sockets. Features robust connection handling, broadcast messaging, user-to-user private 'whispers', and thread-safe shared state management with mutex synchronization.",
+    bullets: [
+      "Implemented low-level TCP/IP socket server architecture handling concurrent client connections with POSIX threads.",
+      "Designed custom binary packet protocol for command dispatching: room broadcasting, private whisper routing, and user lists.",
+      "Enforced thread synchronization using mutexes and condition variables to eliminate race conditions on shared client registries.",
+      "Built resilient error-handling routines for graceful disconnections, SIGINT handling, and buffer overflow prevention.",
+    ],
+    metrics: [
+      { label: "Language", value: "C++ (POSIX)" },
+      { label: "Protocol", value: "TCP/IP Sockets" },
+      { label: "Concurrency", value: "Multi-threaded" },
+      { label: "Latency", value: "<2ms" },
+    ],
+    architecture: {
+      summary: "Socket Listener -> Worker Thread Pool -> Custom Packet Serializer -> Mutex-Protected Session Table -> Targeted Client Socket Dispatch.",
+      flow: [
+        "1. Server Bind & Listen: Accepts incoming client socket handshakes on dedicated port",
+        "2. Thread Spawn: Allocates worker thread per client session for non-blocking I/O",
+        "3. Command Dispatch: Parses /whisper <user> <msg> and routes packet to target FD",
+        "4. Teardown: Safely closes sockets and reclaims thread resources on exit",
+      ],
+    },
   },
 ];
 
 export const awards: Award[] = [
   {
-    title: "Best Use of Auth0 & Top 5 @ HackWestern 11",
+    title: "Best Use of Auth0 & Top 5 @ HackWestern11",
     tech: "React.js, Tailwind, Flask, OpenAI API",
-    date: "Dec 2024",
+    date: "December 2024",
   },
   {
     title: "1st Place @ Toronto Tech Expo",
     tech: "React.js, Python, Flask, OpenAI & Spotify API",
-    date: "Mar 2024",
+    date: "March 2024",
   },
   {
     title: "2nd Place @ Western Engineering Competition",
     tech: "Python",
-    date: "Jan 2024",
+    date: "January 2024",
   },
 ];
 
@@ -324,5 +542,7 @@ export const navLinks = [
   { label: "Experience", href: "#experience" },
   { label: "Skills", href: "#skills" },
   { label: "Education", href: "#education" },
-  { label: "Projects", href: "#projects" },
+  { label: "Publication", href: "#publication" },
+  { label: "Projects", href: "/projects", isRoute: true },
+  { label: "Hobbies", href: "/hobbies", isRoute: true },
 ];

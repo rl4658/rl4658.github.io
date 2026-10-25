@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Menu, X, FileText } from "lucide-react";
 import { navLinks, profile } from "@/data/profile";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useScene } from "@/contexts/SceneContext";
 import GlitchText from "@/components/animated/GlitchText";
 
@@ -14,12 +15,9 @@ const NavBar = ({ onResumeClick, onLogoClick }: NavBarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { activeScene } = useScene();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  /*
-   * Active link is derived from `activeScene` (single source of truth shared
-   * with ChapterStrip), so the navbar highlight, the chapter strip, and the
-   * match-cut line all switch in lockstep instead of via competing IOs.
-   */
   const activeSection = activeScene === "hero" ? "" : `#${activeScene}`;
 
   useEffect(() => {
@@ -31,9 +29,20 @@ const NavBar = ({ onResumeClick, onLogoClick }: NavBarProps) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleNavClick = (href: string) => {
+  const handleNavClick = (link: { href: string; isRoute?: boolean }) => {
     setIsMobileMenuOpen(false);
-    const element = document.querySelector(href);
+
+    if (link.isRoute || link.href.startsWith("/")) {
+      navigate(link.href);
+      return;
+    }
+
+    if (location.pathname !== "/") {
+      navigate(`/${link.href}`);
+      return;
+    }
+
+    const element = document.querySelector(link.href);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
     }
@@ -41,7 +50,6 @@ const NavBar = ({ onResumeClick, onLogoClick }: NavBarProps) => {
 
   return (
     <motion.nav
-      /* Cinematic spring drop — first element to land after the dive. */
       initial={{ y: -140, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{
@@ -61,53 +69,65 @@ const NavBar = ({ onResumeClick, onLogoClick }: NavBarProps) => {
             isScrolled ? "shadow-lg" : ""
           }`}
         >
-          {/* Logo — click to replay intro (or scroll to top if no replay handler). */}
+          {/* Logo — click to replay intro or scroll to top */}
           <button
             type="button"
             onClick={() => {
-              if (onLogoClick) {
+              if (location.pathname !== "/") {
+                navigate("/");
+              } else if (onLogoClick) {
                 onLogoClick();
               } else {
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }
             }}
             className="font-display font-bold text-xl text-gradient relative group"
-            title="Replay intro"
-            aria-label="Replay intro"
+            title="Home"
+            aria-label="Home"
           >
             <GlitchText text={`${profile.name.split(" ")[0]}.dev`} className="font-display font-bold text-xl text-gradient">
               {profile.name.split(" ")[0]}
               <span className="text-foreground/60">.dev</span>
             </GlitchText>
-            {/* Subtle hint underline that reveals on hover */}
             <span className="absolute -bottom-0.5 left-0 right-0 h-px scale-x-0 group-hover:scale-x-100 transition-transform origin-left bg-gradient-to-r from-primary to-accent" />
           </button>
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <button
-                key={link.href}
-                onClick={() => handleNavClick(link.href)}
-                className={`relative px-4 py-2 rounded-xl text-sm font-medium transition-colors duration-300 ${
-                  activeSection === link.href
-                    ? "text-primary"
-                    : "text-foreground/70 hover:text-foreground"
-                }`}
-              >
-                {activeSection === link.href && (
-                  <motion.div
-                    layoutId="activeIndicator"
-                    className="absolute inset-0 bg-primary/20 rounded-xl"
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                  />
-                )}
-                <span className="relative z-10">{link.label}</span>
-              </button>
-            ))}
+            {navLinks.map((link) => {
+              const isCurrent = link.isRoute
+                ? location.pathname === link.href
+                : location.pathname === "/" && activeSection === link.href;
+
+              return (
+                <button
+                  key={link.href}
+                  onClick={() => handleNavClick(link)}
+                  className={`relative px-3.5 py-2 rounded-xl text-sm font-medium transition-colors duration-300 ${
+                    isCurrent
+                      ? "text-primary"
+                      : "text-foreground/70 hover:text-foreground"
+                  }`}
+                >
+                  {isCurrent && (
+                    <motion.div
+                      layoutId="activeIndicator"
+                      className="absolute inset-0 bg-primary/20 rounded-xl"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center gap-1.5">
+                    {link.label}
+                    {link.isRoute && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                    )}
+                  </span>
+                </button>
+              );
+            })}
             <button
               onClick={onResumeClick}
-              className="ml-2 px-4 py-2 rounded-xl text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 flex items-center gap-2"
+              className="ml-2 px-4 py-2 rounded-xl text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 flex items-center gap-2 shadow-[0_0_15px_hsl(var(--primary)/0.3)]"
             >
               <FileText size={16} />
               Resume
@@ -134,19 +154,30 @@ const NavBar = ({ onResumeClick, onLogoClick }: NavBarProps) => {
               className="md:hidden mt-2 glass rounded-2xl p-4 overflow-hidden"
             >
               <div className="flex flex-col gap-1">
-                {navLinks.map((link) => (
-                  <button
-                    key={link.href}
-                    onClick={() => handleNavClick(link.href)}
-                    className={`px-4 py-3 rounded-xl text-left font-medium transition-all ${
-                      activeSection === link.href
-                        ? "bg-primary/20 text-primary"
-                        : "text-foreground/70 hover:text-foreground hover:bg-foreground/5"
-                    }`}
-                  >
-                    {link.label}
-                  </button>
-                ))}
+                {navLinks.map((link) => {
+                  const isCurrent = link.isRoute
+                    ? location.pathname === link.href
+                    : location.pathname === "/" && activeSection === link.href;
+
+                  return (
+                    <button
+                      key={link.href}
+                      onClick={() => handleNavClick(link)}
+                      className={`px-4 py-3 rounded-xl text-left font-medium transition-all flex items-center justify-between ${
+                        isCurrent
+                          ? "bg-primary/20 text-primary"
+                          : "text-foreground/70 hover:text-foreground hover:bg-foreground/5"
+                      }`}
+                    >
+                      <span>{link.label}</span>
+                      {link.isRoute && (
+                        <span className="text-[10px] font-mono uppercase tracking-widest text-primary/70 bg-primary/10 px-2 py-0.5 rounded">
+                          Page
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
                 <button
                   onClick={() => {
                     setIsMobileMenuOpen(false);

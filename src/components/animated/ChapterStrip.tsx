@@ -16,12 +16,13 @@ interface Chapter {
 }
 
 const CHAPTERS: Chapter[] = [
-  { scene: "hero",       number: "01", label: "Intro",      href: null },
-  { scene: "about",      number: "02", label: "About",      href: "#about" },
-  { scene: "experience", number: "03", label: "Experience", href: "#experience" },
-  { scene: "skills",     number: "04", label: "Skills",     href: "#skills" },
-  { scene: "education",  number: "05", label: "Education",  href: "#education" },
-  { scene: "projects",   number: "06", label: "Projects",   href: "#projects" },
+  { scene: "hero",        number: "01", label: "Intro",       href: null },
+  { scene: "about",       number: "02", label: "About",       href: "#about" },
+  { scene: "experience",  number: "03", label: "Experience",  href: "#experience" },
+  { scene: "skills",      number: "04", label: "Skills",      href: "#skills" },
+  { scene: "education",   number: "05", label: "Education",   href: "#education" },
+  { scene: "publication", number: "06", label: "Publication", href: "#publication" },
+  { scene: "projects",    number: "07", label: "Projects",    href: "#projects" },
 ];
 
 /* Sanity check at module-evaluation time: chapters cover every Scene, in order. */

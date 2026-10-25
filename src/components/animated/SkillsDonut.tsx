@@ -24,12 +24,13 @@ interface DonutMark {
 }
 
 const DONUT_MARKS: Record<Scene, DonutMark> = {
-  hero:       { posX: 1.8, posY: 0, posZ: 0, scale: 1.00, velScale: 1.00, emissive: 0.12, opacity: 0.22, cameraZ: 9 },
-  about:      { posX: 0,   posY: 0, posZ: 0, scale: 1.00, velScale: 0.80, emissive: 0.10, opacity: 0.20, cameraZ: 9 },
-  experience: { posX: 0,   posY: 0, posZ: 0, scale: 1.00, velScale: 1.00, emissive: 0.12, opacity: 0.22, cameraZ: 9 },
-  skills:     { posX: 0,   posY: 0, posZ: 0, scale: 0.60, velScale: 0.40, emissive: 0.03, opacity: 0.05, cameraZ: 9 },
-  education:  { posX: 0,   posY: 0, posZ: 0, scale: 1.00, velScale: 0.80, emissive: 0.10, opacity: 0.20, cameraZ: 9 },
-  projects:   { posX: 0,   posY: 0, posZ: 0, scale: 1.00, velScale: 0.90, emissive: 0.10, opacity: 0.18, cameraZ: 9 },
+  hero:        { posX: 1.8, posY: 0, posZ: 0, scale: 1.00, velScale: 1.00, emissive: 0.12, opacity: 0.22, cameraZ: 9 },
+  about:       { posX: 0,   posY: 0, posZ: 0, scale: 1.00, velScale: 0.80, emissive: 0.10, opacity: 0.20, cameraZ: 9 },
+  experience:  { posX: 0,   posY: 0, posZ: 0, scale: 1.00, velScale: 1.00, emissive: 0.12, opacity: 0.22, cameraZ: 9 },
+  skills:      { posX: 0,   posY: 0, posZ: 0, scale: 0.60, velScale: 0.40, emissive: 0.03, opacity: 0.05, cameraZ: 9 },
+  education:   { posX: 0,   posY: 0, posZ: 0, scale: 1.00, velScale: 0.80, emissive: 0.10, opacity: 0.20, cameraZ: 9 },
+  publication: { posX: 0,   posY: 0, posZ: 0, scale: 0.95, velScale: 0.85, emissive: 0.12, opacity: 0.22, cameraZ: 9 },
+  projects:    { posX: 0,   posY: 0, posZ: 0, scale: 1.00, velScale: 0.90, emissive: 0.10, opacity: 0.18, cameraZ: 9 },
 };
 
 interface SkillsDonutProps {

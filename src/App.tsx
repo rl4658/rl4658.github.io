@@ -8,8 +8,9 @@ import { trackPageView } from "@/lib/analytics";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
-/* Hobbies pulls in a second three.js scene — keep it out of the main bundle. */
+/* Hobbies and Projects pull in specialized interactive engines — keep them code-split */
 const Hobbies = lazy(() => import("./pages/Hobbies"));
+const Projects = lazy(() => import("./pages/Projects"));
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/hobbies" element={<Hobbies />} />
+            <Route path="/projects" element={<Projects />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

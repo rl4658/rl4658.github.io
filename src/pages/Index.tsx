@@ -4,13 +4,14 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import AuroraBackground from "@/components/AuroraBackground";
 import CursorGlow from "@/components/CursorGlow";
-import { ChapterStrip, SceneWipe, SectionCutSentinel, SkillsDonut } from "@/components/animated";
+import { ChapterStrip, SectionCutSentinel, SkillsDonut } from "@/components/animated";
 import NavBar from "@/components/NavBar";
 import HeroSection from "@/components/sections/HeroSection";
 import AboutSection from "@/components/sections/AboutSection";
 import ExperienceSection from "@/components/sections/ExperienceSection";
 import SkillsSection from "@/components/sections/SkillsSection";
 import EducationSection from "@/components/sections/EducationSection";
+import PublicationSection from "@/components/sections/PublicationSection";
 import ProjectsSection from "@/components/sections/ProjectsSection";
 import Footer from "@/components/Footer";
 import ResumeModal from "@/components/ResumeModal";
@@ -131,7 +132,6 @@ const IndexInner = () => {
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             >
               <ChapterStrip />
-              <SceneWipe />
 
               <NavBar
                 onResumeClick={() => setIsResumeModalOpen(true)}
@@ -149,6 +149,8 @@ const IndexInner = () => {
                 <SectionCutSentinel />
                 <EducationSection />
                 <SectionCutSentinel />
+                <PublicationSection />
+                <SectionCutSentinel />
                 <ProjectsSection />
               </main>
 
@@ -163,12 +165,12 @@ const IndexInner = () => {
                 {activeExperience && (
                   <ExperienceDetail
                     key={activeExperience.slug}
-                    experience={activeExperience}
-                    index={activeIndex}
-                    total={experiences.length}
+                    exp={activeExperience}
                     onClose={closeExperience}
                     onPrev={prevExperience}
                     onNext={nextExperience}
+                    currentIndex={activeIndex}
+                    totalCount={experiences.length}
                   />
                 )}
               </AnimatePresence>
