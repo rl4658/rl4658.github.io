@@ -18,7 +18,6 @@ import {
   Smartphone,
   ChevronRight,
   Terminal,
-  ImageIcon,
 } from "lucide-react";
 import NavBar from "@/components/NavBar";
 import ResumeModal from "@/components/ResumeModal";
@@ -204,102 +203,6 @@ const FormFixerProject = () => {
               />
             </div>
           </motion.div>
-
-          {/* Repository Visuals & Mobile Interface Showcase Gallery */}
-          <div className="mb-16">
-            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-neutral-400 mb-2">
-              <ImageIcon size={14} className="text-white" />
-              <span>Mobile Application Assets & Visual Showcase</span>
-            </div>
-            <h2 className="text-2xl md:text-3xl font-bold font-display text-white mb-6">
-              Production Architecture & Edge Mobile Experience
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* Card 1: Real-Time Skeletal Tracking GIF */}
-              <div className="rounded-3xl bg-neutral-950/80 border border-white/10 p-5 flex flex-col justify-between group hover:border-white/30 transition-all shadow-lg">
-                <div>
-                  <div className="text-xs font-mono text-neutral-400 uppercase tracking-wider mb-2">
-                    Edge Mobile Execution
-                  </div>
-                  <h4 className="font-bold text-white text-base mb-3">Skeletal Landmark Overlay</h4>
-                  <div className="h-64 rounded-2xl overflow-hidden bg-black border border-white/10 mb-4 flex items-center justify-center">
-                    <img
-                      src="/images/formfixer_preview.gif"
-                      alt="FormFixer Skeletal Angle Overlay"
-                      className="h-full w-auto object-contain group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                </div>
-                <p className="text-neutral-400 text-xs leading-relaxed">
-                  Real-time 33-point skeletal landmark rendering with sub-28ms inference latency using VisionCamera and Shopify Skia.
-                </p>
-              </div>
-
-              {/* Card 2: App Splashscreen & Brand */}
-              <div className="rounded-3xl bg-neutral-950/80 border border-white/10 p-5 flex flex-col justify-between group hover:border-white/30 transition-all shadow-lg">
-                <div>
-                  <div className="text-xs font-mono text-neutral-400 uppercase tracking-wider mb-2">
-                    Mobile Identity
-                  </div>
-                  <h4 className="font-bold text-white text-base mb-3">Splashscreen & Branding</h4>
-                  <div className="h-64 rounded-2xl overflow-hidden bg-black/90 border border-white/10 mb-4 flex items-center justify-center p-6">
-                    <img
-                      src="/images/projects/form-fixer/splashscreen_logo.png"
-                      alt="FormFixer Splash Logo"
-                      className="max-h-full max-w-full object-contain filter drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                </div>
-                <p className="text-neutral-400 text-xs leading-relaxed">
-                  Native Android splashscreen and adaptive branding assets compiled directly into the Expo EAS mobile release bundle.
-                </p>
-              </div>
-
-              {/* Card 3: Mobile Onboarding & Login Screen */}
-              <div className="rounded-3xl bg-neutral-950/80 border border-white/10 p-5 flex flex-col justify-between group hover:border-white/30 transition-all shadow-lg">
-                <div>
-                  <div className="text-xs font-mono text-neutral-400 uppercase tracking-wider mb-2">
-                    User Experience
-                  </div>
-                  <h4 className="font-bold text-white text-base mb-3">Login & Session Setup</h4>
-                  <div className="h-64 rounded-2xl overflow-hidden bg-black border border-white/10 mb-4 relative">
-                    <img
-                      src="/images/projects/form-fixer/loginbg.jpg"
-                      alt="FormFixer Login Interface"
-                      className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-3">
-                      <span className="text-[11px] font-mono text-white/90 font-bold">Authentication & Profile Sync</span>
-                    </div>
-                  </div>
-                </div>
-                <p className="text-neutral-400 text-xs leading-relaxed">
-                  JWT-backed session state with encrypted credentials via bcrypt and automated Nodemailer email verification.
-                </p>
-              </div>
-
-              {/* Card 4: Mobile App Icon & Adaptive Asset */}
-              <div className="rounded-3xl bg-neutral-950/80 border border-white/10 p-5 flex flex-col justify-between group hover:border-white/30 transition-all shadow-lg">
-                <div>
-                  <div className="text-xs font-mono text-neutral-400 uppercase tracking-wider mb-2">
-                    Android & iOS Icon
-                  </div>
-                  <h4 className="font-bold text-white text-base mb-3">Adaptive App Icon</h4>
-                  <div className="h-64 rounded-2xl overflow-hidden bg-black/90 border border-white/10 mb-4 flex items-center justify-center p-6">
-                    <img
-                      src="/images/projects/form-fixer/icon.png"
-                      alt="FormFixer App Icon"
-                      className="w-32 h-32 rounded-3xl object-contain shadow-[0_0_25px_rgba(255,255,255,0.15)] group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                </div>
-                <p className="text-neutral-400 text-xs leading-relaxed">
-                  High-DPI icon asset designed for Google Play Store and iOS App Store submission with vector mask support.
-                </p>
-              </div>
-            </div>
-          </div>
 
           {/* Section 1: Problem Statement & Motivation */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
