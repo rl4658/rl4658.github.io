@@ -19,44 +19,17 @@ import {
   Copy,
   Info,
   X,
-  Star,
   Cpu,
-  Video,
-  Pause,
-  Volume2,
-  VolumeX,
 } from "lucide-react";
 import CursorGlow from "@/components/CursorGlow";
 import { projects, profile, type Project } from "@/data/profile";
 import ResumeModal from "@/components/ResumeModal";
 
 /* ------------------------------------------------------------------------- */
-/* 1. FormFixer Real Video Demo (Recorded with Playwright)                   */
+/* 1. FormFixer AI Preview Widget (Embedded GIF + Direct Architecture Link)  */
 /* ------------------------------------------------------------------------- */
 const FormFixerWidget = ({ project }: { project: Project }) => {
   const navigate = useNavigate();
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [isMuted, setIsMuted] = useState(true);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-
-  const togglePlay = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!videoRef.current) return;
-    if (videoRef.current.paused) {
-      videoRef.current.play();
-      setIsPlaying(true);
-    } else {
-      videoRef.current.pause();
-      setIsPlaying(false);
-    }
-  };
-
-  const toggleMute = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!videoRef.current) return;
-    videoRef.current.muted = !videoRef.current.muted;
-    setIsMuted(videoRef.current.muted);
-  };
 
   return (
     <div className="flex flex-col h-full bg-[#080808]">
@@ -65,7 +38,7 @@ const FormFixerWidget = ({ project }: { project: Project }) => {
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
           <span className="text-xs font-mono text-neutral-300 font-bold uppercase tracking-wider">
-            Live Workout Screencast
+            Pose Model Workout Preview
           </span>
         </div>
         <a
@@ -81,56 +54,38 @@ const FormFixerWidget = ({ project }: { project: Project }) => {
         </a>
       </div>
 
-      {/* Video preview container - click to navigate to full page */}
+      {/* Embedded GIF Preview - click to view full architecture page */}
       <div
         onClick={() => navigate("/projects/form-fixer")}
-        className="relative aspect-video w-full bg-black overflow-hidden group cursor-pointer"
-        title="Click to view full architecture and case study"
+        className="relative h-64 md:h-72 w-full bg-[#050505] flex items-center justify-center p-3 overflow-hidden group cursor-pointer"
+        title="Click into widget to view full descriptions and architecture"
       >
-        <video
-          ref={videoRef}
-          src="/videos/formfixer_demo.webm"
-          poster="/videos/formfixer_poster.jpg"
-          autoPlay
-          loop
-          muted={isMuted}
-          playsInline
-          className="w-full h-full object-contain bg-black group-hover:scale-[1.02] transition-transform duration-500 pointer-events-none"
-          onPlay={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
-        />
+        {/* Subtle radial glow behind phone */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.06),transparent_70%)] pointer-events-none" />
 
-        {/* Video Overlay on Hover */}
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+        {/* Realistic Mobile Device Frame */}
+        <div className="relative h-full aspect-[216/454] rounded-2xl overflow-hidden border border-white/20 shadow-[0_0_25px_rgba(255,255,255,0.06)] bg-black group-hover:border-white/40 transition-colors">
+          <img
+            src="/images/formfixer_preview.gif"
+            alt="FormFixer AI Workout Preview"
+            className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+            loading="lazy"
+          />
+        </div>
+
+        {/* Hover Action Overlay */}
+        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none backdrop-blur-[2px]">
           <div className="px-4 py-2 rounded-xl bg-white text-black font-bold text-xs font-mono shadow-2xl flex items-center gap-2 transform translate-y-2 group-hover:translate-y-0 transition-transform">
             <span>Explore Full Architecture & Case Study</span>
             <ExternalLink size={12} />
           </div>
         </div>
 
-        {/* Top-right audio / pause toggles */}
-        <div className="absolute top-2 right-2 flex gap-1.5 z-10">
-          <button
-            onClick={toggleMute}
-            className="p-1.5 rounded-lg bg-black/80 hover:bg-black text-white/80 hover:text-white border border-white/15 backdrop-blur-md transition-all text-xs"
-            title={isMuted ? "Unmute" : "Mute"}
-          >
-            {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
-          </button>
-          <button
-            onClick={togglePlay}
-            className="p-1.5 rounded-lg bg-black/80 hover:bg-black text-white/80 hover:text-white border border-white/15 backdrop-blur-md transition-all text-xs"
-            title={isPlaying ? "Pause" : "Play"}
-          >
-            {isPlaying ? <Pause size={13} /> : <Play size={13} />}
-          </button>
-        </div>
-
         {/* Floating badge */}
-        <div className="absolute bottom-2 left-2 right-2 bg-black/85 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 flex items-center justify-between text-[11px] font-mono pointer-events-none">
+        <div className="absolute bottom-2 left-3 right-3 bg-black/85 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 flex items-center justify-between text-[11px] font-mono pointer-events-none">
           <span className="text-neutral-400">Pose Model Workout Tracking</span>
           <span className="text-white font-bold flex items-center gap-1">
-            Click to View Deep Dive →
+            Read Full Page →
           </span>
         </div>
       </div>
@@ -182,7 +137,7 @@ const SpotifyWidget = () => {
         <button
           onClick={handleGenerate}
           disabled={isGenerating}
-          className="px-3 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-neutral-200 border border-emerald-500/40 text-[11px] font-mono flex items-center gap-1.5 transition-all shadow-[0_0_12px_rgba(16,185,129,0.2)] disabled:opacity-50"
+          className="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 text-[11px] font-mono flex items-center gap-1.5 transition-all shadow-[0_0_12px_rgba(255,255,255,0.15)] disabled:opacity-50"
         >
           <Sparkles size={12} className={isGenerating ? "animate-spin" : ""} />
           <span>{isGenerating ? "Synthesizing..." : "Generate AI Mix"}</span>
@@ -354,7 +309,7 @@ const SortingHubWidget = () => {
     <div className="flex flex-col h-full bg-slate-950/80 p-4">
       <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
         <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
+          <div className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
           <span className="text-xs font-mono text-white font-semibold uppercase tracking-wider">
             JavaFX Sorting Engine
           </span>
@@ -383,7 +338,7 @@ const SortingHubWidget = () => {
               className="flex-1 rounded-t transition-colors"
               style={{
                 height: `${val}%`,
-                backgroundColor: isActive ? "#ffffff" : "#22d3ee",
+                backgroundColor: isActive ? "#ffffff" : "#525252",
                 boxShadow: isActive ? "0 0 12px #ffffff" : "none",
               }}
             />
@@ -407,7 +362,7 @@ const SortingHubWidget = () => {
           <button
             onClick={runSort}
             disabled={isSorting}
-            className="px-3 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-neutral-200 border border-amber-500/40 transition-colors font-bold disabled:opacity-40"
+            className="px-3 py-1 rounded bg-white/10 hover:bg-white/20 text-white border border-white/20 transition-colors font-bold disabled:opacity-40"
           >
             {isSorting ? "Sorting..." : "Start Sort"}
           </button>
@@ -504,7 +459,7 @@ const EnginereaWidget = () => {
           </button>
           <button
             onClick={() => setLoadApplied((l) => (l > 300 ? 80 : l + 60))}
-            className="flex-1 py-1 rounded bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40"
+            className="flex-1 py-1 rounded bg-white/10 hover:bg-white/20 text-white border border-white/20"
           >
             Apply Load
           </button>
@@ -543,7 +498,7 @@ const ChatroomWidget = () => {
     <div className="flex flex-col h-full bg-slate-950/90 p-4 font-mono">
       <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
         <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-rose-400 animate-pulse" />
+          <div className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
           <span className="text-xs text-neutral-300 font-semibold uppercase tracking-wider">
             C++ POSIX Sockets Terminal
           </span>
@@ -560,13 +515,13 @@ const ChatroomWidget = () => {
                 m.type === "sys"
                   ? "text-white font-bold"
                   : m.type === "whisper"
-                  ? "text-purple-400 font-bold"
+                  ? "text-neutral-300 font-bold"
                   : "text-white font-bold"
               }
             >
               [{m.sender}]:
             </span>{" "}
-            <span className={m.type === "whisper" ? "text-purple-300 italic" : "text-foreground/80"}>
+            <span className={m.type === "whisper" ? "text-neutral-400 italic" : "text-foreground/80"}>
               {m.text}
             </span>
           </div>
@@ -588,7 +543,7 @@ const ChatroomWidget = () => {
         </div>
         <button
           onClick={handleSend}
-          className="px-3 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs"
+          className="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs"
         >
           Send
         </button>
@@ -669,7 +624,7 @@ const Projects = () => {
             </a>
             <button
               onClick={() => setIsResumeModalOpen(true)}
-              className="px-3.5 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors shadow-[0_0_15px_rgba(34,211,238,0.3)]"
+              className="px-3.5 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors shadow-[0_0_15px_rgba(255,255,255,0.2)]"
             >
               Resume
             </button>
@@ -772,23 +727,6 @@ const Projects = () => {
                     {project.id === "enginerea" && <EnginereaWidget />}
                     {project.id === "chatroom-whisperers" && <ChatroomWidget />}
                   </div>
-
-                  {/* Summary & Key Bullets: omitted for FormFixer */}
-                  {project.id !== "form-fixer" && (
-                    <div className="p-6">
-                      <p className="text-foreground/80 text-xs md:text-sm leading-relaxed mb-4">
-                        {project.overview}
-                      </p>
-                      <ul className="space-y-2 mb-4">
-                        {project.bullets.slice(0, 2).map((b, bIdx) => (
-                          <li key={bIdx} className="flex items-start gap-2.5 text-xs text-foreground/70">
-                            <span className="w-1.5 h-1.5 rounded-full bg-white mt-1.5 shrink-0 shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
-                            <span>{b}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
                 </div>
 
                 {/* Card Footer */}

@@ -60,7 +60,7 @@ const PublicationSection = () => {
             >
               {/* Subtle ambient gradient flare */}
               <div className="absolute -top-32 -right-32 w-80 h-80 bg-white/5 blur-[90px] rounded-full pointer-events-none" />
-              <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-emerald-500/10 blur-[90px] rounded-full pointer-events-none" />
+              <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-white/5 blur-[90px] rounded-full pointer-events-none" />
 
               {/* Header Badges */}
               <div className="flex flex-wrap items-center justify-between gap-3 pb-6 border-b border-border/50">
@@ -77,7 +77,7 @@ const PublicationSection = () => {
                     href={publication.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs md:text-sm font-medium hover:bg-primary/90 transition-all shadow-[0_0_15px_rgba(34,211,238,0.3)]"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs md:text-sm font-medium hover:bg-primary/90 transition-all shadow-[0_0_15px_rgba(255,255,255,0.2)]"
                   >
                     <span>Read on SPIE Digital Library</span>
                     <ExternalLink size={14} />
@@ -87,7 +87,7 @@ const PublicationSection = () => {
                     className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-secondary/60 hover:bg-secondary text-foreground text-xs font-mono transition-colors border border-border/40"
                     title="Copy BibTeX Citation"
                   >
-                    {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                    {copied ? <Check size={14} className="text-white" /> : <Copy size={14} />}
                     <span>{copied ? "Copied BibTeX!" : "Cite"}</span>
                   </button>
                 </div>

@@ -124,7 +124,7 @@ const FallingStars = () => {
             width: `${s.size}px`,
             height: `${s.size}px`,
             opacity: s.opacity,
-            boxShadow: "0 0 6px rgba(34,211,238,0.8)",
+            boxShadow: "0 0 6px rgba(255,255,255,0.8)",
             animation: `starfall ${s.duration}s ${s.delay}s linear infinite`,
           }}
         />
