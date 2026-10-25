@@ -179,10 +179,10 @@ const Typewriter = ({ text, delayMs }: { text: string; delayMs: number }) => {
 const GlitchText = ({ children }: { children: string }) => {
   return (
     <span className="relative inline-block text-gradient">
-      <span aria-hidden className="absolute inset-0 text-[#06b6d4] mix-blend-screen animate-[glitch-r_2.4s_infinite_ease-in-out]">
+      <span aria-hidden className="absolute inset-0 text-white/40 mix-blend-screen animate-[glitch-r_2.4s_infinite_ease-in-out]">
         {children}
       </span>
-      <span aria-hidden className="absolute inset-0 text-[#10b981] mix-blend-screen animate-[glitch-g_2.4s_infinite_ease-in-out]">
+      <span aria-hidden className="absolute inset-0 text-neutral-400/40 mix-blend-screen animate-[glitch-g_2.4s_infinite_ease-in-out]">
         {children}
       </span>
       <span className="relative">{children}</span>
@@ -191,7 +191,7 @@ const GlitchText = ({ children }: { children: string }) => {
 };
 
 /* ------------------------------------------------------------------------- */
-/* BeginButton — neon, pulsing, magnetic-feeling.                            */
+/* BeginButton — aesthetic monochrome silver/white.                         */
 /* ------------------------------------------------------------------------- */
 
 const BeginButton = ({
@@ -215,11 +215,11 @@ const BeginButton = ({
       className="group relative px-10 py-4 rounded-full font-mono font-semibold text-base tracking-[0.25em] uppercase overflow-hidden"
       style={{
         background:
-          "linear-gradient(135deg, rgba(6,182,212,0.18) 0%, rgba(16,185,129,0.18) 100%)",
-        border: "1px solid rgba(34,211,238,0.55)",
-        color: "#a5f3fc",
+          "linear-gradient(135deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.03) 100%)",
+        border: "1px solid rgba(255,255,255,0.35)",
+        color: "#ffffff",
         boxShadow:
-          "0 0 0 0 rgba(6,182,212,0.4), 0 0 36px rgba(6,182,212,0.18) inset",
+          "0 0 0 0 rgba(255,255,255,0.2), 0 0 36px rgba(255,255,255,0.08) inset",
       }}
       aria-label="Begin — enter portfolio"
     >
@@ -233,7 +233,7 @@ const BeginButton = ({
         }
         transition={{ duration: hovered ? 1.2 : 1.8, repeat: Infinity, ease: "easeInOut" }}
         className="absolute inset-0 rounded-full"
-        style={{ boxShadow: "0 0 0 2px rgba(34,211,238,0.55)" }}
+        style={{ boxShadow: "0 0 0 2px rgba(255,255,255,0.35)" }}
       />
 
       {/* Sweep highlight on hover */}
@@ -242,19 +242,19 @@ const BeginButton = ({
         className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
         style={{
           background:
-            "linear-gradient(120deg, transparent 30%, rgba(34,211,238,0.35) 50%, transparent 70%)",
+            "linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%)",
           backgroundSize: "200% 100%",
           animation: "marquee-scroll 1.6s linear infinite",
         }}
       />
 
       <span className="relative z-10 flex items-center gap-3">
-        <span className="text-accent">{">"}</span>
+        <span className="text-white">{">"}</span>
         Begin
         <motion.span
           animate={{ x: [0, 4, 0] }}
           transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
-          className="text-accent"
+          className="text-white"
         >
           ▮
         </motion.span>

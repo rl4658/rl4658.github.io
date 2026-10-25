@@ -60,10 +60,19 @@ interface SceneContextValue {
 
 const SceneContext = createContext<SceneContextValue | null>(null);
 
+const fallbackSceneContext: SceneContextValue = {
+  activeScene: "hero",
+  activeSceneRef: { current: "hero" },
+  sceneProgressRef: { current: 0 },
+  pageProgressRef: { current: 0 },
+  registerSection: () => () => {},
+  isWarping: false,
+  triggerWarp: (cb) => cb(),
+};
+
 export const useScene = (): SceneContextValue => {
   const ctx = useContext(SceneContext);
-  if (!ctx) throw new Error("useScene must be used within a SceneProvider");
-  return ctx;
+  return ctx || fallbackSceneContext;
 };
 
 const clamp01 = (v: number): number => (v < 0 ? 0 : v > 1 ? 1 : v);

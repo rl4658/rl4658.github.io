@@ -10,10 +10,10 @@ const SKILLS = [
   "Linux", "Kubernetes", "PyTorch", "Oracle Fusion",
 ];
 
-/* Cyan ↔ emerald gradient across the sphere. Position-based so it's stable per word. */
-const CYAN = new THREE.Color("#22d3ee");
-const EMERALD = new THREE.Color("#10b981");
-const HOVER = new THREE.Color("#a5f3fc");
+/* Monochrome gradient across the sphere. Position-based so it's stable per word. */
+const SILVER = new THREE.Color("#e2e8f0");
+const GRAPHITE = new THREE.Color("#71717a");
+const HOVER = new THREE.Color("#ffffff");
 
 const Word = ({
   position,
@@ -27,7 +27,7 @@ const Word = ({
 
   const baseColor = useMemo(() => {
     const t = (position.y / 6 + 1) / 2;
-    return new THREE.Color().lerpColors(EMERALD, CYAN, t);
+    return new THREE.Color().lerpColors(GRAPHITE, SILVER, t);
   }, [position]);
 
   useFrame(() => {
@@ -113,9 +113,9 @@ const SkillsGlobe = ({ active = true }: SkillsGlobeProps) => {
         gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
         frameloop={active ? "always" : "never"}
       >
-        <ambientLight intensity={0.6} />
-        <pointLight position={[10, 10, 10]} intensity={0.8} color="#22d3ee" />
-        <pointLight position={[-10, -10, -10]} intensity={0.4} color="#10b981" />
+        <ambientLight intensity={0.7} />
+        <pointLight position={[10, 10, 10]} intensity={0.8} color="#ffffff" />
+        <pointLight position={[-10, -10, -10]} intensity={0.4} color="#94a3b8" />
 
         <Cloud radius={6} skills={SKILLS} />
 

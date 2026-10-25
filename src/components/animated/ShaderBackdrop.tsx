@@ -68,13 +68,13 @@ const FRAGMENT = /* glsl */ `
     float n1 = fbm(p * 1.5 + flow + vec2(t, -t * 0.7));
     float n2 = fbm(p * 2.1 - flow.yx * 0.6 + vec2(-t * 0.55, t * 0.9));
 
-    vec3 cyan    = vec3(0.13, 0.83, 0.93);
-    vec3 indigo  = vec3(0.39, 0.40, 0.95);
-    vec3 emerald = vec3(0.06, 0.73, 0.51);
+    vec3 white    = vec3(0.95, 0.95, 0.98);
+    vec3 silver   = vec3(0.65, 0.68, 0.72);
+    vec3 graphite = vec3(0.25, 0.25, 0.28);
 
-    /* Palette drifts from cyan/indigo at the top of the page toward emerald at the bottom. */
-    vec3 col = mix(cyan, indigo, smoothstep(0.30, 0.80, n1));
-    col = mix(col, emerald, smoothstep(0.45, 0.85, n2) * (0.35 + 0.65 * uScroll));
+    /* Palette drifts smoothly through monochrome tones */
+    vec3 col = mix(white, silver, smoothstep(0.30, 0.80, n1));
+    col = mix(col, graphite, smoothstep(0.45, 0.85, n2) * (0.35 + 0.65 * uScroll));
 
     float glow = smoothstep(0.38, 0.92, n1 * 0.62 + n2 * 0.48);
 

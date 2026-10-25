@@ -86,7 +86,7 @@ const SkillsSection = () => {
               {hasBeenNear && <SkillsGlobe active={inView} />}
             </Suspense>
             {/* Soft cyan/emerald glow underneath the canvas */}
-            <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,hsl(189_94%_50%/0.18),transparent_60%)]" />
+            <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08),transparent_60%)]" />
           </motion.div>
 
           <div className="lg:col-span-3 grid sm:grid-cols-2 gap-6">
@@ -100,7 +100,7 @@ const SkillsSection = () => {
               <motion.div
                 whileHover={{
                   y: -8,
-                  boxShadow: "0 20px 60px rgba(6, 182, 212, 0.18)",
+                  boxShadow: "0 20px 60px rgba(255, 255, 255, 0.12)",
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 className="glass-strong rounded-2xl p-5 md:p-6 h-full"

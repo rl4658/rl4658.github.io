@@ -63,8 +63,7 @@ export interface Project {
   tagline: string;
   githubUrl: string;
   demoUrl?: string;
-  youtubeId?: string;
-  stars: number;
+  youtubeId?: string;  stars?: number;
   overview: string;
   bullets: string[];
   metrics?: { label: string; value: string }[];
@@ -372,7 +371,6 @@ export const projects: Project[] = [
     githubUrl: "https://github.com/rl4658/form-fixer",
     demoUrl: "https://www.youtube.com/watch?v=JZ4HPtc7ChY&ab_channel=TheBestofAI",
     youtubeId: "JZ4HPtc7ChY",
-    stars: 1,
     overview:
       "FormFixer.AI is a full-stack AI fitness platform built with React Native (Expo) and Node.js/Express. It runs on-device TensorFlow Lite pose estimation via VisionCamera and Shopify Skia, extracting 33 skeletal landmarks at 30+ FPS and applying the Law of Cosines to calculate joint angles in real time for exercises like Barbell Squat, Bench Press, and Deadlift.",
     bullets: [
@@ -407,7 +405,6 @@ export const projects: Project[] = [
     category: "Full-Stack & APIs",
     tagline: "AI natural language prompt to personalized Spotify playlist generator with acoustic feature tuning",
     githubUrl: "https://github.com/rl4658/spotify-playlist-generator",
-    stars: 1,
     overview:
       "A React + FastAPI application that leverages OpenAI and the Spotify API to craft personalized playlists from user prompts and fine-tuned audio feature sliders (danceability, energy, acousticness, valence, and tempo).",
     bullets: [
@@ -440,7 +437,6 @@ export const projects: Project[] = [
     category: "Algorithms & Data",
     tagline: "Interactive graphical demonstration and real-time visualization of sorting algorithms",
     githubUrl: "https://github.com/rl4658/sorting-hub",
-    stars: 1,
     overview:
       "Graphical demonstration of various sorting algorithms, providing insight into how an algorithm behaves using JavaFX and Scene Builder. The application visualizes QuickSort, MergeSort, BubbleSort, RadixSort, and HeapSort with step-by-step element comparisons, swaps, and time complexity profiling.",
     bullets: [
@@ -473,7 +469,6 @@ export const projects: Project[] = [
     category: "Full-Stack & APIs",
     tagline: "Interactive engineering simulation & narrative world of master builders",
     githubUrl: "https://github.com/rl4658/enginerea",
-    stars: 1,
     overview:
       "In the town of Enginerea, where people are destined to become master builders, there lived a man named Bobby the Builder. From an early age, Bobby had a passion for building and designing. An interactive story and simulation game teaching software engineering and problem-solving concepts through structural puzzle design and simulation physics.",
     bullets: [
@@ -503,7 +498,6 @@ export const projects: Project[] = [
     category: "Systems & Networking",
     tagline: "High-performance multi-threaded client-server chat system with encrypted whisper channels",
     githubUrl: "https://github.com/rl4658/chatroom-whisperers",
-    stars: 0,
     overview:
       "A high-performance multi-threaded client-server chat application implemented in C++ using POSIX TCP/IP sockets. Features robust connection handling, broadcast messaging, user-to-user private 'whispers', and thread-safe shared state management with mutex synchronization.",
     bullets: [

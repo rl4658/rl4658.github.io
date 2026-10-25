@@ -25,7 +25,7 @@ const ProjectsSection = () => {
     <section id="projects" ref={sectionRef} className="py-24 px-4 relative">
       <motion.div style={{ y }} className="container mx-auto max-w-5xl">
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-mono uppercase tracking-widest mb-4">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-neutral-300 text-xs font-mono uppercase tracking-widest mb-4">
             <Sparkles size={13} />
             Engineering Showcases & Demos
           </div>
@@ -49,14 +49,14 @@ const ProjectsSection = () => {
             <motion.div
               whileHover={{ scale: 1.01 }}
               transition={{ duration: 0.3 }}
-              className="glass-strong rounded-3xl p-8 relative overflow-hidden border border-cyan-500/30 shadow-[0_0_40px_rgba(34,211,238,0.12)] group cursor-pointer"
+              className="glass-strong rounded-3xl p-8 relative overflow-hidden border border-white/15 shadow-[0_0_40px_rgba(255,255,255,0.06)] group cursor-pointer"
               onClick={() => navigate("/projects")}
             >
-              <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-cyan-500/20 via-primary/10 to-transparent blur-[80px] pointer-events-none group-hover:scale-125 transition-transform duration-700" />
+              <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-white/10 via-white/5 to-transparent blur-[80px] pointer-events-none group-hover:scale-125 transition-transform duration-700" />
               <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                 <div>
-                  <div className="flex items-center gap-2.5 text-cyan-400 font-mono text-xs uppercase tracking-widest mb-2">
-                    <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+                  <div className="flex items-center gap-2.5 text-neutral-300 font-mono text-xs uppercase tracking-widest mb-2">
+                    <span className="w-2 h-2 rounded-full bg-white animate-ping" />
                     Interactive Showcase Page
                   </div>
                   <h3 className="font-display text-2xl md:text-3xl font-bold text-foreground">
@@ -71,7 +71,7 @@ const ProjectsSection = () => {
                     e.stopPropagation();
                     navigate("/projects");
                   }}
-                  className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-cyan-400 to-emerald-400 text-slate-950 font-bold text-sm tracking-wide flex items-center gap-2 hover:shadow-[0_0_25px_rgba(34,211,238,0.5)] transition-all shrink-0 group-hover:translate-x-1"
+                  className="px-6 py-3.5 rounded-2xl bg-white text-black font-bold text-sm tracking-wide flex items-center gap-2 hover:shadow-[0_0_25px_rgba(255,255,255,0.5)] hover:bg-neutral-200 transition-all shrink-0 group-hover:translate-x-1"
                 >
                   <Play size={16} className="fill-slate-950" />
                   <span>Launch Projects Page</span>
@@ -105,7 +105,7 @@ const ProjectsSection = () => {
                         <Code size={18} />
                         <span className="font-mono font-medium text-xs md:text-sm">{project.tech}</span>
                       </div>
-                      <span className="font-mono text-[10px] text-cyan-400/80 bg-cyan-500/10 px-2 py-0.5 rounded uppercase tracking-wider">
+                      <span className="font-mono text-[10px] text-neutral-300/80 bg-white/5 px-2 py-0.5 rounded uppercase tracking-wider">
                         {project.category}
                       </span>
                     </div>

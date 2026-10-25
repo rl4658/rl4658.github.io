@@ -118,7 +118,7 @@ const FallingStars = () => {
       {stars.map((s) => (
         <div
           key={s.id}
-          className="absolute rounded-full bg-cyan-200"
+          className="absolute rounded-full bg-white"
           style={{
             left: `${s.left}%`,
             width: `${s.size}px`,
@@ -316,7 +316,7 @@ const Hobbies = () => {
         <header className="sticky top-0 z-50 backdrop-blur-xl bg-slate-950/70 border-b border-white/5 px-6 md:px-12 py-4 flex items-center justify-between">
           <button
             onClick={() => navigate("/")}
-            className="flex items-center gap-2 text-foreground/60 hover:text-cyan-400 font-mono text-xs uppercase tracking-widest transition-colors p-2 rounded-xl hover:bg-white/5"
+            className="flex items-center gap-2 text-foreground/60 hover:text-white font-mono text-xs uppercase tracking-widest transition-colors p-2 rounded-xl hover:bg-white/5"
           >
             <ArrowLeft size={16} />
             <span>Back to Home</span>
@@ -330,7 +330,7 @@ const Hobbies = () => {
               }}
               className={`px-3 py-1.5 rounded-xl border text-xs font-mono flex items-center gap-2 transition-all ${
                 soundEnabled
-                  ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-300 shadow-[0_0_12px_rgba(34,211,238,0.2)]"
+                  ? "bg-white/10 border-white/30 text-white shadow-[0_0_12px_rgba(255,255,255,0.15)]"
                   : "bg-white/5 border-white/10 text-foreground/40"
               }`}
               title="Toggle 8-bit Web Audio Synthesizer"
@@ -345,11 +345,11 @@ const Hobbies = () => {
         <main className="relative z-10 max-w-4xl mx-auto px-6 pt-10 pb-24 flex flex-col items-center">
           {/* Header Title */}
           <div className="text-center max-w-2xl mx-auto mb-10">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-mono uppercase tracking-widest mb-4">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-neutral-300 text-xs font-mono uppercase tracking-widest mb-4">
               <Sparkles size={13} />
               Interactive Life & Gaming Studio
             </div>
-            <h1 className="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400 tracking-tight pb-2">
+            <h1 className="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-neutral-200 to-neutral-400 tracking-tight pb-2">
               Beyond the Code
             </h1>
             <p className="mt-4 text-base md:text-lg text-foreground/70 font-light leading-relaxed">
@@ -359,7 +359,7 @@ const Hobbies = () => {
 
           {/* Interactive 8-Bit Character Easter Egg Bar */}
           <div className="w-full mb-12 p-3.5 rounded-2xl glass border border-white/10 flex items-center justify-between gap-2 overflow-x-auto">
-            <div className="text-xs font-mono text-cyan-400 uppercase tracking-widest flex items-center gap-1.5 pl-2">
+            <div className="text-xs font-mono text-neutral-300 uppercase tracking-widest flex items-center gap-1.5 pl-2">
               <Zap size={14} />
               <span>World Companions:</span>
             </div>
@@ -377,7 +377,7 @@ const Hobbies = () => {
                     triggerSfx(c.sfx);
                     setLastLoreQuote(c.quote);
                   }}
-                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-cyan-500/20 border border-white/10 hover:border-cyan-400/40 text-xs font-mono transition-all text-foreground/80 hover:text-cyan-300"
+                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30 text-xs font-mono transition-all text-foreground/80 hover:text-white"
                 >
                   {c.name}
                 </button>
@@ -387,7 +387,7 @@ const Hobbies = () => {
 
           {/* Centered & Justified Story Section 1: Career & Balance */}
           <div className="w-full max-w-3xl text-justify mb-14 space-y-4 glass rounded-3xl p-6 md:p-8 border border-white/10">
-            <div className="flex items-center gap-2 text-cyan-400 font-mono text-xs uppercase tracking-widest">
+            <div className="flex items-center gap-2 text-neutral-300 font-mono text-xs uppercase tracking-widest">
               <span>01 // PHILOSOPHY & MOMENTUM</span>
             </div>
             <h2 className="text-2xl font-bold text-foreground">
@@ -399,10 +399,10 @@ const Hobbies = () => {
           </div>
 
           {/* INTERACTIVE MODULE 1: Fitness & Heavy Lifting Studio */}
-          <div className="w-full max-w-3xl mb-14 glass-strong rounded-3xl p-6 md:p-8 border border-cyan-500/20 shadow-2xl relative overflow-hidden">
+          <div className="w-full max-w-3xl mb-14 glass-strong rounded-3xl p-6 md:p-8 border border-white/10 shadow-2xl relative overflow-hidden">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10 mb-6">
               <div className="flex items-center gap-3">
-                <div className="p-3 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+                <div className="p-3 rounded-2xl bg-white/5 border border-white/10 text-neutral-300">
                   <Dumbbell size={24} />
                 </div>
                 <div>
@@ -414,7 +414,7 @@ const Hobbies = () => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleGymRep}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-400 to-emerald-400 text-slate-950 font-bold text-xs font-mono flex items-center gap-1.5 shadow-[0_0_15px_rgba(34,211,238,0.4)] hover:scale-105 active:scale-95 transition-all"
+                  className="px-4 py-2 rounded-xl bg-white text-black font-bold text-xs font-mono flex items-center gap-1.5 shadow-[0_0_15px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95 transition-all"
                 >
                   <Flame size={14} />
                   <span>+1 Rep (Clank!)</span>
@@ -433,12 +433,12 @@ const Hobbies = () => {
                   }}
                   className={`p-3.5 rounded-2xl border text-center transition-all ${
                     selectedLift === lift
-                      ? "bg-cyan-500/20 border-cyan-400/50 shadow-[0_0_15px_rgba(34,211,238,0.2)]"
+                      ? "bg-white/10 border-white/30 shadow-[0_0_15px_rgba(255,255,255,0.15)]"
                       : "bg-white/[0.02] border-white/5 hover:border-white/15"
                   }`}
                 >
                   <div className="text-xs font-mono uppercase text-foreground/60">{lift}</div>
-                  <div className="text-lg md:text-xl font-extrabold text-cyan-300 mt-1">
+                  <div className="text-lg md:text-xl font-extrabold text-white mt-1">
                     {liftStats[lift].weight}
                   </div>
                   <div className="text-[10px] font-mono text-foreground/50 mt-0.5">PR: {liftStats[lift].pr}</div>
@@ -451,7 +451,7 @@ const Hobbies = () => {
               <p>
                 Lifting weights provides the absolute counter-weight to intellectual desk work. When squatting or benching heavy, you can't fake attention or multitask. It teaches resilience, respect for progressive overload, and iterative improvement—principles that translate directly into how I architect software systems.
               </p>
-              <div className="pt-2 flex items-center justify-between text-xs font-mono text-cyan-400">
+              <div className="pt-2 flex items-center justify-between text-xs font-mono text-neutral-300">
                 <span>Target Focus: {liftStats[selectedLift].target}</span>
                 <span>Session Total Reps: {gymReps}</span>
               </div>
@@ -592,10 +592,10 @@ const Hobbies = () => {
           </div>
 
           {/* INTERACTIVE MODULE 4: League of Legends Ranked Vault & APM Test */}
-          <div className="w-full max-w-3xl mb-14 glass-strong rounded-3xl p-6 md:p-8 border border-blue-500/20 shadow-2xl relative overflow-hidden">
+          <div className="w-full max-w-3xl mb-14 glass-strong rounded-3xl p-6 md:p-8 border border-white/10 shadow-2xl relative overflow-hidden">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10 mb-6">
               <div className="flex items-center gap-3">
-                <div className="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
+                <div className="p-3 rounded-2xl bg-white/5 border border-white/10 text-white">
                   <Trophy size={24} />
                 </div>
                 <div>
@@ -603,7 +603,7 @@ const Hobbies = () => {
                   <p className="text-xs font-mono text-foreground/60">Tilt Management • Split-Second Decisions • High APM</p>
                 </div>
               </div>
-              <span className="text-xs font-mono px-3 py-1 rounded-full bg-blue-500/10 text-blue-300 border border-blue-500/20">
+              <span className="text-xs font-mono px-3 py-1 rounded-full bg-white/5 text-white border border-white/10">
                 Peak: Diamond Rank (Retired)
               </span>
             </div>
@@ -612,7 +612,7 @@ const Hobbies = () => {
               <div className="space-y-2">
                 <div className="flex justify-between text-xs font-mono text-foreground/70">
                   <span>Tilt-O-Meter Calibration:</span>
-                  <span className="text-blue-400 font-bold">
+                  <span className="text-white font-bold">
                     {tiltLevel < 20 ? "Zen Developer Mindset (0% Tilt)" : tiltLevel < 60 ? "Focused & Controlled" : "High Pressure Game 5"}
                   </span>
                 </div>
@@ -622,7 +622,7 @@ const Hobbies = () => {
                   max="100"
                   value={tiltLevel}
                   onChange={(e) => setTiltLevel(Number(e.target.value))}
-                  className="w-full accent-blue-400 h-1.5 bg-slate-800 rounded cursor-pointer"
+                  className="w-full accent-white h-1.5 bg-slate-800 rounded cursor-pointer"
                 />
               </div>
 
@@ -636,7 +636,7 @@ const Hobbies = () => {
                 {reactionTestState === "idle" && (
                   <button
                     onClick={startReactionTest}
-                    className="px-4 py-2 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/40 font-mono text-xs"
+                    className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 font-mono text-xs"
                   >
                     Start Test
                   </button>
@@ -685,7 +685,7 @@ const Hobbies = () => {
           {/* INTERACTIVE MODULE 5: 3D Interactive Games Globe (BORDERLESS) */}
           <div className="w-full max-w-4xl mb-12 flex flex-col items-center">
             <div className="text-center mb-6">
-              <div className="inline-flex items-center gap-2 text-cyan-400 font-mono text-xs uppercase tracking-widest mb-2">
+              <div className="inline-flex items-center gap-2 text-neutral-300 font-mono text-xs uppercase tracking-widest mb-2">
                 <Gamepad2 size={15} />
                 <span>Interactive 3D Games Constellation Globe</span>
               </div>
@@ -716,7 +716,7 @@ const Hobbies = () => {
           <div className="text-center">
             <button
               onClick={() => navigate("/")}
-              className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-cyan-400 to-emerald-400 text-slate-950 font-bold text-sm tracking-wide shadow-[0_0_25px_rgba(34,211,238,0.4)] hover:scale-105 active:scale-95 transition-all"
+              className="px-8 py-3.5 rounded-2xl bg-white text-black font-bold text-sm tracking-wide shadow-[0_0_25px_rgba(255,255,255,0.3)] hover:bg-neutral-200 hover:scale-105 active:scale-95 transition-all"
             >
               Return to Main Portfolio
             </button>

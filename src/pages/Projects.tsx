@@ -34,12 +34,13 @@ import ResumeModal from "@/components/ResumeModal";
 /* 1. FormFixer Real Video Demo (Recorded with Playwright)                   */
 /* ------------------------------------------------------------------------- */
 const FormFixerWidget = ({ project }: { project: Project }) => {
-  const [activeTab, setActiveTab] = useState<"clip" | "full">("clip");
+  const navigate = useNavigate();
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  const togglePlay = () => {
+  const togglePlay = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!videoRef.current) return;
     if (videoRef.current.paused) {
       videoRef.current.play();
@@ -50,126 +51,88 @@ const FormFixerWidget = ({ project }: { project: Project }) => {
     }
   };
 
-  const toggleMute = () => {
+  const toggleMute = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!videoRef.current) return;
     videoRef.current.muted = !videoRef.current.muted;
     setIsMuted(videoRef.current.muted);
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-950">
-      {/* Header bar with controls */}
-      <div className="flex items-center justify-between p-3 border-b border-white/10 bg-black/50">
+    <div className="flex flex-col h-full bg-[#080808]">
+      {/* Top bar */}
+      <div className="flex items-center justify-between p-3 border-b border-white/10 bg-black/60">
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
-          <span className="text-xs font-mono text-rose-400 font-bold uppercase tracking-wider">
-            {activeTab === "clip" ? "Live Android Screencast" : "Full YouTube Walkthrough"}
+          <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+          <span className="text-xs font-mono text-neutral-300 font-bold uppercase tracking-wider">
+            Live Workout Screencast
           </span>
         </div>
-
-        <div className="flex gap-1 bg-white/5 p-1 rounded-xl border border-white/10">
-          <button
-            onClick={() => setActiveTab("clip")}
-            className={`px-3 py-1 rounded-lg text-[11px] font-mono transition-colors flex items-center gap-1.5 ${
-              activeTab === "clip"
-                ? "bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30"
-                : "text-foreground/60 hover:text-foreground"
-            }`}
-          >
-            <Video size={12} />
-            Recorded Demo
-          </button>
-          <button
-            onClick={() => setActiveTab("full")}
-            className={`px-3 py-1 rounded-lg text-[11px] font-mono transition-colors flex items-center gap-1.5 ${
-              activeTab === "full"
-                ? "bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30"
-                : "text-foreground/60 hover:text-foreground"
-            }`}
-          >
-            <ExternalLink size={12} />
-            Full Presentation
-          </button>
-        </div>
-      </div>
-
-      {activeTab === "clip" ? (
-        <div className="relative aspect-video w-full bg-black overflow-hidden group">
-          <video
-            ref={videoRef}
-            src="/videos/formfixer_demo.webm"
-            poster="/videos/formfixer_poster.jpg"
-            autoPlay
-            loop
-            muted={isMuted}
-            playsInline
-            className="w-full h-full object-contain bg-black"
-            onPlay={() => setIsPlaying(true)}
-            onPause={() => setIsPlaying(false)}
-          />
-
-          {/* Floating HUD over video */}
-          <div className="absolute top-2 left-2 bg-black/80 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-white/10 text-[10px] font-mono flex items-center gap-2 text-rose-300">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            <span>Actual VisionCamera + Skia Android Run</span>
-          </div>
-
-          <div className="absolute top-2 right-2 flex gap-1.5">
-            <button
-              onClick={toggleMute}
-              className="p-1.5 rounded-lg bg-black/75 hover:bg-black text-white/80 hover:text-white border border-white/10 backdrop-blur-md transition-all text-xs"
-              title={isMuted ? "Unmute" : "Mute"}
-            >
-              {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-            </button>
-            <button
-              onClick={togglePlay}
-              className="p-1.5 rounded-lg bg-black/75 hover:bg-black text-white/80 hover:text-white border border-white/10 backdrop-blur-md transition-all text-xs"
-              title={isPlaying ? "Pause" : "Play"}
-            >
-              {isPlaying ? <Pause size={14} /> : <Play size={14} />}
-            </button>
-          </div>
-
-          {/* Bottom engineering badge */}
-          <div className="absolute bottom-2 left-2 right-2 bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 flex items-center justify-between text-[11px] font-mono">
-            <span className="text-foreground/70">
-              Live joint tracking · 30 FPS · Law of Cosines angle math
-            </span>
-            <span className="text-emerald-400 font-bold uppercase tracking-wider text-[10px]">
-              On-Device Inference
-            </span>
-          </div>
-        </div>
-      ) : (
-        <div className="relative aspect-video w-full bg-black overflow-hidden">
-          <iframe
-            src="https://www.youtube-nocookie.com/embed/JZ4HPtc7ChY?start=1445&autoplay=1&rel=0&modestbranding=1"
-            title={project.name}
-            className="w-full h-full border-0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        </div>
-      )}
-
-      {/* Engineering telemetry bar below video */}
-      <div className="p-3 bg-slate-900/60 border-t border-white/5 flex items-center justify-between text-xs font-mono text-foreground/60">
-        <div className="flex items-center gap-2">
-          <span className="text-rose-400 font-semibold">TFLite Pose Model</span>
-          <span>·</span>
-          <span>33 Landmarks</span>
-          <span>·</span>
-          <span>Bicep & Lateral Raise Form</span>
-        </div>
         <a
-          href="https://www.youtube.com/watch?v=JZ4HPtc7ChY&t=1445s"
+          href="https://www.youtube.com/watch?v=JZ4HPtc7ChY"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-rose-400 hover:text-rose-300 flex items-center gap-1 transition-colors text-[11px]"
+          onClick={(e) => e.stopPropagation()}
+          className="text-[11px] font-mono text-neutral-400 hover:text-white flex items-center gap-1 transition-colors bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-lg border border-white/10"
         >
-          Watch on YouTube <ExternalLink size={11} />
+          <Play size={10} fill="currentColor" />
+          <span>YouTube Video</span>
+          <ExternalLink size={10} className="opacity-60" />
         </a>
+      </div>
+
+      {/* Video preview container - click to navigate to full page */}
+      <div
+        onClick={() => navigate("/projects/form-fixer")}
+        className="relative aspect-video w-full bg-black overflow-hidden group cursor-pointer"
+        title="Click to view full architecture and case study"
+      >
+        <video
+          ref={videoRef}
+          src="/videos/formfixer_demo.webm"
+          poster="/videos/formfixer_poster.jpg"
+          autoPlay
+          loop
+          muted={isMuted}
+          playsInline
+          className="w-full h-full object-contain bg-black group-hover:scale-[1.02] transition-transform duration-500 pointer-events-none"
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
+        />
+
+        {/* Video Overlay on Hover */}
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+          <div className="px-4 py-2 rounded-xl bg-white text-black font-bold text-xs font-mono shadow-2xl flex items-center gap-2 transform translate-y-2 group-hover:translate-y-0 transition-transform">
+            <span>Explore Full Architecture & Case Study</span>
+            <ExternalLink size={12} />
+          </div>
+        </div>
+
+        {/* Top-right audio / pause toggles */}
+        <div className="absolute top-2 right-2 flex gap-1.5 z-10">
+          <button
+            onClick={toggleMute}
+            className="p-1.5 rounded-lg bg-black/80 hover:bg-black text-white/80 hover:text-white border border-white/15 backdrop-blur-md transition-all text-xs"
+            title={isMuted ? "Unmute" : "Mute"}
+          >
+            {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+          </button>
+          <button
+            onClick={togglePlay}
+            className="p-1.5 rounded-lg bg-black/80 hover:bg-black text-white/80 hover:text-white border border-white/15 backdrop-blur-md transition-all text-xs"
+            title={isPlaying ? "Pause" : "Play"}
+          >
+            {isPlaying ? <Pause size={13} /> : <Play size={13} />}
+          </button>
+        </div>
+
+        {/* Floating badge */}
+        <div className="absolute bottom-2 left-2 right-2 bg-black/85 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 flex items-center justify-between text-[11px] font-mono pointer-events-none">
+          <span className="text-neutral-400">Pose Model Workout Tracking</span>
+          <span className="text-white font-bold flex items-center gap-1">
+            Click to View Deep Dive →
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -211,15 +174,15 @@ const SpotifyWidget = () => {
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
         <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-xs font-mono text-emerald-400 font-semibold uppercase tracking-wider">
+          <div className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
+          <span className="text-xs font-mono text-white font-semibold uppercase tracking-wider">
             Spotify API + OpenAI Studio
           </span>
         </div>
         <button
           onClick={handleGenerate}
           disabled={isGenerating}
-          className="px-3 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-[11px] font-mono flex items-center gap-1.5 transition-all shadow-[0_0_12px_rgba(16,185,129,0.2)] disabled:opacity-50"
+          className="px-3 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-neutral-200 border border-emerald-500/40 text-[11px] font-mono flex items-center gap-1.5 transition-all shadow-[0_0_12px_rgba(16,185,129,0.2)] disabled:opacity-50"
         >
           <Sparkles size={12} className={isGenerating ? "animate-spin" : ""} />
           <span>{isGenerating ? "Synthesizing..." : "Generate AI Mix"}</span>
@@ -231,7 +194,7 @@ const SpotifyWidget = () => {
         <div className="space-y-1">
           <div className="flex justify-between text-[10px] font-mono text-foreground/70">
             <span>Energy</span>
-            <span className="text-emerald-400">{energy}%</span>
+            <span className="text-white">{energy}%</span>
           </div>
           <input
             type="range"
@@ -239,13 +202,13 @@ const SpotifyWidget = () => {
             max="100"
             value={energy}
             onChange={(e) => setEnergy(Number(e.target.value))}
-            className="w-full accent-emerald-400 h-1 bg-slate-800 rounded cursor-pointer"
+            className="w-full accent-white h-1 bg-slate-800 rounded cursor-pointer"
           />
         </div>
         <div className="space-y-1">
           <div className="flex justify-between text-[10px] font-mono text-foreground/70">
             <span>Danceability</span>
-            <span className="text-emerald-400">{danceability}%</span>
+            <span className="text-white">{danceability}%</span>
           </div>
           <input
             type="range"
@@ -253,13 +216,13 @@ const SpotifyWidget = () => {
             max="100"
             value={danceability}
             onChange={(e) => setDanceability(Number(e.target.value))}
-            className="w-full accent-emerald-400 h-1 bg-slate-800 rounded cursor-pointer"
+            className="w-full accent-white h-1 bg-slate-800 rounded cursor-pointer"
           />
         </div>
         <div className="space-y-1">
           <div className="flex justify-between text-[10px] font-mono text-foreground/70">
             <span>Acousticness</span>
-            <span className="text-emerald-400">{acousticness}%</span>
+            <span className="text-white">{acousticness}%</span>
           </div>
           <input
             type="range"
@@ -267,13 +230,13 @@ const SpotifyWidget = () => {
             max="100"
             value={acousticness}
             onChange={(e) => setAcousticness(Number(e.target.value))}
-            className="w-full accent-emerald-400 h-1 bg-slate-800 rounded cursor-pointer"
+            className="w-full accent-white h-1 bg-slate-800 rounded cursor-pointer"
           />
         </div>
         <div className="space-y-1">
           <div className="flex justify-between text-[10px] font-mono text-foreground/70">
             <span>Tempo (BPM)</span>
-            <span className="text-emerald-400">{tempo} BPM</span>
+            <span className="text-white">{tempo} BPM</span>
           </div>
           <input
             type="range"
@@ -281,7 +244,7 @@ const SpotifyWidget = () => {
             max="165"
             value={tempo}
             onChange={(e) => setTempo(Number(e.target.value))}
-            className="w-full accent-emerald-400 h-1 bg-slate-800 rounded cursor-pointer"
+            className="w-full accent-white h-1 bg-slate-800 rounded cursor-pointer"
           />
         </div>
       </div>
@@ -298,7 +261,7 @@ const SpotifyWidget = () => {
             className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] hover:bg-white/[0.05] border border-white/5 text-xs font-mono transition-colors"
           >
             <div className="flex items-center gap-2">
-              <span className="text-emerald-400 text-[10px]">#{i + 1}</span>
+              <span className="text-white text-[10px]">#{i + 1}</span>
               <div>
                 <div className="text-foreground font-medium">{track.title}</div>
                 <div className="text-[10px] text-foreground/50">{track.artist}</div>
@@ -392,7 +355,7 @@ const SortingHubWidget = () => {
       <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
         <div className="flex items-center gap-2">
           <div className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
-          <span className="text-xs font-mono text-amber-400 font-semibold uppercase tracking-wider">
+          <span className="text-xs font-mono text-white font-semibold uppercase tracking-wider">
             JavaFX Sorting Engine
           </span>
         </div>
@@ -420,8 +383,8 @@ const SortingHubWidget = () => {
               className="flex-1 rounded-t transition-colors"
               style={{
                 height: `${val}%`,
-                backgroundColor: isActive ? "#f59e0b" : "#22d3ee",
-                boxShadow: isActive ? "0 0 12px #f59e0b" : "none",
+                backgroundColor: isActive ? "#ffffff" : "#22d3ee",
+                boxShadow: isActive ? "0 0 12px #ffffff" : "none",
               }}
             />
           );
@@ -431,7 +394,7 @@ const SortingHubWidget = () => {
       {/* Actions and Stats */}
       <div className="flex items-center justify-between text-xs font-mono text-foreground/70">
         <div>
-          Comparisons: <span className="text-amber-400 font-bold">{comparisons}</span>
+          Comparisons: <span className="text-white font-bold">{comparisons}</span>
         </div>
         <div className="flex gap-2">
           <button
@@ -444,7 +407,7 @@ const SortingHubWidget = () => {
           <button
             onClick={runSort}
             disabled={isSorting}
-            className="px-3 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 transition-colors font-bold disabled:opacity-40"
+            className="px-3 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-neutral-200 border border-amber-500/40 transition-colors font-bold disabled:opacity-40"
           >
             {isSorting ? "Sorting..." : "Start Sort"}
           </button>
@@ -467,8 +430,8 @@ const EnginereaWidget = () => {
     <div className="flex flex-col h-full bg-slate-950/80 p-4">
       <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
         <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-indigo-400 animate-pulse" />
-          <span className="text-xs font-mono text-indigo-400 font-semibold uppercase tracking-wider">
+          <div className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
+          <span className="text-xs font-mono text-white font-semibold uppercase tracking-wider">
             Enginerea Physics Simulator
           </span>
         </div>
@@ -483,7 +446,7 @@ const EnginereaWidget = () => {
           <polygon points="175,85 190,85 183,70" fill="#64748b" />
 
           {/* Lower chord */}
-          <line x1="17" y1="70" x2="183" y2="70" stroke="#38bdf8" strokeWidth="3" />
+          <line x1="17" y1="70" x2="183" y2="70" stroke="#ffffff" strokeWidth="3" />
 
           {/* Dynamic Truss Struts */}
           {Array.from({ length: trussCount }, (_, i) => {
@@ -494,12 +457,12 @@ const EnginereaWidget = () => {
 
             return (
               <g key={i}>
-                <line x1={x1} y1="70" x2={apexX} y2="35" stroke={passed ? "#10b981" : "#f43f5e"} strokeWidth="2" />
-                <line x1={apexX} y1="35" x2={x2} y2="70" stroke={passed ? "#10b981" : "#f43f5e"} strokeWidth="2" />
+                <line x1={x1} y1="70" x2={apexX} y2="35" stroke={passed ? "#e2e8f0" : "#f43f5e"} strokeWidth="2" />
+                <line x1={apexX} y1="35" x2={x2} y2="70" stroke={passed ? "#e2e8f0" : "#f43f5e"} strokeWidth="2" />
                 {i < trussCount - 1 && (
-                  <line x1={apexX} y1="35" x2={apexX + step} y2="35" stroke="#38bdf8" strokeWidth="2" />
+                  <line x1={apexX} y1="35" x2={apexX + step} y2="35" stroke="#ffffff" strokeWidth="2" />
                 )}
-                <circle cx={apexX} cy="35" r="3" fill="#38bdf8" />
+                <circle cx={apexX} cy="35" r="3" fill="#ffffff" />
               </g>
             );
           })}
@@ -509,8 +472,8 @@ const EnginereaWidget = () => {
             animate={{ y: [0, 4, 0] }}
             transition={{ repeat: Infinity, duration: 1.5 }}
           >
-            <line x1="100" y1="10" x2="100" y2="32" stroke="#f43f5e" strokeWidth="3" markerEnd="url(#arrow)" />
-            <polygon points="96,25 104,25 100,34" fill="#f43f5e" />
+            <line x1="100" y1="10" x2="100" y2="32" stroke="#ffffff" strokeWidth="3" markerEnd="url(#arrow)" />
+            <polygon points="96,25 104,25 100,34" fill="#ffffff" />
           </motion.g>
         </svg>
 
@@ -522,7 +485,7 @@ const EnginereaWidget = () => {
       <div className="space-y-2 text-xs font-mono">
         <div className="flex justify-between text-foreground/70">
           <span>Structural Members: {trussCount}</span>
-          <span className={passed ? "text-emerald-400 font-bold" : "text-rose-400 font-bold"}>
+          <span className={passed ? "text-white font-bold" : "text-neutral-300 font-bold"}>
             Safety Factor: {safetyFactor}x ({passed ? "PASSED" : "COLLAPSE"})
           </span>
         </div>
@@ -581,7 +544,7 @@ const ChatroomWidget = () => {
       <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
         <div className="flex items-center gap-2">
           <div className="w-2.5 h-2.5 rounded-full bg-rose-400 animate-pulse" />
-          <span className="text-xs text-rose-400 font-semibold uppercase tracking-wider">
+          <span className="text-xs text-neutral-300 font-semibold uppercase tracking-wider">
             C++ POSIX Sockets Terminal
           </span>
         </div>
@@ -595,10 +558,10 @@ const ChatroomWidget = () => {
             <span
               className={
                 m.type === "sys"
-                  ? "text-cyan-400 font-bold"
+                  ? "text-white font-bold"
                   : m.type === "whisper"
                   ? "text-purple-400 font-bold"
-                  : "text-emerald-400 font-bold"
+                  : "text-white font-bold"
               }
             >
               [{m.sender}]:
@@ -683,13 +646,13 @@ const Projects = () => {
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate("/")}
-              className="flex items-center gap-2 text-foreground/60 hover:text-cyan-400 font-mono text-xs uppercase tracking-widest transition-colors p-2 rounded-xl hover:bg-white/5"
+              className="flex items-center gap-2 text-foreground/60 hover:text-white font-mono text-xs uppercase tracking-widest transition-colors p-2 rounded-xl hover:bg-white/5"
             >
               <ArrowLeft size={16} />
               <span>Back to Home</span>
             </button>
             <div className="h-4 w-px bg-white/10 hidden sm:block" />
-            <h1 className="text-sm font-mono font-bold tracking-wider text-cyan-400 hidden sm:block">
+            <h1 className="text-sm font-mono font-bold tracking-wider text-white hidden sm:block">
               {profile.name.toUpperCase()} // PROJECTS LAB
             </h1>
           </div>
@@ -716,11 +679,11 @@ const Projects = () => {
         {/* Page Hero */}
         <main className="max-w-7xl mx-auto px-6 md:px-12 pt-12 pb-24">
           <div className="text-center max-w-3xl mx-auto mb-12">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-mono uppercase tracking-widest mb-4">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/15 text-white text-xs font-mono uppercase tracking-widest mb-4">
               <Sparkles size={13} />
               Live Interactive Sandbox & Codebases
             </div>
-            <h2 className="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400 tracking-tight pb-2">
+            <h2 className="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-neutral-200 to-neutral-400 tracking-tight pb-2">
               Projects & Engineering
             </h2>
             <p className="mt-4 text-base md:text-lg text-foreground/70 font-light leading-relaxed">
@@ -738,7 +701,7 @@ const Projects = () => {
                   onClick={() => setSelectedCategory(cat)}
                   className={`px-3.5 py-1.5 rounded-xl text-xs font-mono whitespace-nowrap transition-all ${
                     selectedCategory === cat
-                      ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold shadow-[0_0_12px_rgba(34,211,238,0.2)]"
+                      ? "bg-white text-black font-bold shadow-[0_0_15px_rgba(255,255,255,0.4)]"
                       : "bg-white/[0.03] text-foreground/60 hover:text-foreground border border-white/5 hover:border-white/10"
                   }`}
                 >
@@ -755,7 +718,7 @@ const Projects = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search projects or tech..."
-                className="w-full pl-9 pr-4 py-2 rounded-xl bg-white/[0.03] border border-white/10 text-xs text-foreground placeholder:text-foreground/40 focus:outline-none focus:border-cyan-400/50 font-mono transition-colors"
+                className="w-full pl-9 pr-4 py-2 rounded-xl bg-white/[0.03] border border-white/10 text-xs text-foreground placeholder:text-foreground/40 focus:outline-none focus:border-white/50 font-mono transition-colors"
               />
             </div>
           </div>
@@ -768,20 +731,17 @@ const Projects = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: idx * 0.1 }}
-                className="glass-strong rounded-3xl overflow-hidden border border-white/10 flex flex-col justify-between group hover:border-cyan-500/30 hover:shadow-[0_0_40px_rgba(34,211,238,0.12)] transition-all"
+                className="glass-strong rounded-3xl overflow-hidden border border-white/10 flex flex-col justify-between group hover:border-white/30 hover:shadow-[0_0_40px_rgba(255,255,255,0.06)] transition-all"
               >
                 <div>
                   {/* Card Header */}
                   <div className="p-6 border-b border-white/10 flex items-start justify-between gap-4">
                     <div>
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-[10px] font-mono text-cyan-400 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/20 uppercase tracking-wider">
+                        <span className="text-[10px] font-mono text-white bg-white/5 px-2.5 py-0.5 rounded-full border border-white/15 uppercase tracking-wider">
                           {project.category}
                         </span>
-                        <div className="flex items-center gap-1 text-[11px] font-mono text-foreground/50">
-                          <Star size={12} className="text-amber-400 fill-amber-400" />
-                          <span>{project.stars}</span>
-                        </div>
+                        
                       </div>
                       <h3 className="text-xl md:text-2xl font-bold text-foreground">
                         {project.name}
@@ -796,7 +756,7 @@ const Projects = () => {
                         href={project.githubUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-foreground/70 hover:text-cyan-400 transition-colors"
+                        className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-foreground/70 hover:text-white transition-colors"
                         title="View GitHub Repository"
                       >
                         <Github size={16} />
@@ -813,41 +773,64 @@ const Projects = () => {
                     {project.id === "chatroom-whisperers" && <ChatroomWidget />}
                   </div>
 
-                  {/* Summary & Key Bullets */}
-                  <div className="p-6">
-                    <p className="text-foreground/80 text-xs md:text-sm leading-relaxed mb-4">
-                      {project.overview}
-                    </p>
-                    <ul className="space-y-2 mb-4">
-                      {project.bullets.slice(0, 2).map((b, bIdx) => (
-                        <li key={bIdx} className="flex items-start gap-2.5 text-xs text-foreground/70">
-                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 shrink-0 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
-                          <span>{b}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  {/* Summary & Key Bullets: omitted for FormFixer */}
+                  {project.id !== "form-fixer" && (
+                    <div className="p-6">
+                      <p className="text-foreground/80 text-xs md:text-sm leading-relaxed mb-4">
+                        {project.overview}
+                      </p>
+                      <ul className="space-y-2 mb-4">
+                        {project.bullets.slice(0, 2).map((b, bIdx) => (
+                          <li key={bIdx} className="flex items-start gap-2.5 text-xs text-foreground/70">
+                            <span className="w-1.5 h-1.5 rounded-full bg-white mt-1.5 shrink-0 shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
+                            <span>{b}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
 
                 {/* Card Footer */}
-                <div className="px-6 py-4 bg-white/[0.02] border-t border-white/10 flex items-center justify-between">
-                  <button
-                    onClick={() => setSelectedProject(project)}
-                    className="text-xs font-mono text-cyan-400 hover:text-cyan-300 flex items-center gap-1.5 transition-colors"
-                  >
-                    <Info size={14} />
-                    <span>View Full Architecture & Metrics</span>
-                  </button>
-                  <a
-                    href={project.githubUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs font-mono text-foreground/60 hover:text-foreground flex items-center gap-1.5 transition-colors"
-                  >
-                    <span>Inspect Code</span>
-                    <ExternalLink size={13} />
-                  </a>
-                </div>
+                {project.id === "form-fixer" ? (
+                  <div className="px-6 py-4 bg-white/[0.02] border-t border-white/10 flex items-center justify-between">
+                    <button
+                      onClick={() => navigate("/projects/form-fixer")}
+                      className="text-xs font-mono text-white hover:text-neutral-300 flex items-center gap-2 font-bold transition-colors"
+                    >
+                      <Info size={14} />
+                      <span>Read Full Description & Architecture Page →</span>
+                    </button>
+                    <a
+                      href="https://www.youtube.com/watch?v=JZ4HPtc7ChY"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-mono text-neutral-400 hover:text-white flex items-center gap-1.5 transition-colors"
+                    >
+                      <span>YouTube</span>
+                      <ExternalLink size={12} />
+                    </a>
+                  </div>
+                ) : (
+                  <div className="px-6 py-4 bg-white/[0.02] border-t border-white/10 flex items-center justify-between">
+                    <button
+                      onClick={() => setSelectedProject(project)}
+                      className="text-xs font-mono text-white hover:text-neutral-200 flex items-center gap-1.5 transition-colors"
+                    >
+                      <Info size={14} />
+                      <span>View Architecture & Metrics</span>
+                    </button>
+                    <a
+                      href={project.githubUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-mono text-foreground/60 hover:text-foreground flex items-center gap-1.5 transition-colors"
+                    >
+                      <span>Inspect Code</span>
+                      <ExternalLink size={13} />
+                    </a>
+                  </div>
+                )}
               </motion.div>
             ))}
           </div>
@@ -873,7 +856,7 @@ const Projects = () => {
                 {/* Modal Header */}
                 <div className="p-6 border-b border-white/10 flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] font-mono text-cyan-400 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/20 uppercase tracking-wider">
+                    <span className="text-[10px] font-mono text-white bg-white/5 px-2.5 py-0.5 rounded-full border border-white/15 uppercase tracking-wider">
                       {selectedProject.category}
                     </span>
                     <h2 className="text-2xl md:text-3xl font-bold mt-1 text-foreground">
@@ -909,7 +892,7 @@ const Projects = () => {
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                         {selectedProject.metrics.map((m, i) => (
                           <div key={i} className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 text-center">
-                            <div className="text-xl md:text-2xl font-bold text-cyan-400">{m.value}</div>
+                            <div className="text-xl md:text-2xl font-bold text-white">{m.value}</div>
                             <div className="text-[11px] font-mono text-foreground/60 mt-1">{m.label}</div>
                           </div>
                         ))}
@@ -924,12 +907,12 @@ const Projects = () => {
                         System Architecture Flow
                       </h4>
                       <div className="p-4 rounded-2xl bg-slate-900 border border-white/5 space-y-2">
-                        <div className="text-xs font-mono text-cyan-300 pb-2 border-b border-white/10">
+                        <div className="text-xs font-mono text-neutral-200 pb-2 border-b border-white/10">
                           {selectedProject.architecture.summary}
                         </div>
                         {selectedProject.architecture.flow.map((step, idx) => (
                           <div key={idx} className="text-xs font-mono text-foreground/75 flex items-start gap-2">
-                            <span className="text-cyan-400 font-bold">→</span>
+                            <span className="text-white font-bold">→</span>
                             <span>{step}</span>
                           </div>
                         ))}
@@ -959,9 +942,9 @@ const Projects = () => {
                     </span>
                     <button
                       onClick={() => copyCloneCmd(selectedProject.githubUrl)}
-                      className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-mono text-cyan-400 flex items-center gap-1.5"
+                      className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-mono text-white flex items-center gap-1.5"
                     >
-                      {copiedClone ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                      {copiedClone ? <Check size={14} className="text-white" /> : <Copy size={14} />}
                       <span>{copiedClone ? "Copied" : "Copy Clone"}</span>
                     </button>
                   </div>
@@ -973,7 +956,7 @@ const Projects = () => {
                     href={selectedProject.githubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-5 py-2.5 rounded-xl bg-cyan-400 text-slate-950 font-bold text-xs font-mono flex items-center gap-2 hover:bg-cyan-300 transition-colors"
+                    className="px-5 py-2.5 rounded-xl bg-white text-black font-bold text-xs font-mono flex items-center gap-2 hover:bg-neutral-200 transition-colors"
                   >
                     <Github size={15} />
                     <span>Open GitHub Repository</span>

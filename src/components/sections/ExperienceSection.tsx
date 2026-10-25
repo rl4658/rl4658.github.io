@@ -205,7 +205,7 @@ const ExperienceCard = ({
         {exp.stack.map((skill) => (
           <span
             key={skill}
-            className="px-3 py-1.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-xs font-medium tracking-wide"
+            className="px-3 py-1.5 rounded-full bg-white/5 text-neutral-300 border border-white/10 text-xs font-medium tracking-wide"
           >
             {skill}
           </span>

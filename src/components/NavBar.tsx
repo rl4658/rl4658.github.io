@@ -119,7 +119,7 @@ const NavBar = ({ onResumeClick, onLogoClick }: NavBarProps) => {
                   <span className="relative z-10 flex items-center gap-1.5">
                     {link.label}
                     {link.isRoute && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                     )}
                   </span>
                 </button>

@@ -64,7 +64,7 @@ const SkillsDonut = ({ rotationSpeed = 0.003 }: SkillsDonutProps) => {
       className="fixed inset-0 w-full h-full pointer-events-none transition-[background-color] duration-700"
       style={{
         zIndex: isForeground ? 5 : -1,
-        backgroundColor: isForeground ? "#020617" : "transparent",
+        backgroundColor: isForeground ? "#030303" : "transparent",
       }}
       aria-hidden="true"
     >
@@ -73,11 +73,11 @@ const SkillsDonut = ({ rotationSpeed = 0.003 }: SkillsDonutProps) => {
         dpr={1}
         gl={{ antialias: false, alpha: true, powerPreference: "high-performance", stencil: false }}
       >
-        <fog attach="fog" args={["#020617", 12, 28]} />
+        <fog attach="fog" args={["#030303", 12, 28]} />
 
-        <ambientLight intensity={0.18} />
-        <pointLight position={[10, 10, 10]} intensity={0.8} color="#22d3ee" />
-        <pointLight position={[-10, -8, 4]} intensity={0.5} color="#10b981" />
+        <ambientLight intensity={0.25} />
+        <pointLight position={[10, 10, 10]} intensity={0.9} color="#ffffff" />
+        <pointLight position={[-10, -8, 4]} intensity={0.4} color="#94a3b8" />
 
         <ShaderBackdrop phase={phase} pageProgressRef={pageProgressRef} isWarping={isWarping} />
 
@@ -272,11 +272,11 @@ const DonutMesh = ({
       <meshStandardMaterial
         ref={matRef}
         wireframe
-        color="#22d3ee"
-        emissive="#06b6d4"
-        emissiveIntensity={0.65}
+        color="#e2e8f0"
+        emissive="#ffffff"
+        emissiveIntensity={0.45}
         transparent
-        opacity={0.78}
+        opacity={0.82}
         depthWrite={false}
       />
     </mesh>
@@ -441,9 +441,9 @@ const ParticleField = ({
         <pointsMaterial
           ref={matRef}
           size={0.07}
-          color="#67e8f9"
+          color="#ffffff"
           transparent
-          opacity={0.85}
+          opacity={0.9}
           sizeAttenuation
           depthWrite={false}
           blending={THREE.AdditiveBlending}
@@ -454,7 +454,7 @@ const ParticleField = ({
         <pointsMaterial
           ref={fallingMatRef}
           size={0.06}
-          color="#a5f3fc"
+          color="#e2e8f0"
           transparent
           opacity={0}
           sizeAttenuation

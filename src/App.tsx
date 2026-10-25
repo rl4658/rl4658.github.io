@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 /* Hobbies and Projects pull in specialized interactive engines — keep them code-split */
 const Hobbies = lazy(() => import("./pages/Hobbies"));
 const Projects = lazy(() => import("./pages/Projects"));
+const FormFixerProject = lazy(() => import("./pages/FormFixerProject"));
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/hobbies" element={<Hobbies />} />
             <Route path="/projects" element={<Projects />} />
+            <Route path="/projects/form-fixer" element={<FormFixerProject />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

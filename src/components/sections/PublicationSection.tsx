@@ -32,7 +32,7 @@ const PublicationSection = () => {
     <section id="publication" ref={sectionRef} className="py-24 px-4 relative">
       <div className="container mx-auto max-w-5xl">
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-mono uppercase tracking-widest mb-4">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-neutral-300 text-xs font-mono uppercase tracking-widest mb-4">
             <BookOpen size={13} />
             Peer-Reviewed Academic Research
           </div>
@@ -56,10 +56,10 @@ const PublicationSection = () => {
             <motion.div
               whileHover={cardHover}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              className="glass-strong rounded-3xl p-6 md:p-10 relative overflow-hidden border border-cyan-500/20"
+              className="glass-strong rounded-3xl p-6 md:p-10 relative overflow-hidden border border-white/10"
             >
               {/* Subtle ambient gradient flare */}
-              <div className="absolute -top-32 -right-32 w-80 h-80 bg-cyan-500/10 blur-[90px] rounded-full pointer-events-none" />
+              <div className="absolute -top-32 -right-32 w-80 h-80 bg-white/5 blur-[90px] rounded-full pointer-events-none" />
               <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-emerald-500/10 blur-[90px] rounded-full pointer-events-none" />
 
               {/* Header Badges */}
@@ -123,9 +123,9 @@ const PublicationSection = () => {
                 {publication.metrics.map((metric, i) => (
                   <div
                     key={i}
-                    className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 flex flex-col items-center text-center group hover:border-cyan-500/30 transition-colors"
+                    className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 flex flex-col items-center text-center group hover:border-white/30 transition-colors"
                   >
-                    <span className="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400 mb-1">
+                    <span className="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-neutral-200 to-neutral-400 mb-1">
                       {metric.value}
                     </span>
                     <span className="text-xs font-mono text-foreground/60 uppercase tracking-wider">
@@ -136,10 +136,10 @@ const PublicationSection = () => {
               </div>
 
               {/* Interactive Fourier Optics & Synthetic Aperture Visualizer */}
-              <div className="p-6 rounded-2xl bg-black/40 border border-cyan-500/20 mb-8">
+              <div className="p-6 rounded-2xl bg-black/40 border border-white/10 mb-8">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
                   <div>
-                    <div className="flex items-center gap-2 text-cyan-400 font-mono text-xs uppercase tracking-wider">
+                    <div className="flex items-center gap-2 text-neutral-300 font-mono text-xs uppercase tracking-wider">
                       <Microscope size={15} />
                       <span>Interactive Synthetic Aperture & LED Illumination Angle Lab</span>
                     </div>
@@ -176,10 +176,10 @@ const PublicationSection = () => {
                             onClick={() => setSelectedLed(idx)}
                             className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
                               isSelected
-                                ? "bg-cyan-400 text-slate-950 shadow-[0_0_15px_#22d3ee] scale-110 font-bold"
+                                ? "bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.6)] scale-110 font-bold"
                                 : isCenter
                                 ? "bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/40"
-                                : "bg-white/5 border border-white/10 hover:border-cyan-400/40 hover:bg-cyan-500/20"
+                                : "bg-white/5 border border-white/10 hover:border-white/40 hover:bg-white/10"
                             }`}
                             title={`LED (${col}, ${row})`}
                           >
@@ -200,7 +200,7 @@ const PublicationSection = () => {
                     <span className="text-[11px] font-mono text-foreground/50 uppercase tracking-widest mb-3">
                       Fourier Domain Synthetic Aperture Passband
                     </span>
-                    <div className="w-full max-w-[280px] aspect-square rounded-2xl bg-slate-950 border border-cyan-500/20 relative flex items-center justify-center overflow-hidden shadow-2xl">
+                    <div className="w-full max-w-[280px] aspect-square rounded-2xl bg-slate-950 border border-white/10 relative flex items-center justify-center overflow-hidden shadow-2xl">
                       {/* Grid crosshairs */}
                       <div className="absolute inset-x-0 top-1/2 h-px bg-white/10" />
                       <div className="absolute inset-y-0 left-1/2 w-px bg-white/10" />
@@ -213,8 +213,8 @@ const PublicationSection = () => {
                       </div>
 
                       {/* Hardware Physical Low-NA Objective Lens (Center) */}
-                      <div className="w-24 h-24 rounded-full border border-cyan-400/30 bg-cyan-500/5 absolute flex items-center justify-center">
-                        <span className="text-[8px] font-mono text-cyan-400/50">
+                      <div className="w-24 h-24 rounded-full border border-white/30 bg-white/5 absolute flex items-center justify-center">
+                        <span className="text-[8px] font-mono text-neutral-300/50">
                           Raw Objective (1x NA)
                         </span>
                       </div>
@@ -230,9 +230,9 @@ const PublicationSection = () => {
                           <motion.div
                             animate={{ x: offsetX, y: offsetY }}
                             transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                            className="w-24 h-24 rounded-full border-2 border-cyan-400 bg-cyan-400/20 absolute shadow-[0_0_20px_rgba(34,211,238,0.5)] flex items-center justify-center pointer-events-none"
+                            className="w-24 h-24 rounded-full border-2 border-white bg-white/20 absolute shadow-[0_0_20px_rgba(255,255,255,0.4)] flex items-center justify-center pointer-events-none"
                           >
-                            <span className="text-[9px] font-mono text-cyan-200 font-bold">
+                            <span className="text-[9px] font-mono text-white font-bold">
                               Shifted k-vector
                             </span>
                           </motion.div>
@@ -262,7 +262,7 @@ const PublicationSection = () => {
                       key={index}
                       className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 text-sm text-foreground/80 flex items-start gap-3"
                     >
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-2 shrink-0 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-white mt-2 shrink-0 shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
                       <span>{highlight}</span>
                     </div>
                   ))}
