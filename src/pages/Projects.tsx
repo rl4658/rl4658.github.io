@@ -14,6 +14,7 @@ import {
   Terminal,
   Activity,
   ArrowLeft,
+  ArrowRight,
   Search,
   Check,
   Copy,
@@ -26,63 +27,34 @@ import { projects, profile, type Project } from "@/data/profile";
 import ResumeModal from "@/components/ResumeModal";
 
 /* ------------------------------------------------------------------------- */
-/* 1. FormFixer AI Preview Widget (Pixel-Perfect Clean Preview)              */
+/* 1. FormFixer AI Preview Widget (Enlarged Full-Bleed Phone Preview)        */
 /* ------------------------------------------------------------------------- */
 const FormFixerWidget = ({ project }: { project: Project }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col h-full bg-slate-950/80 p-4">
-      {/* Top bar with real icon & YouTube link */}
-      <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
-        <div className="flex items-center gap-2.5">
-          <img
-            src="/images/projects/form-fixer/icon.png"
-            alt="FormFixer Icon"
-            className="w-5 h-5 rounded-md object-contain bg-white/10"
-          />
-          <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
-          <span className="text-xs font-mono text-white font-semibold uppercase tracking-wider">
-            Pose Model Workout Preview
-          </span>
-        </div>
-        <a
-          href="https://www.youtube.com/watch?v=JZ4HPtc7ChY"
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          className="text-[11px] font-mono text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-lg border border-white/10"
-        >
-          <Play size={10} fill="currentColor" />
-          <span>YouTube Video</span>
-          <ExternalLink size={10} className="opacity-60" />
-        </a>
+    <div
+      onClick={() => navigate("/projects/form-fixer")}
+      className="relative h-[480px] sm:h-[520px] md:h-[560px] w-full bg-black/95 flex items-center justify-center p-4 sm:p-6 overflow-hidden group/phone cursor-pointer"
+      title="Click to Explore FormFixer.AI"
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(56,189,248,0.12),transparent_70%)] pointer-events-none" />
+
+      {/* Enlarged, High-Resolution Phone Display */}
+      <div className="relative h-full aspect-[221/474] rounded-2xl overflow-hidden border-2 border-white/20 shadow-[0_0_40px_rgba(56,189,248,0.22)] bg-black transition-all duration-300 group-hover/phone:scale-[1.02] group-hover/phone:border-cyan-400">
+        <img
+          src="/images/formfixer_preview.gif"
+          alt="FormFixer AI Workout Preview"
+          className="w-full h-full object-cover"
+          loading="eager"
+        />
       </div>
 
-      {/* Embedded Pixel-Perfect Preview - Click to view full architecture page */}
-      <div
-        onClick={() => navigate("/projects/form-fixer")}
-        className="relative h-48 sm:h-52 md:h-56 w-full rounded-xl overflow-hidden border border-white/10 bg-black/90 flex items-center justify-center p-3 group cursor-pointer transition-all hover:border-cyan-400/40 shadow-inner"
-        title="Click into widget to view full descriptions and architecture"
-      >
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(56,189,248,0.06),transparent_70%)] pointer-events-none" />
-
-        {/* Clean, Pixel-Perfect Rectangular Viewport */}
-        <div className="relative h-full aspect-[221/474] rounded-lg overflow-hidden border border-white/15 bg-black shadow-2xl group-hover:border-cyan-400/60 transition-colors">
-          <img
-            src="/images/formfixer_preview.gif"
-            alt="FormFixer AI Workout Preview"
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-            loading="eager"
-          />
-        </div>
-
-        {/* Subtle Hover Action Overlay */}
-        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none backdrop-blur-[2px]">
-          <div className="px-4 py-2 rounded-xl bg-white text-black font-bold text-xs font-mono shadow-2xl flex items-center gap-2 transform translate-y-2 group-hover:translate-y-0 transition-transform">
-            <span>Explore Full Architecture & Case Study</span>
-            <ExternalLink size={12} />
-          </div>
+      {/* Hover Action Overlay */}
+      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/phone:opacity-100 transition-opacity flex items-center justify-center pointer-events-none backdrop-blur-[2px]">
+        <div className="px-5 py-2.5 rounded-full bg-white text-black font-bold text-xs font-mono shadow-2xl flex items-center gap-2 transform translate-y-2 group-hover/phone:translate-y-0 transition-transform">
+          <span>Explore Project</span>
+          <ArrowRight size={14} />
         </div>
       </div>
     </div>
@@ -92,7 +64,7 @@ const FormFixerWidget = ({ project }: { project: Project }) => {
 /* ------------------------------------------------------------------------- */
 /* 2. Spotify Playlist Generator Interactive Studio                          */
 /* ------------------------------------------------------------------------- */
-const SpotifyWidget = () => {
+const SpotifyWidget = ({ onExplore }: { onExplore?: () => void }) => {
   const [viewMode, setViewMode] = useState<"studio" | "app">("studio");
   const [energy, setEnergy] = useState(82);
   const [danceability, setDanceability] = useState(74);
@@ -122,7 +94,7 @@ const SpotifyWidget = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-950/80 p-4">
+    <div className="flex flex-col h-[480px] sm:h-[520px] md:h-[560px] bg-slate-950/80 p-5 justify-between relative group/widget">
       {/* Header with View Mode Switcher */}
       <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
         <div className="flex items-center gap-2">
@@ -135,13 +107,13 @@ const SpotifyWidget = () => {
         <div className="flex items-center gap-2">
           <div className="flex bg-white/5 p-0.5 rounded-lg border border-white/10 text-[11px] font-mono">
             <button
-              onClick={() => setViewMode("studio")}
+              onClick={(e) => { e.stopPropagation(); setViewMode("studio"); }}
               className={`px-2.5 py-0.5 rounded transition-colors ${viewMode === "studio" ? "bg-white/20 text-white font-bold" : "text-neutral-400 hover:text-white"}`}
             >
               Interactive
             </button>
             <button
-              onClick={() => setViewMode("app")}
+              onClick={(e) => { e.stopPropagation(); setViewMode("app"); }}
               className={`px-2.5 py-0.5 rounded transition-colors ${viewMode === "app" ? "bg-white/20 text-white font-bold" : "text-neutral-400 hover:text-white"}`}
             >
               App UI
@@ -150,7 +122,7 @@ const SpotifyWidget = () => {
 
           {viewMode === "studio" && (
             <button
-              onClick={handleGenerate}
+              onClick={(e) => { e.stopPropagation(); handleGenerate(); }}
               disabled={isGenerating}
               className="px-3 py-1 rounded-lg bg-[#1DB954]/20 hover:bg-[#1DB954]/30 text-[#1DB954] border border-[#1DB954]/40 text-[11px] font-mono flex items-center gap-1.5 transition-all shadow-[0_0_12px_rgba(29,185,84,0.2)] disabled:opacity-50"
             >
@@ -162,7 +134,7 @@ const SpotifyWidget = () => {
       </div>
 
       {viewMode === "app" ? (
-        <div className="relative h-60 rounded-xl overflow-hidden border border-white/10 group bg-black">
+        <div className="flex-1 rounded-xl overflow-hidden border border-white/10 group bg-black relative mb-4">
           <img
             src="/images/projects/spotify/home-page.jpeg"
             alt="Spotify Playlist Generator UI"
@@ -192,7 +164,7 @@ const SpotifyWidget = () => {
                 min="0"
                 max="100"
                 value={energy}
-                onChange={(e) => setEnergy(Number(e.target.value))}
+                onChange={(e) => setEnergy(Number(e.target.value))} onClick={(e) => e.stopPropagation()}
                 className="w-full accent-cyan-400 h-1 bg-slate-800 rounded cursor-pointer"
               />
             </div>
@@ -206,7 +178,7 @@ const SpotifyWidget = () => {
                 min="0"
                 max="100"
                 value={danceability}
-                onChange={(e) => setDanceability(Number(e.target.value))}
+                onChange={(e) => setDanceability(Number(e.target.value))} onClick={(e) => e.stopPropagation()}
                 className="w-full accent-cyan-400 h-1 bg-slate-800 rounded cursor-pointer"
               />
             </div>
@@ -220,7 +192,7 @@ const SpotifyWidget = () => {
                 min="0"
                 max="100"
                 value={acousticness}
-                onChange={(e) => setAcousticness(Number(e.target.value))}
+                onChange={(e) => setAcousticness(Number(e.target.value))} onClick={(e) => e.stopPropagation()}
                 className="w-full accent-cyan-400 h-1 bg-slate-800 rounded cursor-pointer"
               />
             </div>
@@ -234,7 +206,7 @@ const SpotifyWidget = () => {
                 min="80"
                 max="165"
                 value={tempo}
-                onChange={(e) => setTempo(Number(e.target.value))}
+                onChange={(e) => setTempo(Number(e.target.value))} onClick={(e) => e.stopPropagation()}
                 className="w-full accent-cyan-400 h-1 bg-slate-800 rounded cursor-pointer"
               />
             </div>
@@ -343,7 +315,7 @@ const SortingHubWidget = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-950/80 p-4">
+    <div className="flex flex-col h-[480px] sm:h-[520px] md:h-[560px] bg-slate-950/80 p-5 justify-between relative group/widget">
       <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
         <div className="flex items-center gap-2">
           <img
@@ -359,7 +331,7 @@ const SortingHubWidget = () => {
         <div className="flex items-center gap-2">
           <select
             value={algorithm}
-            onChange={(e) => setAlgorithm(e.target.value as any)}
+            onChange={(e) => setAlgorithm(e.target.value as any)} onClick={(e) => e.stopPropagation()}
             disabled={isSorting}
             className="px-2 py-1 rounded bg-white/5 border border-white/10 text-xs font-mono text-foreground"
           >
@@ -370,7 +342,7 @@ const SortingHubWidget = () => {
       </div>
 
       {/* Visualizer Canvas */}
-      <div className="h-44 bg-slate-900/80 rounded-xl border border-white/10 p-3 flex items-end justify-between gap-1 mb-3">
+      <div className="flex-1 bg-slate-900/80 rounded-xl border border-white/10 p-4 flex items-end justify-between gap-1 mb-4">
         {array.map((val, idx) => {
           const isActive = activeIndices.includes(idx);
           return (
@@ -395,14 +367,14 @@ const SortingHubWidget = () => {
         </div>
         <div className="flex gap-2">
           <button
-            onClick={shuffleArray}
+            onClick={(e) => { e.stopPropagation(); shuffleArray(); }}
             disabled={isSorting}
             className="px-2.5 py-1 rounded bg-white/5 hover:bg-white/10 border border-white/10 transition-colors disabled:opacity-40"
           >
             Shuffle
           </button>
           <button
-            onClick={runSort}
+            onClick={(e) => { e.stopPropagation(); runSort(); }}
             disabled={isSorting}
             className="px-3 py-1 rounded bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 transition-colors font-bold disabled:opacity-40 shadow-[0_0_12px_rgba(56,189,248,0.2)]"
           >
@@ -425,7 +397,7 @@ const EnginereaWidget = () => {
   const passed = Number(safetyFactor) >= 1.5;
 
   return (
-    <div className="flex flex-col h-full bg-slate-950/80 p-4">
+    <div className="flex flex-col h-[480px] sm:h-[520px] md:h-[560px] bg-slate-950/80 p-5 justify-between relative group/widget">
       <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
         <div className="flex items-center gap-2">
           <img
@@ -441,13 +413,13 @@ const EnginereaWidget = () => {
 
         <div className="flex bg-white/5 p-0.5 rounded-lg border border-white/10 text-[11px] font-mono">
           <button
-            onClick={() => setViewMode("physics")}
+            onClick={(e) => { e.stopPropagation(); setViewMode("physics"); }}
             className={`px-2 py-0.5 rounded transition-colors ${viewMode === "physics" ? "bg-white/20 text-white font-bold" : "text-neutral-400 hover:text-white"}`}
           >
             Truss Physics
           </button>
           <button
-            onClick={() => setViewMode("game")}
+            onClick={(e) => { e.stopPropagation(); setViewMode("game"); }}
             className={`px-2 py-0.5 rounded transition-colors ${viewMode === "game" ? "bg-white/20 text-white font-bold" : "text-neutral-400 hover:text-white"}`}
           >
             Game Screen
@@ -456,7 +428,7 @@ const EnginereaWidget = () => {
       </div>
 
       {viewMode === "game" ? (
-        <div className="relative h-44 rounded-xl overflow-hidden border border-white/10 group bg-black mb-3">
+        <div className="flex-1 rounded-xl overflow-hidden border border-white/10 group bg-black mb-4 relative">
           <img
             src="/images/projects/enginerea/main_screen.png"
             alt="Enginerea Title Screen"
@@ -470,7 +442,7 @@ const EnginereaWidget = () => {
         </div>
       ) : (
         /* 2D Bridge / Truss Canvas */
-        <div className="h-44 bg-slate-900/90 rounded-xl border border-white/10 relative overflow-hidden flex items-center justify-center p-4 mb-3">
+        <div className="flex-1 bg-slate-900/90 rounded-xl border border-white/10 relative overflow-hidden flex items-center justify-center p-4 mb-4">
           <svg className="w-full h-full" viewBox="0 0 200 100">
             {/* Ground anchors */}
             <polygon points="10,85 25,85 17,70" fill="#64748b" />
@@ -572,7 +544,7 @@ const ChatroomWidget = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-950/90 p-4 font-mono">
+    <div className="flex flex-col h-[480px] sm:h-[520px] md:h-[560px] bg-slate-950/90 p-5 justify-between relative group/widget font-mono">
       <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
         <div className="flex items-center gap-2">
           <img
@@ -589,7 +561,7 @@ const ChatroomWidget = () => {
       </div>
 
       {/* Terminal Output */}
-      <div className="h-40 bg-black/70 rounded-xl p-3 border border-white/10 overflow-y-auto space-y-1.5 mb-3 text-xs">
+      <div className="flex-1 bg-black/70 rounded-xl p-3 border border-white/10 overflow-y-auto space-y-1.5 mb-3 text-xs">
         {messages.map((m, i) => (
           <div key={i} className="leading-relaxed">
             <span
@@ -617,14 +589,14 @@ const ChatroomWidget = () => {
           <input
             type="text"
             value={inputVal}
-            onChange={(e) => setInputVal(e.target.value)}
+            onChange={(e) => setInputVal(e.target.value)} onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
             placeholder="/whisper client_1 hello"
             className="bg-transparent border-none outline-none text-xs text-foreground w-full font-mono"
           />
         </div>
         <button
-          onClick={handleSend}
+          onClick={(e) => { e.stopPropagation(); handleSend(); }}
           className="px-3 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-mono"
         >
           Send
@@ -766,7 +738,14 @@ const Projects = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: idx * 0.1 }}
-                className="glass-strong rounded-3xl overflow-hidden border border-white/10 flex flex-col justify-between group hover:border-white/30 hover:shadow-[0_0_40px_rgba(255,255,255,0.06)] transition-all"
+                onClick={() => {
+                  if (project.id === "form-fixer") {
+                    navigate("/projects/form-fixer");
+                  } else {
+                    setSelectedProject(project);
+                  }
+                }}
+                className="glass-strong rounded-3xl overflow-hidden border border-white/10 flex flex-col justify-between group hover:border-white/30 hover:shadow-[0_0_40px_rgba(255,255,255,0.06)] transition-all cursor-pointer"
               >
                 <div>
                   {/* Card Header */}
@@ -809,47 +788,7 @@ const Projects = () => {
                   </div>
                 </div>
 
-                {/* Card Footer */}
-                {project.id === "form-fixer" ? (
-                  <div className="px-6 py-4 bg-white/[0.02] border-t border-white/10 flex items-center justify-between">
-                    <button
-                      onClick={() => navigate("/projects/form-fixer")}
-                      className="text-xs font-mono text-white hover:text-neutral-300 flex items-center gap-2 font-bold transition-colors"
-                    >
-                      <Info size={14} />
-                      <span>Read Full Description & Architecture Page →</span>
-                    </button>
-                    <a
-                      href="https://www.youtube.com/watch?v=JZ4HPtc7ChY"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs font-mono text-neutral-400 hover:text-white flex items-center gap-1.5 transition-colors"
-                    >
-                      <span>YouTube</span>
-                      <ExternalLink size={12} />
-                    </a>
-                  </div>
-                ) : (
-                  <div className="px-6 py-4 bg-white/[0.02] border-t border-white/10 flex items-center justify-between">
-                    <button
-                      onClick={() => setSelectedProject(project)}
-                      className="text-xs font-mono text-white hover:text-neutral-200 flex items-center gap-1.5 transition-colors"
-                    >
-                      <Info size={14} />
-                      <span>View Architecture & Metrics</span>
-                    </button>
-                    <a
-                      href={project.githubUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs font-mono text-foreground/60 hover:text-foreground flex items-center gap-1.5 transition-colors"
-                    >
-                      <span>Inspect Code</span>
-                      <ExternalLink size={13} />
-                    </a>
-                  </div>
-                )}
-              </motion.div>
+                </motion.div>
             ))}
           </div>
         </main>
