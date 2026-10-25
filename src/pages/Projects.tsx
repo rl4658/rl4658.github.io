@@ -30,50 +30,66 @@ import ResumeModal from "@/components/ResumeModal";
 /* ------------------------------------------------------------------------- */
 /* 1. FormFixer Interactive Pose Estimator & Video Preview                   */
 /* ------------------------------------------------------------------------- */
-const FormFixerWidget = ({ project }: { project: Project }) => {
-  const [mode, setMode] = useState<"video" | "sandbox">("video");
-  const [squatDepth, setSquatDepth] = useState(88); // degrees (optimal ~85-90)
-  const [reps, setReps] = useState(7);
+type FormFixerExercise =
+  | "Barbell Squat"
+  | "Barbell Bench"
+  | "Conventional Deadlift"
+  | "Barbell Shoulder Press"
+  | "Incline Dumbbell Press"
+  | "Shoulder Lateral Raise";
 
-  const kneeAngle = squatDepth;
-  const hipAngle = Math.round(180 - squatDepth * 0.7);
-  const isOptimal = kneeAngle >= 80 && kneeAngle <= 95;
-  const injuryRisk = isOptimal ? "Low (4%)" : kneeAngle < 80 ? "Medium - Too Deep (28%)" : "High - Shallow Squat (42%)";
+const FormFixerWidget = ({ project }: { project: Project }) => {
+  const [mode, setMode] = useState<"vision" | "expo" | "video">("vision");
+  const [exercise, setExercise] = useState<FormFixerExercise>("Barbell Squat");
+  const [jointAngle, setJointAngle] = useState(88); // degrees
+  const [reps, setReps] = useState(8);
+
+  const isSquatOrDeadlift = exercise === "Barbell Squat" || exercise === "Conventional Deadlift";
+  const isOptimal = jointAngle >= 80 && jointAngle <= 95;
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Mode toggle */}
-      <div className="flex items-center justify-between p-3 bg-slate-950/80 border-b border-white/10">
+    <div className="flex flex-col h-full bg-slate-950/80">
+      {/* Mode navigation bar */}
+      <div className="flex items-center justify-between p-3 border-b border-white/10 bg-black/40">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-          <span className="text-xs font-mono text-cyan-400 font-semibold uppercase tracking-wider">
-            {mode === "video" ? "Demo Video" : "AI Pose Simulator"}
+          <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
+          <span className="text-xs font-mono text-rose-400 font-bold uppercase tracking-wider">
+            {exercise} · {mode === "vision" ? "VisionCamera Skia" : mode === "expo" ? "Expo UI Dashboard" : "Demo Video"}
           </span>
         </div>
-        <div className="flex gap-1 bg-white/5 p-1 rounded-lg border border-white/10">
+        <div className="flex gap-1 bg-white/5 p-1 rounded-xl border border-white/10">
+          <button
+            onClick={() => setMode("vision")}
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-mono transition-colors flex items-center gap-1.5 ${
+              mode === "vision" ? "bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30" : "text-foreground/60 hover:text-foreground"
+            }`}
+          >
+            <Activity size={12} />
+            Live Vision
+          </button>
+          <button
+            onClick={() => setMode("expo")}
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-mono transition-colors flex items-center gap-1.5 ${
+              mode === "expo" ? "bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30" : "text-foreground/60 hover:text-foreground"
+            }`}
+          >
+            <Layers size={12} />
+            Exercises (6)
+          </button>
           <button
             onClick={() => setMode("video")}
-            className={`px-2.5 py-1 rounded text-[11px] font-mono transition-colors flex items-center gap-1.5 ${
-              mode === "video" ? "bg-cyan-500/20 text-cyan-300 font-bold" : "text-foreground/60 hover:text-foreground"
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-mono transition-colors flex items-center gap-1.5 ${
+              mode === "video" ? "bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30" : "text-foreground/60 hover:text-foreground"
             }`}
           >
             <Video size={12} />
             Video
           </button>
-          <button
-            onClick={() => setMode("sandbox")}
-            className={`px-2.5 py-1 rounded text-[11px] font-mono transition-colors flex items-center gap-1.5 ${
-              mode === "sandbox" ? "bg-cyan-500/20 text-cyan-300 font-bold" : "text-foreground/60 hover:text-foreground"
-            }`}
-          >
-            <Activity size={12} />
-            Interactive
-          </button>
         </div>
       </div>
 
       {mode === "video" ? (
-        <div className="relative aspect-video w-full bg-black overflow-hidden group">
+        <div className="relative aspect-video w-full bg-black overflow-hidden">
           {project.youtubeId ? (
             <iframe
               src={`https://www.youtube-nocookie.com/embed/${project.youtubeId}?autoplay=0&rel=0&modestbranding=1`}
@@ -88,81 +104,177 @@ const FormFixerWidget = ({ project }: { project: Project }) => {
             </div>
           )}
         </div>
-      ) : (
-        <div className="p-4 bg-slate-950/60 flex-1 flex flex-col justify-between">
-          {/* Simulated 2D Skeletal Pose Canvas */}
-          <div className="relative h-44 bg-slate-900/90 rounded-xl border border-white/10 overflow-hidden flex items-center justify-center">
-            <svg className="w-48 h-40" viewBox="0 0 100 100">
-              {/* Head */}
-              <circle cx="50" cy="18" r="6" fill="#22d3ee" className="shadow-lg" />
-              {/* Torso */}
-              <line x1="50" y1="24" x2="50" y2="52" stroke="#22d3ee" strokeWidth="3" strokeLinecap="round" />
-              {/* Arms */}
-              <line x1="50" y1="28" x2="35" y2="40" stroke="#38bdf8" strokeWidth="2.5" />
-              <line x1="35" y1="40" x2="42" y2="48" stroke="#38bdf8" strokeWidth="2.5" />
-              <line x1="50" y1="28" x2="65" y2="40" stroke="#38bdf8" strokeWidth="2.5" />
-              <line x1="65" y1="40" x2="58" y2="48" stroke="#38bdf8" strokeWidth="2.5" />
-              {/* Hips to Knees */}
-              <line
-                x1="50"
-                y1="52"
-                x2={38 + (kneeAngle - 90) * 0.15}
-                y2={70 - (kneeAngle - 90) * 0.1}
-                stroke={isOptimal ? "#10b981" : "#f59e0b"}
-                strokeWidth="3"
-              />
-              <line
-                x1="50"
-                y1="52"
-                x2={62 - (kneeAngle - 90) * 0.15}
-                y2={70 - (kneeAngle - 90) * 0.1}
-                stroke={isOptimal ? "#10b981" : "#f59e0b"}
-                strokeWidth="3"
-              />
-              {/* Knees to Ankles */}
-              <line
-                x1={38 + (kneeAngle - 90) * 0.15}
-                y1={70 - (kneeAngle - 90) * 0.1}
-                x2="38"
-                y2="92"
-                stroke={isOptimal ? "#10b981" : "#f59e0b"}
-                strokeWidth="3"
-              />
-              <line
-                x1={62 - (kneeAngle - 90) * 0.15}
-                y1={70 - (kneeAngle - 90) * 0.1}
-                x2="62"
-                y2="92"
-                stroke={isOptimal ? "#10b981" : "#f59e0b"}
-                strokeWidth="3"
-              />
-              {/* Keypoint markers */}
-              <circle cx="50" cy="52" r="3" fill="#f43f5e" />
-              <circle cx={38 + (kneeAngle - 90) * 0.15} cy={70 - (kneeAngle - 90) * 0.1} r="3" fill="#10b981" />
-              <circle cx={62 - (kneeAngle - 90) * 0.15} cy={70 - (kneeAngle - 90) * 0.1} r="3" fill="#10b981" />
-              <circle cx="38" cy="92" r="3" fill="#f43f5e" />
-              <circle cx="62" cy="92" r="3" fill="#f43f5e" />
-            </svg>
-
-            {/* Live HUD telemetry overlay */}
-            <div className="absolute top-2 left-2 text-[10px] font-mono space-y-0.5 bg-black/60 p-2 rounded border border-white/10">
-              <div className="text-cyan-400">FPS: 32.4 | Latency: 28ms</div>
-              <div className={isOptimal ? "text-emerald-400 font-bold" : "text-amber-400 font-bold"}>
-                Knee Flexion: {kneeAngle}°
-              </div>
-              <div className="text-foreground/70">Hip Angle: {hipAngle}°</div>
-              <div className="text-foreground/70">Injury Risk: {injuryRisk}</div>
+      ) : mode === "expo" ? (
+        /* Reproduction of React Native Frontend/app/(tabs)/Home.tsx */
+        <div className="p-4 bg-slate-950 flex-1 flex flex-col justify-between overflow-y-auto">
+          <div>
+            <div className="text-center mb-3">
+              <h4 className="text-base font-extrabold tracking-wide">
+                <span className="text-[#F50707]">AI</span> <span className="text-white">Fitness Trainer</span>
+              </h4>
+              <p className="text-[11px] text-foreground/50 font-mono">React Native (Expo 52) Dashboard</p>
             </div>
 
-            <div className="absolute bottom-2 right-2">
+            {/* Form Mastery Metrics Cards */}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="p-3 bg-white text-slate-950 rounded-xl flex flex-col items-center shadow-md">
+                <span className="text-xl font-black text-[#990000]">5</span>
+                <span className="text-[11px] font-semibold text-[#990000] uppercase tracking-wider">Forms Mastered</span>
+              </div>
+              <div className="p-3 bg-[#990000] text-white rounded-xl flex flex-col items-center shadow-md">
+                <span className="text-xl font-black text-white">7</span>
+                <span className="text-[11px] font-semibold text-white uppercase tracking-wider">Forms Left</span>
+              </div>
+            </div>
+
+            <div className="text-xs font-mono text-foreground/60 uppercase tracking-widest mb-2 text-center">
+              Choose a form to analyze in real-time:
+            </div>
+
+            {/* 6 Core Exercises Grid from FormFixer App */}
+            <div className="grid grid-cols-2 gap-2">
+              {(
+                [
+                  "Barbell Squat",
+                  "Barbell Bench",
+                  "Conventional Deadlift",
+                  "Barbell Shoulder Press",
+                  "Incline Dumbbell Press",
+                  "Shoulder Lateral Raise",
+                ] as FormFixerExercise[]
+              ).map((name) => (
+                <button
+                  key={name}
+                  onClick={() => {
+                    setExercise(name);
+                    setMode("vision");
+                  }}
+                  className={`p-2.5 rounded-xl border text-left transition-all flex items-center justify-between ${
+                    exercise === name
+                      ? "bg-rose-500/20 border-rose-500 text-rose-300 font-bold"
+                      : "bg-white/[0.03] border-white/10 hover:border-white/20 text-foreground/80 hover:bg-white/5"
+                  }`}
+                >
+                  <span className="text-xs font-mono">{name}</span>
+                  <Play size={10} className="text-rose-400" />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-3 text-[10px] font-mono text-center text-foreground/40">
+            Clicking an exercise routes to VisionCamera (TFLite) worklet frame processor.
+          </div>
+        </div>
+      ) : (
+        /* Real-time Vision Camera + Shopify Skia Pose Estimation Simulator */
+        <div className="p-4 bg-slate-950/70 flex-1 flex flex-col justify-between">
+          <div className="relative h-48 bg-slate-900/90 rounded-2xl border border-rose-500/20 overflow-hidden flex items-center justify-center shadow-inner">
+            <svg className="w-52 h-44" viewBox="0 0 100 100">
+              {/* Head */}
+              <circle cx="50" cy="18" r="6" fill="#F50707" className="shadow-lg" />
+              {/* Spine / Torso */}
+              <line x1="50" y1="24" x2="50" y2="52" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" />
+
+              {/* Arms (Shoulder 5/6 -> Elbow 7/8 -> Wrist 9/10) */}
+              {isSquatOrDeadlift ? (
+                <>
+                  <line x1="50" y1="28" x2="35" y2="38" stroke="#ffffff" strokeWidth="2.5" />
+                  <line x1="35" y1="38" x2="40" y2="46" stroke="#ffffff" strokeWidth="2.5" />
+                  <line x1="50" y1="28" x2="65" y2="38" stroke="#ffffff" strokeWidth="2.5" />
+                  <line x1="65" y1="38" x2="60" y2="46" stroke="#ffffff" strokeWidth="2.5" />
+                </>
+              ) : (
+                /* Bench / Press Arm Flexion */
+                <>
+                  <line x1="50" y1="28" x2="30" y2={35 + (jointAngle - 90) * 0.15} stroke={isOptimal ? "#10b981" : "#f50707"} strokeWidth="3" />
+                  <line x1="30" y1={35 + (jointAngle - 90) * 0.15} x2="32" y2={20 + (jointAngle - 90) * 0.2} stroke={isOptimal ? "#10b981" : "#f50707"} strokeWidth="3" />
+                  <line x1="50" y1="28" x2="70" y2={35 + (jointAngle - 90) * 0.15} stroke={isOptimal ? "#10b981" : "#f50707"} strokeWidth="3" />
+                  <line x1="70" y1={35 + (jointAngle - 90) * 0.15} x2="68" y2={20 + (jointAngle - 90) * 0.2} stroke={isOptimal ? "#10b981" : "#f50707"} strokeWidth="3" />
+                  {/* Barbell across hands */}
+                  <line x1="15" y1={20 + (jointAngle - 90) * 0.2} x2="85" y2={20 + (jointAngle - 90) * 0.2} stroke="#38bdf8" strokeWidth="4" />
+                </>
+              )}
+
+              {/* Lower Body (Hip 11/12 -> Knee 13/14 -> Ankle 15/16) */}
+              {isSquatOrDeadlift ? (
+                <>
+                  <line
+                    x1="50"
+                    y1="52"
+                    x2={38 + (jointAngle - 90) * 0.15}
+                    y2={70 - (jointAngle - 90) * 0.1}
+                    stroke={isOptimal ? "#10b981" : "#f50707"}
+                    strokeWidth="3.5"
+                  />
+                  <line
+                    x1="50"
+                    y1="52"
+                    x2={62 - (jointAngle - 90) * 0.15}
+                    y2={70 - (jointAngle - 90) * 0.1}
+                    stroke={isOptimal ? "#10b981" : "#f50707"}
+                    strokeWidth="3.5"
+                  />
+                  <line
+                    x1={38 + (jointAngle - 90) * 0.15}
+                    y1={70 - (jointAngle - 90) * 0.1}
+                    x2="38"
+                    y2="92"
+                    stroke={isOptimal ? "#10b981" : "#f50707"}
+                    strokeWidth="3.5"
+                  />
+                  <line
+                    x1={62 - (kneeAngleOrFlexion => 62 - (jointAngle - 90) * 0.15)()}
+                    y1={70 - (jointAngle - 90) * 0.1}
+                    x2="62"
+                    y2="92"
+                    stroke={isOptimal ? "#10b981" : "#f50707"}
+                    strokeWidth="3.5"
+                  />
+                  {/* Barbell across traps for squat */}
+                  <line x1="20" y1="28" x2="80" y2="28" stroke="#38bdf8" strokeWidth="4" />
+                </>
+              ) : (
+                <>
+                  <line x1="50" y1="52" x2="42" y2="76" stroke="#ffffff" strokeWidth="3" />
+                  <line x1="50" y1="52" x2="58" y2="76" stroke="#ffffff" strokeWidth="3" />
+                  <line x1="42" y1="76" x2="40" y2="92" stroke="#ffffff" strokeWidth="3" />
+                  <line x1="58" y1="76" x2="60" y2="92" stroke="#ffffff" strokeWidth="3" />
+                </>
+              )}
+
+              {/* Skia Keypoint Circles (Radius 2 * SCALE) */}
+              <circle cx="50" cy="28" r="3" fill="#ffffff" />
+              <circle cx="50" cy="52" r="3" fill="#F50707" />
+              <circle cx="35" cy="38" r="2.5" fill="#10b981" />
+              <circle cx="65" cy="38" r="2.5" fill="#10b981" />
+            </svg>
+
+            {/* Live Telemetry Overlay from Video.tsx */}
+            <div className="absolute top-2 left-2 text-[10px] font-mono space-y-0.5 bg-black/75 p-2 rounded-xl border border-white/10 backdrop-blur-md">
+              <div className="text-cyan-400 font-bold">Fast-TFLite: poseModel.tflite</div>
+              <div className="text-foreground/70">FPS: 31.8 · Delegate: CoreML/GPU</div>
+              <div className="text-xs text-rose-400 font-bold">
+                {isSquatOrDeadlift ? "Knee Angle" : "Elbow Angle"}: {jointAngle}°
+              </div>
+              <div className="text-[9px] text-foreground/50 font-mono">
+                cos(θ) = (d57² + d79² - d59²) / (2·d57·d79)
+              </div>
+            </div>
+
+            {/* Instruction Banner from Video.tsx line 216 */}
+            <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between bg-black/80 px-2.5 py-1.5 rounded-lg border border-white/10">
+              <span className="text-[10px] font-mono text-white truncate mr-2">
+                Keep your back straight and fully extend!
+              </span>
               <span
-                className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${
+                className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase shrink-0 ${
                   isOptimal
                     ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
-                    : "bg-amber-500/20 text-amber-300 border border-amber-500/40"
+                    : "bg-rose-500/20 text-rose-300 border border-rose-500/40"
                 }`}
               >
-                {isOptimal ? "FORM APPROVED" : "ADJUST DEPTH"}
+                {isOptimal ? "FORM APPROVED" : "ADJUST ANGLE"}
               </span>
             </div>
           </div>
@@ -170,21 +282,21 @@ const FormFixerWidget = ({ project }: { project: Project }) => {
           {/* Interactive controls */}
           <div className="mt-3 space-y-2">
             <div className="flex items-center justify-between text-xs font-mono text-foreground/70">
-              <span>Drag Squat Depth: {kneeAngle}°</span>
+              <span>Simulate Joint Flexion: {jointAngle}°</span>
               <button
                 onClick={() => setReps((r) => r + 1)}
-                className="px-2 py-0.5 rounded bg-primary/20 text-primary hover:bg-primary/30 transition-colors text-[10px]"
+                className="px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 border border-rose-500/40 transition-colors text-[10px] font-bold"
               >
-                Count Rep ({reps})
+                +1 Rep Count ({reps})
               </button>
             </div>
             <input
               type="range"
-              min="65"
-              max="140"
-              value={squatDepth}
-              onChange={(e) => setSquatDepth(Number(e.target.value))}
-              className="w-full accent-cyan-400 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
+              min="50"
+              max="150"
+              value={jointAngle}
+              onChange={(e) => setJointAngle(Number(e.target.value))}
+              className="w-full accent-rose-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
             />
           </div>
         </div>
