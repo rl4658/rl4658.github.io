@@ -75,9 +75,9 @@ const SkillsDonut = ({ rotationSpeed = 0.003 }: SkillsDonutProps) => {
       >
         <fog attach="fog" args={["#030303", 12, 28]} />
 
-        <ambientLight intensity={0.25} />
-        <pointLight position={[10, 10, 10]} intensity={0.9} color="#ffffff" />
-        <pointLight position={[-10, -8, 4]} intensity={0.4} color="#94a3b8" />
+        <ambientLight intensity={0.3} />
+        <pointLight position={[10, 10, 10]} intensity={1.1} color="#38bdf8" />
+        <pointLight position={[-10, -8, 4]} intensity={0.6} color="#c084fc" />
 
         <ShaderBackdrop phase={phase} pageProgressRef={pageProgressRef} isWarping={isWarping} />
 
@@ -272,11 +272,11 @@ const DonutMesh = ({
       <meshStandardMaterial
         ref={matRef}
         wireframe
-        color="#e2e8f0"
-        emissive="#ffffff"
-        emissiveIntensity={0.45}
+        color="#e0f2fe"
+        emissive="#0284c7"
+        emissiveIntensity={0.5}
         transparent
-        opacity={0.82}
+        opacity={0.85}
         depthWrite={false}
       />
     </mesh>

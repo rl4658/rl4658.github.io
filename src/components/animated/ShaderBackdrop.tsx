@@ -68,20 +68,22 @@ const FRAGMENT = /* glsl */ `
     float n1 = fbm(p * 1.5 + flow + vec2(t, -t * 0.7));
     float n2 = fbm(p * 2.1 - flow.yx * 0.6 + vec2(-t * 0.55, t * 0.9));
 
-    vec3 white    = vec3(0.95, 0.95, 0.98);
-    vec3 silver   = vec3(0.65, 0.68, 0.72);
-    vec3 graphite = vec3(0.25, 0.25, 0.28);
+    vec3 deepNavy      = vec3(0.04, 0.07, 0.16);
+    vec3 electricCyan  = vec3(0.0, 0.88, 0.95);
+    vec3 cosmicPurple  = vec3(0.48, 0.22, 0.92);
+    vec3 silverWhite   = vec3(0.92, 0.96, 1.0);
 
-    /* Palette drifts smoothly through monochrome tones */
-    vec3 col = mix(white, silver, smoothstep(0.30, 0.80, n1));
-    col = mix(col, graphite, smoothstep(0.45, 0.85, n2) * (0.35 + 0.65 * uScroll));
+    /* Dynamic chromatic blend responding to scroll and noise */
+    vec3 col = mix(deepNavy, electricCyan, smoothstep(0.25, 0.75, n1));
+    col = mix(col, cosmicPurple, smoothstep(0.40, 0.85, n2) * (0.35 + 0.65 * uScroll));
+    col = mix(col, silverWhite, smoothstep(0.65, 0.95, n1 * n2) * 0.45);
 
-    float glow = smoothstep(0.38, 0.92, n1 * 0.62 + n2 * 0.48);
+    float glow = smoothstep(0.32, 0.90, n1 * 0.6 + n2 * 0.5);
 
-    /* Soft vignette keeps the edges dark so glass cards stay legible. */
-    float vig = smoothstep(1.15, 0.15, length(uv - 0.5) * 1.55);
+    /* Soft vignette keeps edges dark for card contrast */
+    float vig = smoothstep(1.25, 0.2, length(uv - 0.5) * 1.5);
 
-    float alpha = glow * 0.26 * vig * uOpacity;
+    float alpha = glow * 0.35 * vig * uOpacity;
     gl_FragColor = vec4(col * glow, alpha);
   }
 `;

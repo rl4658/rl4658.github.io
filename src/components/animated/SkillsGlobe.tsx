@@ -10,9 +10,9 @@ const SKILLS = [
   "Linux", "Kubernetes", "PyTorch", "Oracle Fusion",
 ];
 
-/* Monochrome gradient across the sphere. Position-based so it's stable per word. */
-const SILVER = new THREE.Color("#e2e8f0");
-const GRAPHITE = new THREE.Color("#71717a");
+/* Vibrant cyan to purple gradient across the 3D sphere */
+const CYAN = new THREE.Color("#38bdf8");
+const PURPLE = new THREE.Color("#c084fc");
 const HOVER = new THREE.Color("#ffffff");
 
 const Word = ({
@@ -27,7 +27,7 @@ const Word = ({
 
   const baseColor = useMemo(() => {
     const t = (position.y / 6 + 1) / 2;
-    return new THREE.Color().lerpColors(GRAPHITE, SILVER, t);
+    return new THREE.Color().lerpColors(PURPLE, CYAN, t);
   }, [position]);
 
   useFrame(() => {

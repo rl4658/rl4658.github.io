@@ -30,7 +30,7 @@ const PublicationSection = () => {
 
   return (
     <section id="publication" ref={sectionRef} className="py-24 px-4 relative">
-      <div className="container mx-auto max-w-5xl">
+      <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-neutral-300 text-xs font-mono uppercase tracking-widest mb-4">
             <BookOpen size={13} />

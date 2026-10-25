@@ -16,58 +16,58 @@
 
 @layer base {
   :root {
-    --background: 0 0% 3%;
-    --foreground: 0 0% 98%;
+    --background: 224 71% 3%;
+    --foreground: 210 40% 98%;
 
-    --card: 0 0% 6%;
-    --card-foreground: 0 0% 98%;
+    --card: 224 71% 5%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 0 0% 4%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 224 71% 4%;
+    --popover-foreground: 210 40% 98%;
 
-    /* Primary: pure white */
-    --primary: 0 0% 100%;
-    --primary-foreground: 0 0% 3%;
+    /* Primary: vibrant cyan-blue */
+    --primary: 192 95% 50%;
+    --primary-foreground: 224 71% 3%;
 
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 220 35% 12%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 0 0% 10%;
-    --muted-foreground: 0 0% 65%;
+    --muted: 220 30% 10%;
+    --muted-foreground: 215 20% 65%;
 
-    /* Accent: silver */
-    --accent: 0 0% 25%;
-    --accent-foreground: 0 0% 98%;
+    /* Accent: cosmic violet */
+    --accent: 263 70% 62%;
+    --accent-foreground: 210 40% 98%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 0 0% 18%;
-    --input: 0 0% 14%;
-    --ring: 0 0% 100%;
+    --border: 220 30% 18%;
+    --input: 220 30% 14%;
+    --ring: 192 95% 50%;
 
     --radius: 1.25rem;
 
-    /* Glass tokens — opaque enough that text reads over the 3D backdrop */
-    --glass-bg: 0 0% 5% / 0.75;
-    --glass-bg-strong: 0 0% 3% / 0.88;
-    --glass-border: 0 0% 100% / 0.12;
-    --glass-highlight: 0 0% 100% / 0.08;
-    --glass-shadow: 0 0% 0% / 0.75;
-    --glass-blur: 14px;
+    /* Glass tokens — sophisticated deep glass with subtle illumination */
+    --glass-bg: 224 71% 5% / 0.78;
+    --glass-bg-strong: 224 71% 3% / 0.90;
+    --glass-border: 210 40% 98% / 0.12;
+    --glass-highlight: 192 95% 50% / 0.10;
+    --glass-shadow: 0 0% 0% / 0.80;
+    --glass-blur: 16px;
 
-    --gradient-aurora-1: 0 0% 100%;   /* pure white */
-    --gradient-aurora-2: 0 0% 70%;    /* silver */
-    --gradient-aurora-3: 0 0% 35%;    /* graphite */
-    --gradient-text: linear-gradient(135deg, #ffffff 0%, #e4e4e7 45%, #a1a1aa 100%);
+    --gradient-aurora-1: 192 95% 50%;   /* electric cyan */
+    --gradient-aurora-2: 263 70% 62%;   /* cosmic violet */
+    --gradient-aurora-3: 217 91% 60%;   /* deep blue */
+    --gradient-text: linear-gradient(135deg, #ffffff 0%, #38bdf8 50%, #c084fc 100%);
 
     --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     --transition-spring: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   .dark {
-    --background: 0 0% 3%;
-    --foreground: 0 0% 98%;
+    --background: 224 71% 3%;
+    --foreground: 210 40% 98%;
   }
 }
 

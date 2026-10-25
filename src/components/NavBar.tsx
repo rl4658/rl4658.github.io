@@ -63,7 +63,7 @@ const NavBar = ({ onResumeClick, onLogoClick }: NavBarProps) => {
         isScrolled ? "py-3" : "py-5"
       }`}
     >
-      <div className="container mx-auto px-4 md:px-6">
+      <div className="max-w-[1720px] mx-auto px-4 md:px-8">
         <div
           className={`glass rounded-2xl px-6 py-3 flex items-center justify-between transition-all duration-500 ${
             isScrolled ? "shadow-lg" : ""
@@ -118,9 +118,6 @@ const NavBar = ({ onResumeClick, onLogoClick }: NavBarProps) => {
                   )}
                   <span className="relative z-10 flex items-center gap-1.5">
                     {link.label}
-                    {link.isRoute && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                    )}
                   </span>
                 </button>
               );

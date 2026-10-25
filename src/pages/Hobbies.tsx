@@ -342,7 +342,7 @@ const Hobbies = () => {
         </header>
 
         {/* Centered Main Story & Interactive Hub */}
-        <main className="relative z-10 max-w-4xl mx-auto px-6 pt-10 pb-24 flex flex-col items-center">
+        <main className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-8 pt-10 pb-24 flex flex-col items-center">
           {/* Header Title */}
           <div className="text-center max-w-2xl mx-auto mb-10">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-neutral-300 text-xs font-mono uppercase tracking-widest mb-4">

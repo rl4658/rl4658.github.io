@@ -58,7 +58,7 @@ const SkillsSection = () => {
 
   return (
     <section id="skills" ref={sectionRef} className="py-24 px-4 relative">
-      <div className="container mx-auto max-w-6xl relative">
+      <div className="container mx-auto max-w-7xl relative">
         {/* Section Title — kinetic word-by-word reveal. */}
         <h2 className="font-display text-3xl md:text-4xl font-bold mb-4 text-center text-gradient">
           <DecryptTitle text="Skills & Technologies" />

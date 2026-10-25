@@ -22,7 +22,7 @@ const AboutSection = () => {
 
   return (
     <section id="about" ref={sectionRef} className="py-32 px-4 relative">
-      <motion.div style={{ y: parallaxY }} className="container mx-auto max-w-4xl">
+      <motion.div style={{ y: parallaxY }} className="container mx-auto max-w-6xl">
         <ScrollReveal from="zoom" intensity={1}>
         <TiltCard maxTilt={4}>
         <div className="glass-strong rounded-3xl p-8 md:p-12 relative overflow-hidden">

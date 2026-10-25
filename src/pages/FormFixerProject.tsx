@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { motion } from "framer-motion";
@@ -7,9 +7,6 @@ import {
   Github,
   ExternalLink,
   Play,
-  Pause,
-  Volume2,
-  VolumeX,
   Cpu,
   Layers,
   Activity,
@@ -21,8 +18,8 @@ import {
   Smartphone,
   ChevronRight,
   Terminal,
+  ImageIcon,
 } from "lucide-react";
-import CursorGlow from "@/components/CursorGlow";
 import NavBar from "@/components/NavBar";
 import ResumeModal from "@/components/ResumeModal";
 import { profile } from "@/data/profile";
@@ -30,31 +27,10 @@ import { profile } from "@/data/profile";
 const FormFixerProject = () => {
   const navigate = useNavigate();
   const [isResumeOpen, setIsResumeOpen] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [isMuted, setIsMuted] = useState(true);
-  const [activeMediaTab, setActiveMediaTab] = useState<"workout" | "full">("workout");
-  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
-
-  const togglePlay = () => {
-    if (!videoRef.current) return;
-    if (videoRef.current.paused) {
-      videoRef.current.play();
-      setIsPlaying(true);
-    } else {
-      videoRef.current.pause();
-      setIsPlaying(false);
-    }
-  };
-
-  const toggleMute = () => {
-    if (!videoRef.current) return;
-    videoRef.current.muted = !videoRef.current.muted;
-    setIsMuted(videoRef.current.muted);
-  };
 
   const exercises = [
     {
@@ -111,12 +87,10 @@ const FormFixerProject = () => {
         />
       </Helmet>
 
-      <CursorGlow />
-
       <div className="min-h-screen bg-[#050505] text-[#f5f5f5] selection:bg-white/20 selection:text-white pb-32">
         <NavBar onResumeClick={() => setIsResumeOpen(true)} />
 
-        <main className="max-w-6xl mx-auto px-6 pt-28 md:pt-36">
+        <main className="w-full max-w-[1680px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 pt-24 md:pt-32">
           {/* Top Breadcrumb & Navigation */}
           <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
             <button
@@ -127,7 +101,7 @@ const FormFixerProject = () => {
               <span>Back to Projects Lab</span>
             </button>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <a
                 href="https://github.com/rl4658/form-fixer"
                 target="_blank"
@@ -166,7 +140,7 @@ const FormFixerProject = () => {
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight font-display mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white via-neutral-200 to-neutral-400">
               FormFixer.AI
             </h1>
-            <p className="text-lg md:text-xl text-neutral-300 max-w-3xl leading-relaxed">
+            <p className="text-lg md:text-xl text-neutral-300 max-w-4xl leading-relaxed">
               Real-time on-device biomechanical pose correction and gym injury prevention.
               Extracts 33 skeletal landmarks at 30+ FPS via TensorFlow Lite and computes precise joint
               kinematics with the Law of Cosines directly on the mobile edge.
@@ -189,130 +163,152 @@ const FormFixerProject = () => {
             </div>
           </motion.div>
 
-          {/* Video Showcase Section */}
+          {/* YouTube Video Section: Directly into the YouTube Video */}
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
             className="mb-16 rounded-3xl overflow-hidden border border-white/15 bg-black shadow-[0_0_50px_rgba(0,0,0,0.8)]"
           >
-            {/* Player Switcher Bar */}
+            {/* Player Header Bar */}
             <div className="p-4 border-b border-white/10 bg-neutral-950/80 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping" />
+                <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
                 <span className="text-xs font-mono font-bold uppercase tracking-wider text-white">
-                  {activeMediaTab === "workout" ? "Real Workout Video Screencast" : "Full Presentation & Walkthrough"}
+                  YouTube Video Walkthrough & Presentation
+                </span>
+                <span className="text-[11px] font-mono text-neutral-400 hidden sm:inline">
+                  • Workout Analysis Timestamp: 24:05
                 </span>
               </div>
 
-              <div className="flex gap-1.5 bg-white/5 p-1 rounded-xl border border-white/10">
-                <button
-                  onClick={() => setActiveMediaTab("workout")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 ${
-                    activeMediaTab === "workout"
-                      ? "bg-white text-black font-bold shadow-md"
-                      : "text-neutral-400 hover:text-white"
-                  }`}
-                >
-                  <Smartphone size={13} />
-                  Live Workout Demo
-                </button>
-                <button
-                  onClick={() => setActiveMediaTab("full")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 ${
-                    activeMediaTab === "full"
-                      ? "bg-white text-black font-bold shadow-md"
-                      : "text-neutral-400 hover:text-white"
-                  }`}
-                >
-                  <Play size={13} />
-                  YouTube Presentation
-                </button>
-              </div>
+              <a
+                href="https://www.youtube.com/watch?v=JZ4HPtc7ChY&t=1445s"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-mono text-white border border-white/10 flex items-center gap-1.5 transition-colors"
+              >
+                <span>Open in YouTube</span>
+                <ExternalLink size={12} className="opacity-60" />
+              </a>
             </div>
 
-            {/* Video Viewport */}
+            {/* Direct Embedded YouTube Player */}
             <div className="relative aspect-video w-full bg-black flex items-center justify-center overflow-hidden">
-              {activeMediaTab === "workout" ? (
-                <>
-                  <video
-                    ref={videoRef}
-                    src="/videos/formfixer_demo.webm"
-                    poster="/videos/formfixer_poster.jpg"
-                    autoPlay
-                    loop
-                    muted={isMuted}
-                    playsInline
-                    className="w-full h-full object-contain bg-black"
-                    onPlay={() => setIsPlaying(true)}
-                    onPause={() => setIsPlaying(false)}
-                  />
-
-                  {/* Overlaid Telemetry Heads-Up */}
-                  <div className="absolute top-4 left-4 bg-black/85 backdrop-blur-md px-3 py-2 rounded-xl border border-white/15 text-xs font-mono space-y-1">
-                    <div className="text-white font-bold flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                      VisionCamera v4 + Fast-TFLite
-                    </div>
-                    <div className="text-neutral-400 text-[11px]">
-                      Pose: Bicep Curl & Lateral Raise Analysis
-                    </div>
-                    <div className="text-emerald-400 text-[11px] font-bold">
-                      Telemetry: Left Arm ~80° | Right Arm ~88°
-                    </div>
-                  </div>
-
-                  <div className="absolute top-4 right-4 flex gap-2">
-                    <button
-                      onClick={toggleMute}
-                      className="p-2 rounded-xl bg-black/80 hover:bg-neutral-900 border border-white/15 text-white/90 hover:text-white transition-all backdrop-blur-md"
-                      title={isMuted ? "Unmute" : "Mute"}
-                    >
-                      {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-                    </button>
-                    <button
-                      onClick={togglePlay}
-                      className="p-2 rounded-xl bg-black/80 hover:bg-neutral-900 border border-white/15 text-white/90 hover:text-white transition-all backdrop-blur-md"
-                      title={isPlaying ? "Pause" : "Play"}
-                    >
-                      {isPlaying ? <Pause size={16} /> : <Play size={16} />}
-                    </button>
-                  </div>
-
-                  <div className="absolute bottom-4 left-4 right-4 bg-black/85 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/15 flex items-center justify-between text-xs font-mono">
-                    <span className="text-neutral-300">
-                      Actual Android hardware execution with real-time skeletal line drawing and audio feedback
-                    </span>
-                    <a
-                      href="https://www.youtube.com/watch?v=JZ4HPtc7ChY&t=1445s"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-white hover:underline flex items-center gap-1 font-bold shrink-0 ml-4"
-                    >
-                      Watch on YouTube <ExternalLink size={12} />
-                    </a>
-                  </div>
-                </>
-              ) : (
-                <iframe
-                  src="https://www.youtube-nocookie.com/embed/JZ4HPtc7ChY?start=1445&autoplay=1&rel=0&modestbranding=1"
-                  title="FormFixer AI Video Presentation Demo"
-                  className="w-full h-full border-0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              )}
+              <iframe
+                src="https://www.youtube-nocookie.com/embed/JZ4HPtc7ChY?start=1445&rel=0&modestbranding=1"
+                title="FormFixer AI YouTube Video Presentation & Walkthrough"
+                className="w-full h-full border-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
             </div>
           </motion.div>
 
+          {/* Repository Visuals & Mobile Interface Showcase Gallery */}
+          <div className="mb-16">
+            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-neutral-400 mb-2">
+              <ImageIcon size={14} className="text-white" />
+              <span>Mobile Application Assets & Visual Showcase</span>
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold font-display text-white mb-6">
+              Production Architecture & Edge Mobile Experience
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Card 1: Real-Time Skeletal Tracking GIF */}
+              <div className="rounded-3xl bg-neutral-950/80 border border-white/10 p-5 flex flex-col justify-between group hover:border-white/30 transition-all shadow-lg">
+                <div>
+                  <div className="text-xs font-mono text-neutral-400 uppercase tracking-wider mb-2">
+                    Edge Mobile Execution
+                  </div>
+                  <h4 className="font-bold text-white text-base mb-3">Skeletal Landmark Overlay</h4>
+                  <div className="h-64 rounded-2xl overflow-hidden bg-black border border-white/10 mb-4 flex items-center justify-center">
+                    <img
+                      src="/images/formfixer_preview.gif"
+                      alt="FormFixer Skeletal Angle Overlay"
+                      className="h-full w-auto object-contain group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                </div>
+                <p className="text-neutral-400 text-xs leading-relaxed">
+                  Real-time 33-point skeletal landmark rendering with sub-28ms inference latency using VisionCamera and Shopify Skia.
+                </p>
+              </div>
+
+              {/* Card 2: App Splashscreen & Brand */}
+              <div className="rounded-3xl bg-neutral-950/80 border border-white/10 p-5 flex flex-col justify-between group hover:border-white/30 transition-all shadow-lg">
+                <div>
+                  <div className="text-xs font-mono text-neutral-400 uppercase tracking-wider mb-2">
+                    Mobile Identity
+                  </div>
+                  <h4 className="font-bold text-white text-base mb-3">Splashscreen & Branding</h4>
+                  <div className="h-64 rounded-2xl overflow-hidden bg-black/90 border border-white/10 mb-4 flex items-center justify-center p-6">
+                    <img
+                      src="/images/projects/form-fixer/splashscreen_logo.png"
+                      alt="FormFixer Splash Logo"
+                      className="max-h-full max-w-full object-contain filter drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                </div>
+                <p className="text-neutral-400 text-xs leading-relaxed">
+                  Native Android splashscreen and adaptive branding assets compiled directly into the Expo EAS mobile release bundle.
+                </p>
+              </div>
+
+              {/* Card 3: Mobile Onboarding & Login Screen */}
+              <div className="rounded-3xl bg-neutral-950/80 border border-white/10 p-5 flex flex-col justify-between group hover:border-white/30 transition-all shadow-lg">
+                <div>
+                  <div className="text-xs font-mono text-neutral-400 uppercase tracking-wider mb-2">
+                    User Experience
+                  </div>
+                  <h4 className="font-bold text-white text-base mb-3">Login & Session Setup</h4>
+                  <div className="h-64 rounded-2xl overflow-hidden bg-black border border-white/10 mb-4 relative">
+                    <img
+                      src="/images/projects/form-fixer/loginbg.jpg"
+                      alt="FormFixer Login Interface"
+                      className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-3">
+                      <span className="text-[11px] font-mono text-white/90 font-bold">Authentication & Profile Sync</span>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-neutral-400 text-xs leading-relaxed">
+                  JWT-backed session state with encrypted credentials via bcrypt and automated Nodemailer email verification.
+                </p>
+              </div>
+
+              {/* Card 4: Mobile App Icon & Adaptive Asset */}
+              <div className="rounded-3xl bg-neutral-950/80 border border-white/10 p-5 flex flex-col justify-between group hover:border-white/30 transition-all shadow-lg">
+                <div>
+                  <div className="text-xs font-mono text-neutral-400 uppercase tracking-wider mb-2">
+                    Android & iOS Icon
+                  </div>
+                  <h4 className="font-bold text-white text-base mb-3">Adaptive App Icon</h4>
+                  <div className="h-64 rounded-2xl overflow-hidden bg-black/90 border border-white/10 mb-4 flex items-center justify-center p-6">
+                    <img
+                      src="/images/projects/form-fixer/icon.png"
+                      alt="FormFixer App Icon"
+                      className="w-32 h-32 rounded-3xl object-contain shadow-[0_0_25px_rgba(255,255,255,0.15)] group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                </div>
+                <p className="text-neutral-400 text-xs leading-relaxed">
+                  High-DPI icon asset designed for Google Play Store and iOS App Store submission with vector mask support.
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Section 1: Problem Statement & Motivation */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-            <div className="p-8 rounded-3xl bg-white/[0.02] border border-white/10 flex flex-col justify-between">
+            <div className="p-8 md:p-10 rounded-3xl bg-white/[0.02] border border-white/10 flex flex-col justify-between">
               <div>
-                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-white">
-                  <ShieldCheck size={20} />
+                <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-white">
+                  <ShieldCheck size={24} />
                 </div>
-                <h3 className="text-xl font-bold font-display text-white mb-3">The Problem: Gym Injuries & Feedback Vacuum</h3>
+                <h3 className="text-xl md:text-2xl font-bold font-display text-white mb-3">The Problem: Gym Injuries & Feedback Vacuum</h3>
                 <p className="text-neutral-300 text-sm leading-relaxed mb-4">
                   With the growing popularity of weightlifting, millions of beginners step into gyms every day without professional guidance. Over 65% of novice lifters experience joint strains, rotator cuff tears, or lumbar disk herniations due to improper spinal alignment, valgus knee collapse, or improper bar paths.
                 </p>
@@ -322,12 +318,12 @@ const FormFixerProject = () => {
               </div>
             </div>
 
-            <div className="p-8 rounded-3xl bg-white/[0.02] border border-white/10 flex flex-col justify-between">
+            <div className="p-8 md:p-10 rounded-3xl bg-white/[0.02] border border-white/10 flex flex-col justify-between">
               <div>
-                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-white">
-                  <Zap size={20} />
+                <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-white">
+                  <Zap size={24} />
                 </div>
-                <h3 className="text-xl font-bold font-display text-white mb-3">The Solution: An Autonomous Vision Coach</h3>
+                <h3 className="text-xl md:text-2xl font-bold font-display text-white mb-3">The Solution: An Autonomous Vision Coach</h3>
                 <p className="text-neutral-300 text-sm leading-relaxed mb-4">
                   FormFixer.AI turns any standard Android phone into an autonomous biomechanical coach. By running machine learning directly on the edge, the app analyzes exercise posture continuously at 30+ frames per second without sending private video frames to the cloud.
                 </p>

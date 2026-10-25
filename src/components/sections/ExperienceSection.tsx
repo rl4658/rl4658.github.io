@@ -79,7 +79,7 @@ const ExperienceSection = ({ onOpen }: ExperienceSectionProps) => {
 
   return (
     <section id="experience" ref={sectionRef} className="py-24 px-4 relative">
-      <div className="container mx-auto max-w-4xl">
+      <div className="container mx-auto max-w-6xl">
         <h2 className="font-display text-3xl md:text-4xl font-bold mb-4 text-center text-gradient">
           <DecryptTitle text="Experience" />
         </h2>

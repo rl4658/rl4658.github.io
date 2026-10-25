@@ -33,11 +33,16 @@ const FormFixerWidget = ({ project }: { project: Project }) => {
 
   return (
     <div className="flex flex-col h-full bg-[#080808]">
-      {/* Top bar */}
+      {/* Top bar with real icon & YouTube link */}
       <div className="flex items-center justify-between p-3 border-b border-white/10 bg-black/60">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-          <span className="text-xs font-mono text-neutral-300 font-bold uppercase tracking-wider">
+        <div className="flex items-center gap-2.5">
+          <img
+            src="/images/projects/form-fixer/icon.png"
+            alt="FormFixer Icon"
+            className="w-5 h-5 rounded-md object-contain bg-white/10"
+          />
+          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+          <span className="text-xs font-mono text-neutral-200 font-bold uppercase tracking-wider">
             Pose Model Workout Preview
           </span>
         </div>
@@ -46,7 +51,7 @@ const FormFixerWidget = ({ project }: { project: Project }) => {
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
-          className="text-[11px] font-mono text-neutral-400 hover:text-white flex items-center gap-1 transition-colors bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-lg border border-white/10"
+          className="text-[11px] font-mono text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-lg border border-white/10"
         >
           <Play size={10} fill="currentColor" />
           <span>YouTube Video</span>
@@ -60,11 +65,10 @@ const FormFixerWidget = ({ project }: { project: Project }) => {
         className="relative h-64 md:h-72 w-full bg-[#050505] flex items-center justify-center p-3 overflow-hidden group cursor-pointer"
         title="Click into widget to view full descriptions and architecture"
       >
-        {/* Subtle radial glow behind phone */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.06),transparent_70%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(56,189,248,0.08),transparent_70%)] pointer-events-none" />
 
         {/* Realistic Mobile Device Frame */}
-        <div className="relative h-full aspect-[216/454] rounded-2xl overflow-hidden border border-white/20 shadow-[0_0_25px_rgba(255,255,255,0.06)] bg-black group-hover:border-white/40 transition-colors">
+        <div className="relative h-full aspect-[216/454] rounded-2xl overflow-hidden border border-white/20 shadow-[0_0_25px_rgba(56,189,248,0.12)] bg-black group-hover:border-cyan-400/50 transition-colors">
           <img
             src="/images/formfixer_preview.gif"
             alt="FormFixer AI Workout Preview"
@@ -84,7 +88,7 @@ const FormFixerWidget = ({ project }: { project: Project }) => {
         {/* Floating badge */}
         <div className="absolute bottom-2 left-3 right-3 bg-black/85 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 flex items-center justify-between text-[11px] font-mono pointer-events-none">
           <span className="text-neutral-400">Pose Model Workout Tracking</span>
-          <span className="text-white font-bold flex items-center gap-1">
+          <span className="text-cyan-400 font-bold flex items-center gap-1">
             Read Full Page →
           </span>
         </div>
@@ -97,6 +101,7 @@ const FormFixerWidget = ({ project }: { project: Project }) => {
 /* 2. Spotify Playlist Generator Interactive Studio                          */
 /* ------------------------------------------------------------------------- */
 const SpotifyWidget = () => {
+  const [viewMode, setViewMode] = useState<"studio" | "app">("studio");
   const [energy, setEnergy] = useState(82);
   const [danceability, setDanceability] = useState(74);
   const [acousticness, setAcousticness] = useState(15);
@@ -126,106 +131,147 @@ const SpotifyWidget = () => {
 
   return (
     <div className="flex flex-col h-full bg-slate-950/80 p-4">
-      {/* Header */}
+      {/* Header with View Mode Switcher */}
       <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
         <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
+          <div className="w-2.5 h-2.5 rounded-full bg-[#1DB954] animate-pulse" />
           <span className="text-xs font-mono text-white font-semibold uppercase tracking-wider">
             Spotify API + OpenAI Studio
           </span>
         </div>
-        <button
-          onClick={handleGenerate}
-          disabled={isGenerating}
-          className="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 text-[11px] font-mono flex items-center gap-1.5 transition-all shadow-[0_0_12px_rgba(255,255,255,0.15)] disabled:opacity-50"
-        >
-          <Sparkles size={12} className={isGenerating ? "animate-spin" : ""} />
-          <span>{isGenerating ? "Synthesizing..." : "Generate AI Mix"}</span>
-        </button>
-      </div>
 
-      {/* Sliders Grid */}
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="space-y-1">
-          <div className="flex justify-between text-[10px] font-mono text-foreground/70">
-            <span>Energy</span>
-            <span className="text-white">{energy}%</span>
+        <div className="flex items-center gap-2">
+          <div className="flex bg-white/5 p-0.5 rounded-lg border border-white/10 text-[11px] font-mono">
+            <button
+              onClick={() => setViewMode("studio")}
+              className={`px-2.5 py-0.5 rounded transition-colors ${viewMode === "studio" ? "bg-white/20 text-white font-bold" : "text-neutral-400 hover:text-white"}`}
+            >
+              Interactive
+            </button>
+            <button
+              onClick={() => setViewMode("app")}
+              className={`px-2.5 py-0.5 rounded transition-colors ${viewMode === "app" ? "bg-white/20 text-white font-bold" : "text-neutral-400 hover:text-white"}`}
+            >
+              App UI
+            </button>
           </div>
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={energy}
-            onChange={(e) => setEnergy(Number(e.target.value))}
-            className="w-full accent-white h-1 bg-slate-800 rounded cursor-pointer"
-          />
-        </div>
-        <div className="space-y-1">
-          <div className="flex justify-between text-[10px] font-mono text-foreground/70">
-            <span>Danceability</span>
-            <span className="text-white">{danceability}%</span>
-          </div>
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={danceability}
-            onChange={(e) => setDanceability(Number(e.target.value))}
-            className="w-full accent-white h-1 bg-slate-800 rounded cursor-pointer"
-          />
-        </div>
-        <div className="space-y-1">
-          <div className="flex justify-between text-[10px] font-mono text-foreground/70">
-            <span>Acousticness</span>
-            <span className="text-white">{acousticness}%</span>
-          </div>
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={acousticness}
-            onChange={(e) => setAcousticness(Number(e.target.value))}
-            className="w-full accent-white h-1 bg-slate-800 rounded cursor-pointer"
-          />
-        </div>
-        <div className="space-y-1">
-          <div className="flex justify-between text-[10px] font-mono text-foreground/70">
-            <span>Tempo (BPM)</span>
-            <span className="text-white">{tempo} BPM</span>
-          </div>
-          <input
-            type="range"
-            min="80"
-            max="165"
-            value={tempo}
-            onChange={(e) => setTempo(Number(e.target.value))}
-            className="w-full accent-white h-1 bg-slate-800 rounded cursor-pointer"
-          />
+
+          {viewMode === "studio" && (
+            <button
+              onClick={handleGenerate}
+              disabled={isGenerating}
+              className="px-3 py-1 rounded-lg bg-[#1DB954]/20 hover:bg-[#1DB954]/30 text-[#1DB954] border border-[#1DB954]/40 text-[11px] font-mono flex items-center gap-1.5 transition-all shadow-[0_0_12px_rgba(29,185,84,0.2)] disabled:opacity-50"
+            >
+              <Sparkles size={12} className={isGenerating ? "animate-spin" : ""} />
+              <span>{isGenerating ? "Synthesizing..." : "Generate AI Mix"}</span>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Generated Playlist Tracks */}
-      <div className="flex-1 bg-slate-900/60 rounded-xl p-3 border border-white/5 space-y-2">
-        <div className="text-[10px] font-mono uppercase tracking-widest text-foreground/40 flex items-center justify-between">
-          <span>Synthesized Tracklist</span>
-          <span>Target: {tempo} BPM</span>
-        </div>
-        {playlist.map((track, i) => (
-          <div
-            key={i}
-            className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] hover:bg-white/[0.05] border border-white/5 text-xs font-mono transition-colors"
-          >
-            <div className="flex items-center gap-2">
-              <span className="text-white text-[10px]">#{i + 1}</span>
-              <div>
-                <div className="text-foreground font-medium">{track.title}</div>
-                <div className="text-[10px] text-foreground/50">{track.artist}</div>
-              </div>
+      {viewMode === "app" ? (
+        <div className="relative h-60 rounded-xl overflow-hidden border border-white/10 group bg-black">
+          <img
+            src="/images/projects/spotify/home-page.jpeg"
+            alt="Spotify Playlist Generator UI"
+            className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#1DB954] text-black">Spotify Web API</span>
+              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/20 text-white">OpenAI GPT-4</span>
             </div>
-            <div className="text-[11px] text-foreground/50">{track.duration}</div>
+            <p className="text-[11px] font-mono text-neutral-300">
+              Production Web App: Natural language prompt translation into acoustic vector queries
+            </p>
           </div>
-        ))}
-      </div>
+        </div>
+      ) : (
+        <>
+          {/* Sliders Grid */}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="space-y-1">
+              <div className="flex justify-between text-[10px] font-mono text-foreground/70">
+                <span>Energy</span>
+                <span className="text-cyan-400 font-bold">{energy}%</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={energy}
+                onChange={(e) => setEnergy(Number(e.target.value))}
+                className="w-full accent-cyan-400 h-1 bg-slate-800 rounded cursor-pointer"
+              />
+            </div>
+            <div className="space-y-1">
+              <div className="flex justify-between text-[10px] font-mono text-foreground/70">
+                <span>Danceability</span>
+                <span className="text-cyan-400 font-bold">{danceability}%</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={danceability}
+                onChange={(e) => setDanceability(Number(e.target.value))}
+                className="w-full accent-cyan-400 h-1 bg-slate-800 rounded cursor-pointer"
+              />
+            </div>
+            <div className="space-y-1">
+              <div className="flex justify-between text-[10px] font-mono text-foreground/70">
+                <span>Acousticness</span>
+                <span className="text-cyan-400 font-bold">{acousticness}%</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={acousticness}
+                onChange={(e) => setAcousticness(Number(e.target.value))}
+                className="w-full accent-cyan-400 h-1 bg-slate-800 rounded cursor-pointer"
+              />
+            </div>
+            <div className="space-y-1">
+              <div className="flex justify-between text-[10px] font-mono text-foreground/70">
+                <span>Tempo (BPM)</span>
+                <span className="text-cyan-400 font-bold">{tempo} BPM</span>
+              </div>
+              <input
+                type="range"
+                min="80"
+                max="165"
+                value={tempo}
+                onChange={(e) => setTempo(Number(e.target.value))}
+                className="w-full accent-cyan-400 h-1 bg-slate-800 rounded cursor-pointer"
+              />
+            </div>
+          </div>
+
+          {/* Generated Playlist Tracks */}
+          <div className="flex-1 bg-slate-900/60 rounded-xl p-3 border border-white/5 space-y-2">
+            <div className="text-[10px] font-mono uppercase tracking-widest text-foreground/40 flex items-center justify-between">
+              <span>Synthesized Tracklist</span>
+              <span>Target: {tempo} BPM</span>
+            </div>
+            {playlist.map((track, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] hover:bg-white/[0.05] border border-white/5 text-xs font-mono transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-[#1DB954] text-[10px]">#{i + 1}</span>
+                  <div>
+                    <div className="text-foreground font-medium">{track.title}</div>
+                    <div className="text-[10px] text-foreground/50">{track.artist}</div>
+                  </div>
+                </div>
+                <div className="text-[11px] text-foreground/50">{track.duration}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 };
@@ -271,7 +317,6 @@ const SortingHubWidget = () => {
         }
       }
     } else {
-      // Quick sort simulation
       const quickSortHelper = async (low: number, high: number) => {
         if (low < high) {
           const pivot = arr[high];
@@ -309,7 +354,12 @@ const SortingHubWidget = () => {
     <div className="flex flex-col h-full bg-slate-950/80 p-4">
       <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
         <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
+          <img
+            src="/images/projects/sorting/western_logo.png"
+            alt="Western University Logo"
+            className="w-5 h-5 rounded object-contain bg-white/10 p-0.5"
+          />
+          <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
           <span className="text-xs font-mono text-white font-semibold uppercase tracking-wider">
             JavaFX Sorting Engine
           </span>
@@ -338,8 +388,8 @@ const SortingHubWidget = () => {
               className="flex-1 rounded-t transition-colors"
               style={{
                 height: `${val}%`,
-                backgroundColor: isActive ? "#ffffff" : "#525252",
-                boxShadow: isActive ? "0 0 12px #ffffff" : "none",
+                backgroundColor: isActive ? "#ffffff" : "#0284c7",
+                boxShadow: isActive ? "0 0 14px #38bdf8" : "none",
               }}
             />
           );
@@ -349,7 +399,7 @@ const SortingHubWidget = () => {
       {/* Actions and Stats */}
       <div className="flex items-center justify-between text-xs font-mono text-foreground/70">
         <div>
-          Comparisons: <span className="text-white font-bold">{comparisons}</span>
+          Comparisons: <span className="text-cyan-400 font-bold">{comparisons}</span>
         </div>
         <div className="flex gap-2">
           <button
@@ -362,7 +412,7 @@ const SortingHubWidget = () => {
           <button
             onClick={runSort}
             disabled={isSorting}
-            className="px-3 py-1 rounded bg-white/10 hover:bg-white/20 text-white border border-white/20 transition-colors font-bold disabled:opacity-40"
+            className="px-3 py-1 rounded bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 transition-colors font-bold disabled:opacity-40 shadow-[0_0_12px_rgba(56,189,248,0.2)]"
           >
             {isSorting ? "Sorting..." : "Start Sort"}
           </button>
@@ -376,6 +426,7 @@ const SortingHubWidget = () => {
 /* 4. Enginerea Simulation Sandbox                                           */
 /* ------------------------------------------------------------------------- */
 const EnginereaWidget = () => {
+  const [viewMode, setViewMode] = useState<"physics" | "game">("physics");
   const [trussCount, setTrussCount] = useState(4);
   const [loadApplied, setLoadApplied] = useState(120); // kN
   const safetyFactor = (320 / (loadApplied / (trussCount * 0.4))).toFixed(1);
@@ -385,62 +436,96 @@ const EnginereaWidget = () => {
     <div className="flex flex-col h-full bg-slate-950/80 p-4">
       <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
         <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
+          <img
+            src="/images/projects/enginerea/bobby.png"
+            alt="Bobby the Builder"
+            className="w-5 h-5 rounded-full object-contain bg-amber-500/20"
+          />
+          <div className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
           <span className="text-xs font-mono text-white font-semibold uppercase tracking-wider">
-            Enginerea Physics Simulator
+            Enginerea Story & Physics
           </span>
         </div>
-        <span className="text-[10px] font-mono text-foreground/50">Bobby the Builder World</span>
-      </div>
 
-      {/* 2D Bridge / Truss Canvas */}
-      <div className="h-44 bg-slate-900/90 rounded-xl border border-white/10 relative overflow-hidden flex items-center justify-center p-4 mb-3">
-        <svg className="w-full h-full" viewBox="0 0 200 100">
-          {/* Ground anchors */}
-          <polygon points="10,85 25,85 17,70" fill="#64748b" />
-          <polygon points="175,85 190,85 183,70" fill="#64748b" />
-
-          {/* Lower chord */}
-          <line x1="17" y1="70" x2="183" y2="70" stroke="#ffffff" strokeWidth="3" />
-
-          {/* Dynamic Truss Struts */}
-          {Array.from({ length: trussCount }, (_, i) => {
-            const step = (183 - 17) / trussCount;
-            const x1 = 17 + i * step;
-            const x2 = 17 + (i + 1) * step;
-            const apexX = (x1 + x2) / 2;
-
-            return (
-              <g key={i}>
-                <line x1={x1} y1="70" x2={apexX} y2="35" stroke={passed ? "#e2e8f0" : "#f43f5e"} strokeWidth="2" />
-                <line x1={apexX} y1="35" x2={x2} y2="70" stroke={passed ? "#e2e8f0" : "#f43f5e"} strokeWidth="2" />
-                {i < trussCount - 1 && (
-                  <line x1={apexX} y1="35" x2={apexX + step} y2="35" stroke="#ffffff" strokeWidth="2" />
-                )}
-                <circle cx={apexX} cy="35" r="3" fill="#ffffff" />
-              </g>
-            );
-          })}
-
-          {/* Load arrow */}
-          <motion.g
-            animate={{ y: [0, 4, 0] }}
-            transition={{ repeat: Infinity, duration: 1.5 }}
+        <div className="flex bg-white/5 p-0.5 rounded-lg border border-white/10 text-[11px] font-mono">
+          <button
+            onClick={() => setViewMode("physics")}
+            className={`px-2 py-0.5 rounded transition-colors ${viewMode === "physics" ? "bg-white/20 text-white font-bold" : "text-neutral-400 hover:text-white"}`}
           >
-            <line x1="100" y1="10" x2="100" y2="32" stroke="#ffffff" strokeWidth="3" markerEnd="url(#arrow)" />
-            <polygon points="96,25 104,25 100,34" fill="#ffffff" />
-          </motion.g>
-        </svg>
-
-        <div className="absolute top-2 right-2 text-[10px] font-mono bg-black/60 px-2 py-1 rounded border border-white/10">
-          Load: {loadApplied} kN
+            Truss Physics
+          </button>
+          <button
+            onClick={() => setViewMode("game")}
+            className={`px-2 py-0.5 rounded transition-colors ${viewMode === "game" ? "bg-white/20 text-white font-bold" : "text-neutral-400 hover:text-white"}`}
+          >
+            Game Screen
+          </button>
         </div>
       </div>
+
+      {viewMode === "game" ? (
+        <div className="relative h-44 rounded-xl overflow-hidden border border-white/10 group bg-black mb-3">
+          <img
+            src="/images/projects/enginerea/main_screen.png"
+            alt="Enginerea Title Screen"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent flex items-end p-2.5">
+            <span className="text-[11px] font-mono text-amber-300 font-bold">
+              Bobby the Builder in the Town of Enginerea
+            </span>
+          </div>
+        </div>
+      ) : (
+        /* 2D Bridge / Truss Canvas */
+        <div className="h-44 bg-slate-900/90 rounded-xl border border-white/10 relative overflow-hidden flex items-center justify-center p-4 mb-3">
+          <svg className="w-full h-full" viewBox="0 0 200 100">
+            {/* Ground anchors */}
+            <polygon points="10,85 25,85 17,70" fill="#64748b" />
+            <polygon points="175,85 190,85 183,70" fill="#64748b" />
+
+            {/* Lower chord */}
+            <line x1="17" y1="70" x2="183" y2="70" stroke="#ffffff" strokeWidth="3" />
+
+            {/* Dynamic Truss Struts */}
+            {Array.from({ length: trussCount }, (_, i) => {
+              const step = (183 - 17) / trussCount;
+              const x1 = 17 + i * step;
+              const x2 = 17 + (i + 1) * step;
+              const apexX = (x1 + x2) / 2;
+
+              return (
+                <g key={i}>
+                  <line x1={x1} y1="70" x2={apexX} y2="35" stroke={passed ? "#38bdf8" : "#f43f5e"} strokeWidth="2" />
+                  <line x1={apexX} y1="35" x2={x2} y2="70" stroke={passed ? "#38bdf8" : "#f43f5e"} strokeWidth="2" />
+                  {i < trussCount - 1 && (
+                    <line x1={apexX} y1="35" x2={apexX + step} y2="35" stroke="#ffffff" strokeWidth="2" />
+                  )}
+                  <circle cx={apexX} cy="35" r="3" fill="#ffffff" />
+                </g>
+              );
+            })}
+
+            {/* Load arrow */}
+            <motion.g
+              animate={{ y: [0, 4, 0] }}
+              transition={{ repeat: Infinity, duration: 1.5 }}
+            >
+              <line x1="100" y1="10" x2="100" y2="32" stroke="#ffffff" strokeWidth="3" />
+              <polygon points="96,25 104,25 100,34" fill="#ffffff" />
+            </motion.g>
+          </svg>
+
+          <div className="absolute top-2 right-2 text-[10px] font-mono bg-black/60 px-2 py-1 rounded border border-white/10">
+            Load: {loadApplied} kN
+          </div>
+        </div>
+      )}
 
       <div className="space-y-2 text-xs font-mono">
         <div className="flex justify-between text-foreground/70">
           <span>Structural Members: {trussCount}</span>
-          <span className={passed ? "text-white font-bold" : "text-neutral-300 font-bold"}>
+          <span className={passed ? "text-cyan-400 font-bold" : "text-rose-400 font-bold"}>
             Safety Factor: {safetyFactor}x ({passed ? "PASSED" : "COLLAPSE"})
           </span>
         </div>
@@ -459,7 +544,7 @@ const EnginereaWidget = () => {
           </button>
           <button
             onClick={() => setLoadApplied((l) => (l > 300 ? 80 : l + 60))}
-            className="flex-1 py-1 rounded bg-white/10 hover:bg-white/20 text-white border border-white/20"
+            className="flex-1 py-1 rounded bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40"
           >
             Apply Load
           </button>
@@ -498,12 +583,17 @@ const ChatroomWidget = () => {
     <div className="flex flex-col h-full bg-slate-950/90 p-4 font-mono">
       <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
         <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
-          <span className="text-xs text-neutral-300 font-semibold uppercase tracking-wider">
+          <img
+            src="/images/projects/chatroom/logo.png"
+            alt="C++ Logo"
+            className="w-5 h-5 rounded object-contain bg-white/10 p-0.5"
+          />
+          <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-xs text-neutral-200 font-semibold uppercase tracking-wider">
             C++ POSIX Sockets Terminal
           </span>
         </div>
-        <div className="text-[10px] text-foreground/50">Ping: 1.4ms | FD: 5</div>
+        <div className="text-[10px] text-cyan-400">Ping: 1.4ms | FD: 5</div>
       </div>
 
       {/* Terminal Output */}
@@ -513,15 +603,15 @@ const ChatroomWidget = () => {
             <span
               className={
                 m.type === "sys"
-                  ? "text-white font-bold"
+                  ? "text-cyan-400 font-bold"
                   : m.type === "whisper"
-                  ? "text-neutral-300 font-bold"
-                  : "text-white font-bold"
+                  ? "text-purple-400 font-bold"
+                  : "text-emerald-400 font-bold"
               }
             >
               [{m.sender}]:
             </span>{" "}
-            <span className={m.type === "whisper" ? "text-neutral-400 italic" : "text-foreground/80"}>
+            <span className={m.type === "whisper" ? "text-purple-300 italic" : "text-foreground/85"}>
               {m.text}
             </span>
           </div>
@@ -531,7 +621,7 @@ const ChatroomWidget = () => {
       {/* Terminal Input */}
       <div className="flex gap-2">
         <div className="flex-1 flex items-center bg-white/5 border border-white/10 rounded-lg px-2.5 py-1">
-          <span className="text-primary text-xs mr-1.5">$</span>
+          <span className="text-cyan-400 text-xs mr-1.5">$</span>
           <input
             type="text"
             value={inputVal}
@@ -543,7 +633,7 @@ const ChatroomWidget = () => {
         </div>
         <button
           onClick={handleSend}
-          className="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs"
+          className="px-3 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-mono"
         >
           Send
         </button>
@@ -551,8 +641,6 @@ const ChatroomWidget = () => {
     </div>
   );
 };
-
-/* ------------------------------------------------------------------------- */
 /* Main Projects Page Component                                              */
 /* ------------------------------------------------------------------------- */
 const Projects = () => {
@@ -597,7 +685,7 @@ const Projects = () => {
         <CursorGlow />
 
         {/* Top Header & Navigation */}
-        <header className="sticky top-0 z-40 backdrop-blur-xl bg-slate-950/70 border-b border-white/5 py-4 px-6 md:px-12 flex items-center justify-between">
+        <header className="sticky top-0 z-40 backdrop-blur-xl bg-slate-950/70 border-b border-white/5 py-4 px-4 sm:px-8 lg:px-12 xl:px-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate("/")}
@@ -632,7 +720,7 @@ const Projects = () => {
         </header>
 
         {/* Page Hero */}
-        <main className="max-w-7xl mx-auto px-6 md:px-12 pt-12 pb-24">
+        <main className="w-full max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 pt-8 pb-24">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/15 text-white text-xs font-mono uppercase tracking-widest mb-4">
               <Sparkles size={13} />
@@ -679,7 +767,7 @@ const Projects = () => {
           </div>
 
           {/* Projects Interactive Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
             {filteredProjects.map((project, idx) => (
               <motion.div
                 key={project.id}
