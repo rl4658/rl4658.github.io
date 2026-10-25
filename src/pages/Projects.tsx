@@ -42,15 +42,12 @@ const FormFixerWidget = ({ project }: { project: Project }) => {
 
       {/* Enlarged, High-Resolution Phone Display */}
       <div className="relative h-full aspect-[221/474] rounded-2xl overflow-hidden border-2 border-white/20 shadow-[0_0_40px_rgba(56,189,248,0.22)] bg-black transition-all duration-300 group-hover/phone:scale-[1.02] group-hover/phone:border-cyan-400">
-        <picture className="w-full h-full block">
-          <source srcSet="/images/formfixer_preview.webp" type="image/webp" />
-          <img
-            src="/images/formfixer_preview.gif"
-            alt="FormFixer AI Workout Preview"
-            className="w-full h-full object-cover"
-            loading="eager"
-          />
-        </picture>
+        <img
+          src="/images/formfixer_preview.gif"
+          alt="FormFixer AI Workout Preview"
+          className="w-full h-full object-cover"
+          loading="eager"
+        />
       </div>
 
       {/* Hover Action Overlay */}
