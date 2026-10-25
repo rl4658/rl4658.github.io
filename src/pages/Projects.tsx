@@ -26,23 +26,23 @@ import { projects, profile, type Project } from "@/data/profile";
 import ResumeModal from "@/components/ResumeModal";
 
 /* ------------------------------------------------------------------------- */
-/* 1. FormFixer AI Preview Widget (Embedded GIF + Direct Architecture Link)  */
+/* 1. FormFixer AI Preview Widget (Pixel-Perfect Clean Preview)              */
 /* ------------------------------------------------------------------------- */
 const FormFixerWidget = ({ project }: { project: Project }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col h-full bg-[#080808]">
+    <div className="flex flex-col h-full bg-slate-950/80 p-4">
       {/* Top bar with real icon & YouTube link */}
-      <div className="flex items-center justify-between p-3 border-b border-white/10 bg-black/60">
+      <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
         <div className="flex items-center gap-2.5">
           <img
             src="/images/projects/form-fixer/icon.png"
             alt="FormFixer Icon"
             className="w-5 h-5 rounded-md object-contain bg-white/10"
           />
-          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-          <span className="text-xs font-mono text-neutral-200 font-bold uppercase tracking-wider">
+          <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
+          <span className="text-xs font-mono text-white font-semibold uppercase tracking-wider">
             Pose Model Workout Preview
           </span>
         </div>
@@ -59,38 +59,30 @@ const FormFixerWidget = ({ project }: { project: Project }) => {
         </a>
       </div>
 
-      {/* Embedded GIF Preview - click to view full architecture page */}
+      {/* Embedded Pixel-Perfect Preview - Click to view full architecture page */}
       <div
         onClick={() => navigate("/projects/form-fixer")}
-        className="relative h-64 md:h-72 w-full bg-[#050505] flex items-center justify-center p-3 overflow-hidden group cursor-pointer"
+        className="relative h-48 sm:h-52 md:h-56 w-full rounded-xl overflow-hidden border border-white/10 bg-black/90 flex items-center justify-center p-3 group cursor-pointer transition-all hover:border-cyan-400/40 shadow-inner"
         title="Click into widget to view full descriptions and architecture"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(56,189,248,0.08),transparent_70%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(56,189,248,0.06),transparent_70%)] pointer-events-none" />
 
-        {/* Realistic Mobile Device Frame */}
-        <div className="relative h-full aspect-[216/454] rounded-2xl overflow-hidden border border-white/20 shadow-[0_0_25px_rgba(56,189,248,0.12)] bg-black group-hover:border-cyan-400/50 transition-colors">
+        {/* Clean, Pixel-Perfect Rectangular Viewport */}
+        <div className="relative h-full aspect-[221/474] rounded-lg overflow-hidden border border-white/15 bg-black shadow-2xl group-hover:border-cyan-400/60 transition-colors">
           <img
             src="/images/formfixer_preview.gif"
             alt="FormFixer AI Workout Preview"
-            className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
-            loading="lazy"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+            loading="eager"
           />
         </div>
 
-        {/* Hover Action Overlay */}
+        {/* Subtle Hover Action Overlay */}
         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none backdrop-blur-[2px]">
           <div className="px-4 py-2 rounded-xl bg-white text-black font-bold text-xs font-mono shadow-2xl flex items-center gap-2 transform translate-y-2 group-hover:translate-y-0 transition-transform">
             <span>Explore Full Architecture & Case Study</span>
             <ExternalLink size={12} />
           </div>
-        </div>
-
-        {/* Floating badge */}
-        <div className="absolute bottom-2 left-3 right-3 bg-black/85 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 flex items-center justify-between text-[11px] font-mono pointer-events-none">
-          <span className="text-neutral-400">Pose Model Workout Tracking</span>
-          <span className="text-cyan-400 font-bold flex items-center gap-1">
-            Read Full Page →
-          </span>
         </div>
       </div>
     </div>
