@@ -126,42 +126,50 @@ def build_stage_1(with_bobby=True, out_name="scene_stage_1.png"):
 # -------------------------------------------------------------
 def build_arena_backdrop(out_name="scene_arena_backdrop.png"):
     """
-    Renders an uncluttered, cinematic combat arena across a central lava chasm:
-    - Authentic background skyline (lvl1_bg.png)
-    - Atmospheric ruined skyscrapers in background (destroyedbuilding4.png, destroyedbuilding2.png)
-    - Top border flat stones
-    - Left battle platform at y ~ 375 for Bobby (largebrownstone.png + brownplatform.png)
-    - Right battle platform at y ~ 375 for Enemy Goblin (orangeplatform.png + largeorangestone.png)
-    - Center lava chasm (x ~ 380 to 820) with bubbling lava at y ~ 530 and bedrock below
-    - ZERO clutter: NO static goblins, NO car, NO chest, NO door, NO dead tree, NO middle pillar!
+    Renders an uncluttered, cinematic combat arena across a central lava canyon:
+    - Authentic open background skyline (lvl1_bg.png) with ZERO sky platforms or hanging ceiling chunks.
+    - Grounded scenery resting naturally on platform elevation (y=380):
+      - Ruined building on left side standing behind cliff.
+      - Dead tree on right cliff.
+    - Sunken volcanic canyon (x = 360 to 840) with solid bedrock beneath and bubbling lava at y = 510.
+    - Cohesive, matching brown stone cliffs on left (x=0..360) and right (x=840..1200) at y = 380.
+    - Lava is strictly clipped between x=360 and x=840 and under cliffs so ZERO overlap onto cliffs or walls.
     """
     canvas = Image.new("RGBA", (1200, 575), (0, 0, 0, 255))
     bg = Image.open(os.path.join(dest_dir, "lvl1_bg.png")).convert("RGBA")
     canvas.paste(bg.resize((1200, 575)), (0, 0))
 
-    # Atmospheric background skyscrapers (distant layer)
-    paste_img(canvas, "destroyedbuilding4.png", (30, -209))
-    paste_img(canvas, "destroyedbuilding2.png", (625, -135))
+    # 1. Distant grounded scenery resting behind platforms at y=380
+    paste_img(canvas, "destroyedbuilding1.png", (50, 60))
+    paste_img(canvas, "deadtree.png", (980, 201))
 
-    # Top border flat stones
-    for bx in range(0, 1200, 137):
-        paste_img(canvas, "brownflatplatform.png", (bx, 0))
+    # 2. Sunken Canyon Bedrock beneath lava (x = 360 to 840)
+    stone = Image.open(os.path.join(dest_dir, "largebrownstone.png")).convert("RGBA")
+    canvas.paste(stone, (360, 510), stone)
+    canvas.paste(stone, (640, 510), stone)
 
-    # Dark volcanic bedrock beneath the lava pit
-    paste_img(canvas, "largebrownstone.png", (324, 550))
-    paste_img(canvas, "largebrownstone.png", (648, 550))
+    # 3. Bubbling lava pool strictly clipped within the sunken canyon channel
+    lava_tile = Image.open(os.path.join(dest_dir, "lava.png")).convert("RGBA")
+    lava_layer = Image.new("RGBA", (1200, 575), (0, 0, 0, 0))
+    for lx in range(360, 840, lava_tile.width):
+        lava_layer.paste(lava_tile, (lx, 510))
+    lava_mask = Image.new("L", (1200, 575), 0)
+    mask_draw = ImageDraw.Draw(lava_mask)
+    mask_draw.rectangle([360, 510, 840, 540], fill=255)
+    canvas.paste(lava_layer, (0, 0), lava_mask)
 
-    # Left battle platform at y = 375 for Bobby (solid stone terrain + overhanging ledge)
-    paste_img(canvas, "largebrownstone.png", (0, 375))
-    paste_img(canvas, "brownplatform.png", (300, 375))
+    # 4. Solid matching brown stone cliffs framing the canyon
+    # Left platform for Bobby (x=0..360, y=380)
+    canvas.paste(stone, (0, 380), stone)
+    canvas.paste(stone, (40, 380), stone)
+    plat = Image.open(os.path.join(dest_dir, "brownplatform.png")).convert("RGBA")
+    canvas.paste(plat, (280, 375), plat)
 
-    # Right battle platform at y = 375 for Enemy Goblin
-    paste_img(canvas, "orangeplatform.png", (820, 375))
-    paste_img(canvas, "largeorangestone.png", (880, 375))
-
-    # Lava pool across center chasm floor
-    for lx in [280, 422, 564, 706, 848]:
-        paste_img(canvas, "lava.png", (lx, 530))
+    # Right platform for Enemy Goblin (x=840..1200, y=380)
+    canvas.paste(stone, (840, 380), stone)
+    canvas.paste(stone, (880, 380), stone)
+    plat_flipped = plat.transpose(Image.FLIP_LEFT_RIGHT)
+    canvas.paste(plat_flipped, (840, 375), plat_flipped)
 
     out_p = os.path.join(dest_dir, out_name)
     canvas.convert("RGB").save(out_p, "PNG", quality=95)

@@ -54,7 +54,7 @@ const toH = (h: number) => `${((h / 575) * 100).toFixed(3)}%`;
 function AutonomousCombatArena() {
   const [step, setStep] = useState<number>(0);
   const [walkFrame, setWalkFrame] = useState<number>(0);
-  const [circlingSpeed, setCirclingSpeed] = useState<number>(1);
+  const [jumpFrame, setJumpFrame] = useState<number>(1);
   const [axesChucked, setAxesChucked] = useState<number>(14);
   const [coins, setCoins] = useState<number>(65);
   const [deflectedCount, setDeflectedCount] = useState<number>(8);
@@ -78,6 +78,8 @@ function AutonomousCombatArena() {
     let timer3: NodeJS.Timeout;
     let timer4: NodeJS.Timeout;
     let timer5: NodeJS.Timeout;
+    let jf2: NodeJS.Timeout;
+    let jf3: NodeJS.Timeout;
 
     const runCombatCycle = () => {
       setStep(0); // 1. Walk right
@@ -87,6 +89,9 @@ function AutonomousCombatArena() {
 
       timer1 = setTimeout(() => {
         setStep(1); // 2. Parabolic Jump
+        setJumpFrame(1);
+        jf2 = setTimeout(() => setJumpFrame(2), 260);
+        jf3 = setTimeout(() => setJumpFrame(3), 520);
 
         timer2 = setTimeout(() => {
           setStep(2); // 3. Chuck spinning axe & enemy throws rock
@@ -126,6 +131,8 @@ function AutonomousCombatArena() {
       clearTimeout(timer3);
       clearTimeout(timer4);
       clearTimeout(timer5);
+      clearTimeout(jf2);
+      clearTimeout(jf3);
     };
   }, []);
 
@@ -154,15 +161,10 @@ function AutonomousCombatArena() {
 
   const triggerManualJump = () => {
     setStep(1);
+    setJumpFrame(1);
+    setTimeout(() => setJumpFrame(2), 250);
+    setTimeout(() => setJumpFrame(3), 500);
     setTimeout(() => setStep(0), 800);
-  };
-
-  const resetMobs = () => {
-    setEnemyHp(100);
-    setAxesChucked(1);
-    setCoins(0);
-    setDeflectedCount(0);
-    setStep(0);
   };
 
   // Keyboard shortcut triggers for Space (chuck axe) and ArrowUp (jump)
@@ -188,296 +190,210 @@ function AutonomousCombatArena() {
   }, []);
 
   return (
-    <div className="editorial-card p-6 md:p-8 space-y-6 overflow-hidden relative">
-      {/* Header with Circling Axe Showcase */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-white/10">
-        <div>
-          <h3 className="text-base font-medium text-white flex items-center gap-2">
-            Autonomous Combat Arena & Rotational Aerodynamics
-            <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
-              150 FPS Physics Pump
-            </span>
-          </h3>
-          <p className="text-xs text-neutral-400 font-mono mt-0.5">
-            Real-time frame cycling, parabolic kinematics, projectile deflection sparks & autonomous enemy AI
-          </p>
+    <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-black aspect-[1200/575] min-h-[300px] select-none shadow-2xl">
+      {/* Authentic Pre-Composited Pygame Stage 1 Backdrop */}
+      <img
+        src="/images/projects/enginerea/scene_arena_backdrop.png"
+        alt="Stage 1 Ruined Village Arena"
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+      />
+
+      {/* Pygame Live Telemetry HUD Bar */}
+      <div className="absolute top-3 left-4 right-4 flex items-center justify-between text-xs font-mono z-30 pointer-events-none">
+        <div className="flex items-center gap-2.5 bg-black/85 px-3 py-1.5 rounded-xl border border-white/15 backdrop-blur-md shadow-lg">
+          <span className="flex items-center gap-1.5 text-red-400 font-bold">
+            <img src="/images/projects/enginerea/heart.png" alt="HP" className="w-3.5 h-3.5 object-contain" />
+            10/10 HP
+          </span>
+          <span className="w-px h-3 bg-white/20" />
+          <span className="flex items-center gap-1.5 text-amber-300 font-bold">
+            <img src="/images/projects/enginerea/coin.png" alt="Gold" className="w-3.5 h-3.5 object-contain" />
+            {coins} GOLD
+          </span>
+          <span className="w-px h-3 bg-white/20" />
+          <span className="flex items-center gap-1.5 text-sky-300 font-bold">
+            <Shield size={12} className="text-sky-400" />
+            {deflectedCount} DEFLECTED
+          </span>
         </div>
 
-        {/* INFINITE CIRCLING AXE SHOWCASE BADGE */}
-        <div className="flex items-center gap-3 px-3.5 py-2 rounded-2xl bg-amber-500/10 border border-amber-500/30 shadow-lg backdrop-blur-md">
-          <div className="relative w-10 h-10 flex items-center justify-center">
-            <div className="absolute inset-0 rounded-full border border-amber-500/40 border-dashed animate-[spin_8s_linear_infinite]" />
-            <div className="absolute inset-1 rounded-full border border-amber-400/20" />
-            
-            <motion.div
-              animate={{
-                rotate: 360,
-                x: [0, 10, 0, -10, 0],
-                y: [0, -10, 0, 10, 0],
-              }}
-              transition={{
-                rotate: { repeat: Infinity, duration: 0.5 / circlingSpeed, ease: "linear" },
-                x: { repeat: Infinity, duration: 1.6 / circlingSpeed, ease: "easeInOut" },
-                y: { repeat: Infinity, duration: 1.6 / circlingSpeed, ease: "easeInOut" },
-              }}
-              className="w-6 h-6 flex items-center justify-center pointer-events-none drop-shadow-[0_0_12px_rgba(245,158,11,1)]"
-            >
-              <img
-                src="/images/projects/enginerea/axe_single.png"
-                alt="Circling Axe"
-                className="w-full h-full object-contain"
-              />
-            </motion.div>
-          </div>
-
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-mono text-amber-300 font-bold uppercase tracking-wider">
-                Continuous Circling Axe
-              </span>
-              <div className="flex gap-1">
-                {([0.5, 1, 2, 4] as const).map((spd) => (
-                  <button
-                    key={spd}
-                    onClick={() => setCirclingSpeed(spd)}
-                    className={`px-1.5 py-0.2 rounded text-[9px] font-mono font-bold transition-all ${
-                      circlingSpeed === spd
-                        ? "bg-amber-400 text-black shadow-sm"
-                        : "bg-white/10 text-neutral-400 hover:text-white"
-                    }`}
-                  >
-                    {spd}x
-                  </button>
-                ))}
-              </div>
+        <div className="flex items-center gap-3 bg-black/85 px-3 py-1.5 rounded-xl border border-white/15 backdrop-blur-md text-neutral-300 shadow-lg">
+          <div className="flex items-center gap-2 text-amber-300">
+            <div className="relative w-4 h-4 flex items-center justify-center">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 0.5, ease: "linear" }}
+                className="w-3.5 h-3.5 flex items-center justify-center"
+              >
+                <img
+                  src="/images/projects/enginerea/axe_single.png"
+                  alt="Circling Axe"
+                  className="w-full h-full object-contain"
+                />
+              </motion.div>
             </div>
-            <div className="text-[10px] font-mono text-neutral-400 mt-0.5">
-              ω = 12° / 150 Hz tick · Continuous Angular Momentum
-            </div>
+            <span className="text-[11px] font-bold tracking-wide">AERODYNAMIC AXE</span>
           </div>
+          <span className="w-px h-3 bg-white/20" />
+          <span>Tick: <strong className="text-emerald-400">150.0 FPS</strong></span>
+          <span className="w-px h-3 bg-white/20" />
+          <span>Axes: <strong className="text-white">{axesChucked}</strong></span>
         </div>
       </div>
 
-      {/* Main Pygame Stage Viewport (1200 x 575 Aspect Ratio) */}
-      <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-black aspect-[1200/575] min-h-[300px] select-none shadow-2xl">
-        {/* Authentic Pre-Composited Pygame Stage 1 Backdrop */}
+      {/* ==================== BOBBY ANIMATED CHARACTER ==================== */}
+      <motion.div
+        animate={
+          step === 0
+            ? { left: toX(120), top: toY(320), scaleX: 1 }
+            : step === 1
+            ? { left: toX(260), top: toY(225), scaleX: 1 }
+            : step === 2 || step === 3 || step === 4
+            ? { left: toX(320), top: toY(320), scaleX: 1 }
+            : { left: toX(80), top: toY(320), scaleX: -1 }
+        }
+        transition={{ duration: 0.8, ease: "easeInOut" }}
+        style={{ width: toW(74), height: toH(60) }}
+        className="absolute z-20 flex flex-col items-center pointer-events-none"
+      >
         <img
-          src="/images/projects/enginerea/scene_arena_backdrop.png"
-          alt="Stage 1 Ruined Village"
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-        />
-
-        {/* Pygame Live Telemetry HUD Bar */}
-        <div className="absolute top-3 left-4 right-4 flex items-center justify-between text-xs font-mono z-30 pointer-events-none">
-          <div className="flex items-center gap-2.5 bg-black/85 px-3 py-1.5 rounded-xl border border-white/15 backdrop-blur-md">
-            <span className="flex items-center gap-1.5 text-red-400 font-bold">
-              <img src="/images/projects/enginerea/heart.png" alt="HP" className="w-3.5 h-3.5 object-contain" />
-              10/10 HP
-            </span>
-            <span className="w-px h-3 bg-white/20" />
-            <span className="flex items-center gap-1.5 text-amber-300 font-bold">
-              <img src="/images/projects/enginerea/coin.png" alt="Gold" className="w-3.5 h-3.5 object-contain" />
-              {coins} GOLD
-            </span>
-            <span className="w-px h-3 bg-white/20" />
-            <span className="flex items-center gap-1.5 text-sky-300 font-bold">
-              <Shield size={12} className="text-sky-400" />
-              {deflectedCount} DEFLECTED
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3 bg-black/85 px-3 py-1.5 rounded-xl border border-white/15 backdrop-blur-md text-neutral-300">
-            <span>Tick: <strong className="text-emerald-400">150.0 FPS</strong></span>
-            <span>Axes: <strong className="text-white">{axesChucked}</strong></span>
-          </div>
-        </div>
-
-        {/* ==================== BOBBY ANIMATED CHARACTER ==================== */}
-        <motion.div
-          animate={
-            step === 0
-              ? { left: toX(120), top: toY(315), scaleX: 1 }
-              : step === 1
-              ? { left: toX(260), top: toY(220), scaleX: 1 }
-              : step === 2 || step === 3 || step === 4
-              ? { left: toX(320), top: toY(315), scaleX: 1 }
-              : { left: toX(80), top: toY(315), scaleX: -1 }
+          src={
+            step === 1
+              ? `/images/projects/enginerea/bobby_jump_clean_${jumpFrame}.png`
+              : step === 2
+              ? "/images/projects/enginerea/axe1R.png"
+              : `/images/projects/enginerea/bobby_walk_${walkFrame}.png`
           }
-          transition={{ duration: 0.8, ease: "easeInOut" }}
-          style={{ width: toW(74), height: toH(60) }}
-          className="absolute z-20 flex flex-col items-center pointer-events-none"
-        >
-          <img
-            src={
-              step === 1
-                ? "/images/projects/enginerea/bobby_jump_1.png"
-                : step === 2
-                ? "/images/projects/enginerea/axe1R.png"
-                : `/images/projects/enginerea/bobby_walk_${walkFrame}.png`
-            }
-            alt="Bobby"
-            className="w-full h-full object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.95)]"
-          />
-        </motion.div>
+          alt="Bobby"
+          className="w-full h-full object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.95)]"
+        />
+      </motion.div>
 
-        {/* ==================== FLYING SPINNING AXE ==================== */}
-        <AnimatePresence>
-          {(step === 2 || step === 3 || step === 4) && (
-            <motion.div
-              initial={{ left: toX(365), top: toY(335), opacity: 1, scale: 0.9 }}
-              animate={
-                step === 2
-                  ? { left: toX(590), top: toY(335), rotate: 720 }
-                  : step === 3
-                  ? { left: toX(860), top: toY(325), rotate: 1440 }
-                  : { left: toX(880), top: toY(320), rotate: 1800, opacity: 0 }
-              }
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.7, ease: "linear" }}
-              style={{ width: toW(24), height: toH(24) }}
-              className="absolute z-30 pointer-events-none drop-shadow-[0_0_12px_rgba(245,158,11,1)]"
-            >
-              <img
-                src="/images/projects/enginerea/axe_single.png"
-                alt="Spinning Thrown Axe"
-                className="w-full h-full object-contain animate-spin"
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* ==================== ENEMY ROCK PROJECTILE ==================== */}
-        <AnimatePresence>
-          {(step === 2 || step === 3) && (
-            <motion.div
-              initial={{ left: toX(860), top: toY(330), opacity: 1, rotate: 0 }}
-              animate={
-                step === 2
-                  ? { left: toX(610), top: toY(335), rotate: -360 }
-                  : { left: toX(640), top: toY(520), rotate: -720, opacity: 0 }
-              }
-              exit={{ opacity: 0, scale: 0 }}
-              transition={{ duration: 0.7, ease: "linear" }}
-              style={{ width: toW(20), height: toH(20) }}
-              className="absolute z-25 pointer-events-none drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]"
-            >
-              <img
-                src="/images/projects/enginerea/rock_single.png"
-                alt="Enemy Rock"
-                className="w-full h-full object-contain"
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* ==================== MID-AIR DEFLECTION SPARK CLASH ==================== */}
-        <AnimatePresence>
-          {isDeflecting && (
-            <motion.div
-              initial={{ scale: 0.4, opacity: 0 }}
-              animate={{ scale: [1, 1.35, 1], opacity: 1 }}
-              exit={{ opacity: 0, scale: 0.5 }}
-              transition={{ duration: 0.4 }}
-              style={{ left: toX(550), top: toY(305) }}
-              className="absolute z-35 flex items-center justify-center pointer-events-none"
-            >
-              <div className="absolute w-14 h-14 rounded-full bg-amber-400/40 animate-ping" />
-              <div className="relative px-2.5 py-1 rounded bg-black/95 border border-amber-400 text-xs font-mono font-extrabold text-amber-300 shadow-[0_0_20px_rgba(245,158,11,1)]">
-                ⚡ DEFLECTED!
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* ==================== ENEMY PATROL GOBLIN (860, 285) ==================== */}
-        <div
-          style={{ left: toX(860), top: toY(285), width: toW(74), height: toH(90) }}
-          className="absolute z-20 flex flex-col items-center pointer-events-none"
-        >
-          {/* Health Bar */}
-          <div className="w-16 h-1.5 bg-black/90 rounded-full border border-white/20 mb-1 overflow-hidden p-0.5">
-            <div
-              className="h-full bg-red-500 rounded-full transition-all duration-300"
-              style={{ width: `${enemyHp}%` }}
-            />
-          </div>
-
+      {/* ==================== FLYING SPINNING AXE ==================== */}
+      <AnimatePresence>
+        {(step === 2 || step === 3 || step === 4) && (
           <motion.div
+            initial={{ left: toX(365), top: toY(335), opacity: 1, scale: 0.9 }}
             animate={
-              isHit
-                ? { x: [0, 14, -8, 4, 0], filter: ["brightness(1)", "brightness(3)", "brightness(1)"] }
-                : { y: [0, -3, 0] }
+              step === 2
+                ? { left: toX(590), top: toY(335), rotate: 720 }
+                : step === 3
+                ? { left: toX(860), top: toY(325), rotate: 1440 }
+                : { left: toX(880), top: toY(320), rotate: 1800, opacity: 0 }
             }
-            transition={isHit ? { duration: 0.35 } : { repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
-            className="relative w-full h-full"
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.7, ease: "linear" }}
+            style={{ width: toW(24), height: toH(24) }}
+            className="absolute z-30 pointer-events-none drop-shadow-[0_0_12px_rgba(245,158,11,1)]"
           >
             <img
-              src="/images/projects/enginerea/enemy1_frame.png"
-              alt="Enemy Goblin"
-              className="w-full h-full object-contain drop-shadow-[0_4px_15px_rgba(239,68,68,0.7)]"
+              src="/images/projects/enginerea/axe_single.png"
+              alt="Spinning Thrown Axe"
+              className="w-full h-full object-contain animate-spin"
             />
-
-            {/* Floating Damage Number */}
-            {isHit && (
-              <motion.span
-                initial={{ opacity: 1, y: 0, scale: 1.2 }}
-                animate={{ opacity: 0, y: -32, scale: 1 }}
-                transition={{ duration: 0.7 }}
-                className="absolute -top-5 left-1 text-xs font-mono font-extrabold text-amber-300 drop-shadow-[0_2px_4px_rgba(0,0,0,1)]"
-              >
-                -35 DMG!
-              </motion.span>
-            )}
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ==================== ENEMY ROCK PROJECTILE ==================== */}
+      <AnimatePresence>
+        {(step === 2 || step === 3) && (
+          <motion.div
+            initial={{ left: toX(860), top: toY(330), opacity: 1, rotate: 0 }}
+            animate={
+              step === 2
+                ? { left: toX(610), top: toY(335), rotate: -360 }
+                : { left: toX(640), top: toY(520), rotate: -720, opacity: 0 }
+            }
+            exit={{ opacity: 0, scale: 0 }}
+            transition={{ duration: 0.7, ease: "linear" }}
+            style={{ width: toW(20), height: toH(20) }}
+            className="absolute z-25 pointer-events-none drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]"
+          >
+            <img
+              src="/images/projects/enginerea/rock_single.png"
+              alt="Enemy Rock"
+              className="w-full h-full object-contain"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ==================== MID-AIR DEFLECTION SPARK CLASH ==================== */}
+      <AnimatePresence>
+        {isDeflecting && (
+          <motion.div
+            initial={{ scale: 0.4, opacity: 0 }}
+            animate={{ scale: [1, 1.35, 1], opacity: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            transition={{ duration: 0.4 }}
+            style={{ left: toX(560), top: toY(305) }}
+            className="absolute z-35 flex items-center justify-center pointer-events-none"
+          >
+            <div className="absolute w-14 h-14 rounded-full bg-amber-400/40 animate-ping" />
+            <div className="relative px-2.5 py-1 rounded bg-black/95 border border-amber-400 text-xs font-mono font-extrabold text-amber-300 shadow-[0_0_20px_rgba(245,158,11,1)]">
+              ⚡ DEFLECTED!
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ==================== ENEMY PATROL GOBLIN (860, 290) ==================== */}
+      <div
+        style={{ left: toX(860), top: toY(290), width: toW(74), height: toH(90) }}
+        className="absolute z-20 flex flex-col items-center pointer-events-none"
+      >
+        {/* Health Bar */}
+        <div className="w-16 h-1.5 bg-black/90 rounded-full border border-white/20 mb-1 overflow-hidden p-0.5">
+          <div
+            className="h-full bg-red-500 rounded-full transition-all duration-300"
+            style={{ width: `${enemyHp}%` }}
+          />
         </div>
 
-        {/* ==================== BOUNCING COIN LOOT BURST ==================== */}
-        <AnimatePresence>
-          {showCoinPop && (
-            <motion.div
-              initial={{ left: toX(860), top: toY(300), opacity: 1, scale: 0.8 }}
-              animate={{ left: toX(120), top: toY(18), opacity: [1, 1, 0], scale: [0.8, 1.2, 0.9] }}
-              transition={{ duration: 0.9, ease: "easeInOut" }}
-              className="absolute z-40 pointer-events-none flex items-center gap-1.5"
+        <motion.div
+          animate={
+            isHit
+              ? { x: [0, 14, -8, 4, 0], filter: ["brightness(1)", "brightness(3)", "brightness(1)"] }
+              : { y: [0, -3, 0] }
+          }
+          transition={isHit ? { duration: 0.35 } : { repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
+          className="relative w-full h-full"
+        >
+          <img
+            src="/images/projects/enginerea/enemy1_frame.png"
+            alt="Enemy Goblin"
+            className="w-full h-full object-contain drop-shadow-[0_4px_15px_rgba(239,68,68,0.7)]"
+          />
+
+          {/* Floating Damage Number */}
+          {isHit && (
+            <motion.span
+              initial={{ opacity: 1, y: 0, scale: 1.2 }}
+              animate={{ opacity: 0, y: -32, scale: 1 }}
+              transition={{ duration: 0.7 }}
+              className="absolute -top-5 left-1 text-xs font-mono font-extrabold text-amber-300 drop-shadow-[0_2px_4px_rgba(0,0,0,1)]"
             >
-              <img src="/images/projects/enginerea/coin.png" alt="Coin" className="w-5 h-5 animate-spin" />
-              <span className="text-xs font-mono font-bold text-amber-300 drop-shadow-md">+15 G</span>
-            </motion.div>
+              -35 DMG!
+            </motion.span>
           )}
-        </AnimatePresence>
+        </motion.div>
       </div>
 
-      {/* Interactive Control Deck */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-2 text-xs font-mono">
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={triggerManualThrow}
-            className="px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-semibold flex items-center gap-1.5 transition-all shadow-sm"
+      {/* ==================== BOUNCING COIN LOOT BURST ==================== */}
+      <AnimatePresence>
+        {showCoinPop && (
+          <motion.div
+            initial={{ left: toX(860), top: toY(300), opacity: 1, scale: 0.8 }}
+            animate={{ left: toX(120), top: toY(18), opacity: [1, 1, 0], scale: [0.8, 1.2, 0.9] }}
+            transition={{ duration: 0.9, ease: "easeInOut" }}
+            className="absolute z-40 pointer-events-none flex items-center gap-1.5"
           >
-            <Swords size={13} />
-            [SPACE] Force Axe Chuck
-          </button>
-          <button
-            onClick={triggerManualJump}
-            className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/15 flex items-center gap-1.5 transition-all"
-          >
-            <Zap size={13} />
-            [UP] Trigger Vertical Leap
-          </button>
-          <button
-            onClick={resetMobs}
-            className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white border border-white/10 flex items-center gap-1.5 transition-all"
-          >
-            <RotateCcw size={12} />
-            Reset Sim
-          </button>
-        </div>
-
-        <div className="text-[11px] text-neutral-400 flex items-center gap-3">
-          <span>Kinematic Model: <strong className="text-white">AABB Viaduct Adhesion</strong></span>
-          <span className="hidden sm:inline">Deflection: <strong className="text-emerald-400">100% Kinetic Reversal</strong></span>
-        </div>
-      </div>
+            <img src="/images/projects/enginerea/coin.png" alt="Coin" className="w-5 h-5 animate-spin" />
+            <span className="text-xs font-mono font-bold text-amber-300 drop-shadow-md">+15 G</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
