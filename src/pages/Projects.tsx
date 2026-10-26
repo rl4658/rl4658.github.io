@@ -449,7 +449,7 @@ const EnginereaWidget = () => {
     >
       {/* Background with Start Menu Stage Backdrop */}
       <img
-        src="/images/projects/enginerea/main_screen.png"
+        src="/images/projects/enginerea/scene_start_menu.png"
         alt="Bobby: The Town of Enginerea Start Menu Screen"
         className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover/enginerea:scale-105 transition-transform duration-700"
       />
