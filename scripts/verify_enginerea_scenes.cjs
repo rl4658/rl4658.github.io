@@ -7,7 +7,8 @@ const distDir = path.resolve(__dirname, "..", "dist");
 const artifactDirs = [
   "C:\\Users\\ruife\\.gemini\\antigravity\\brain\\2a128d2b-63e6-4d22-9d71-f672c01d6e55",
   "C:\\Users\\ruife\\.gemini\\antigravity\\brain\\af2ac9c5-3336-4351-8fdd-f6ec4c654133",
-  "C:\\Users\\ruife\\.gemini\\antigravity\\brain\\8d3dace4-b12c-4d0e-989e-eacb13ed58a9"
+  "C:\\Users\\ruife\\.gemini\\antigravity\\brain\\8d3dace4-b12c-4d0e-989e-eacb13ed58a9",
+  "C:\\Users\\ruife\\.gemini\\antigravity\\brain\\7689c152-9a75-412f-9623-da221bbcfccf"
 ];
 
 function saveScreenshot(page, filename) {

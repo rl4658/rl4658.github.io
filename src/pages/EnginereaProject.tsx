@@ -79,26 +79,24 @@ function AutonomousCombatArena() {
     let timer4: NodeJS.Timeout;
     let timer5: NodeJS.Timeout;
     let jf2: NodeJS.Timeout;
-    let jf3: NodeJS.Timeout;
 
     const runCombatCycle = () => {
-      setStep(0); // 1. Walk right
+      setStep(0); // 1. Walk right on left cliff (y=315, feet on 375)
       setIsDeflecting(false);
       setIsHit(false);
       setShowCoinPop(false);
 
       timer1 = setTimeout(() => {
-        setStep(1); // 2. Parabolic Jump
+        setStep(1); // 2. Jump arc leaping towards middle floating platform at x=560, y=360
         setJumpFrame(1);
-        jf2 = setTimeout(() => setJumpFrame(2), 260);
-        jf3 = setTimeout(() => setJumpFrame(3), 520);
+        jf2 = setTimeout(() => setJumpFrame(2), 380);
 
         timer2 = setTimeout(() => {
-          setStep(2); // 3. Chuck spinning axe & enemy throws rock
+          setStep(2); // 3. Chuck spinning axe & enemy throws rock horizontally
           setAxesChucked((c) => c + 1);
 
           timer3 = setTimeout(() => {
-            setStep(3); // 4. Mid-air projectile clash & deflection
+            setStep(3); // 4. Mid-air projectile clash & deflection over middle platform/lava
             setIsDeflecting(true);
             setDeflectedCount((d) => d + 1);
 
@@ -111,7 +109,7 @@ function AutonomousCombatArena() {
               setCoins((c) => c + 15);
 
               timer5 = setTimeout(() => {
-                setStep(5); // 6. Return back
+                setStep(5); // 6. Return back to left cliff
                 setIsHit(false);
                 setShowCoinPop(false);
               }, 900);
@@ -132,7 +130,6 @@ function AutonomousCombatArena() {
       clearTimeout(timer4);
       clearTimeout(timer5);
       clearTimeout(jf2);
-      clearTimeout(jf3);
     };
   }, []);
 
@@ -245,12 +242,12 @@ function AutonomousCombatArena() {
       <motion.div
         animate={
           step === 0
-            ? { left: toX(120), top: toY(320), scaleX: 1 }
+            ? { left: toX(120), top: toY(315), scaleX: 1 }
             : step === 1
-            ? { left: toX(260), top: toY(225), scaleX: 1 }
+            ? { left: toX(530), top: toY(360), scaleX: 1 }
             : step === 2 || step === 3 || step === 4
-            ? { left: toX(320), top: toY(320), scaleX: 1 }
-            : { left: toX(80), top: toY(320), scaleX: -1 }
+            ? { left: toX(540), top: toY(360), scaleX: 1 }
+            : { left: toX(100), top: toY(315), scaleX: -1 }
         }
         transition={{ duration: 0.8, ease: "easeInOut" }}
         style={{ width: toW(74), height: toH(60) }}
@@ -273,10 +270,10 @@ function AutonomousCombatArena() {
       <AnimatePresence>
         {(step === 2 || step === 3 || step === 4) && (
           <motion.div
-            initial={{ left: toX(365), top: toY(335), opacity: 1, scale: 0.9 }}
+            initial={{ left: toX(570), top: toY(350), opacity: 1, scale: 0.9 }}
             animate={
               step === 2
-                ? { left: toX(590), top: toY(335), rotate: 720 }
+                ? { left: toX(680), top: toY(340), rotate: 720 }
                 : step === 3
                 ? { left: toX(860), top: toY(325), rotate: 1440 }
                 : { left: toX(880), top: toY(320), rotate: 1800, opacity: 0 }
@@ -302,8 +299,8 @@ function AutonomousCombatArena() {
             initial={{ left: toX(860), top: toY(330), opacity: 1, rotate: 0 }}
             animate={
               step === 2
-                ? { left: toX(610), top: toY(335), rotate: -360 }
-                : { left: toX(640), top: toY(520), rotate: -720, opacity: 0 }
+                ? { left: toX(700), top: toY(340), rotate: -360 }
+                : { left: toX(690), top: toY(520), rotate: -720, opacity: 0 }
             }
             exit={{ opacity: 0, scale: 0 }}
             transition={{ duration: 0.7, ease: "linear" }}
@@ -327,7 +324,7 @@ function AutonomousCombatArena() {
             animate={{ scale: [1, 1.35, 1], opacity: 1 }}
             exit={{ opacity: 0, scale: 0.5 }}
             transition={{ duration: 0.4 }}
-            style={{ left: toX(560), top: toY(305) }}
+            style={{ left: toX(680), top: toY(310) }}
             className="absolute z-35 flex items-center justify-center pointer-events-none"
           >
             <div className="absolute w-14 h-14 rounded-full bg-amber-400/40 animate-ping" />

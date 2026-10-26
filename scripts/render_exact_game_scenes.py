@@ -36,6 +36,33 @@ def extract_single_rock():
         f0.save(out_p, "PNG")
         print(f"Extracted single rock to {out_p}")
 
+def extract_clean_enemy_sprites():
+    p1 = os.path.join(dest_dir, "enemyattackL.png")
+    if os.path.exists(p1):
+        im1 = Image.open(p1).convert("RGBA")
+        c1 = im1.crop((0, 0, 80, 90))
+        b1 = c1.getbbox()
+        t1 = c1.crop(b1)
+        for y in range(0, int(t1.height * 0.4)):
+            for x in range(int(t1.width * 0.7), t1.width):
+                if t1.getpixel((x, y))[3] < 15:
+                    t1.putpixel((x, y), (0, 0, 0, 0))
+        t1.save(os.path.join(dest_dir, "enemy1_frame.png"), "PNG")
+        print("Cleaned enemy1_frame.png saved")
+
+    p2 = os.path.join(dest_dir, "enemy2attackL.png")
+    if os.path.exists(p2):
+        im2 = Image.open(p2).convert("RGBA")
+        c2 = im2.crop((0, 0, 78, 80))
+        b2 = c2.getbbox()
+        t2 = c2.crop(b2)
+        for y in range(0, int(t2.height * 0.4)):
+            for x in range(int(t2.width * 0.7), t2.width):
+                if t2.getpixel((x, y))[3] < 15:
+                    t2.putpixel((x, y), (0, 0, 0, 0))
+        t2.save(os.path.join(dest_dir, "enemy2_frame.png"), "PNG")
+        print("Cleaned enemy2_frame.png saved")
+
 # -------------------------------------------------------------
 # 1. SCENE START MENU
 # -------------------------------------------------------------
@@ -75,7 +102,7 @@ def build_stage_1(with_bobby=True, out_name="scene_stage_1.png"):
     paste_img(canvas, "deadtree.png", (700, 15))
 
     # Brown stones under lava
-    paste_img(canvas, "largebrownstone.png", (0, 480))
+    paste_img(canvas, "largebrownstone.png", (0, 440))
     paste_img(canvas, "largebrownstone.png", (324, 550))
     paste_img(canvas, "largebrownstone.png", (648, 550))
     paste_img(canvas, "largebrownstone.png", (972, 550))
@@ -104,13 +131,13 @@ def build_stage_1(with_bobby=True, out_name="scene_stage_1.png"):
     paste_img(canvas, "chestKey.png", (120, 140))
     paste_img(canvas, "doorClosed.png", (1040, 237))
 
-    # Bobby
+    # Bobby standing heroically on largebrownstone at (0, 440), feet at y=440
     if with_bobby:
         paste_img(canvas, "axe1R.png", (60, 380))
 
-    # Enemies with health bars
+    # Enemies with health bars firmly placed on platforms with zero floating
     draw = ImageDraw.Draw(canvas)
-    for ex, ey in [(385, 334), (855, 284), (900, 94), (90, 44)]:
+    for ex, ey in [(385, 352), (855, 302), (900, 112), (90, 122)]:
         if not with_bobby and ex == 855:
             # For live arena, we animate this enemy dynamically
             continue
@@ -128,20 +155,21 @@ def build_arena_backdrop(out_name="scene_arena_backdrop.png"):
     """
     Renders an uncluttered, cinematic combat arena across a central lava canyon:
     - Authentic open background skyline (lvl1_bg.png) with ZERO sky platforms or hanging ceiling chunks.
-    - Grounded scenery resting naturally on platform elevation (y=380):
+    - Grounded scenery resting naturally behind platform elevation (y=375):
       - Ruined building on left side standing behind cliff.
       - Dead tree on right cliff.
     - Sunken volcanic canyon (x = 360 to 840) with solid bedrock beneath and bubbling lava at y = 510.
-    - Cohesive, matching brown stone cliffs on left (x=0..360) and right (x=840..1200) at y = 380.
+    - Floating small brown platform in the middle top of the lava at (560, 420).
+    - Cohesive, matching brown stone cliffs on left (x=0..360, y=375) and right (x=840..1200, y=375).
     - Lava is strictly clipped between x=360 and x=840 and under cliffs so ZERO overlap onto cliffs or walls.
     """
     canvas = Image.new("RGBA", (1200, 575), (0, 0, 0, 255))
     bg = Image.open(os.path.join(dest_dir, "lvl1_bg.png")).convert("RGBA")
     canvas.paste(bg.resize((1200, 575)), (0, 0))
 
-    # 1. Distant grounded scenery resting behind platforms at y=380
-    paste_img(canvas, "destroyedbuilding1.png", (50, 60))
-    paste_img(canvas, "deadtree.png", (980, 201))
+    # 1. Distant grounded scenery resting behind platforms at y=375
+    paste_img(canvas, "destroyedbuilding1.png", (50, 55))
+    paste_img(canvas, "deadtree.png", (980, 196))
 
     # 2. Sunken Canyon Bedrock beneath lava (x = 360 to 840)
     stone = Image.open(os.path.join(dest_dir, "largebrownstone.png")).convert("RGBA")
@@ -158,18 +186,18 @@ def build_arena_backdrop(out_name="scene_arena_backdrop.png"):
     mask_draw.rectangle([360, 510, 840, 540], fill=255)
     canvas.paste(lava_layer, (0, 0), lava_mask)
 
-    # 4. Solid matching brown stone cliffs framing the canyon
-    # Left platform for Bobby (x=0..360, y=380)
-    canvas.paste(stone, (0, 380), stone)
-    canvas.paste(stone, (40, 380), stone)
+    # 4. Floating small platform centered in the middle top of the lava (x=560, y=420)
     plat = Image.open(os.path.join(dest_dir, "brownplatform.png")).convert("RGBA")
-    canvas.paste(plat, (280, 375), plat)
+    canvas.paste(plat, (560, 420), plat)
 
-    # Right platform for Enemy Goblin (x=840..1200, y=380)
-    canvas.paste(stone, (840, 380), stone)
-    canvas.paste(stone, (880, 380), stone)
-    plat_flipped = plat.transpose(Image.FLIP_LEFT_RIGHT)
-    canvas.paste(plat_flipped, (840, 375), plat_flipped)
+    # 5. Solid matching brown stone cliffs framing the canyon (NO overlapping brownplatform or orangeplatform)
+    # Left platform for Bobby (x=0..360, y=375)
+    canvas.paste(stone, (0, 375), stone)
+    canvas.paste(stone, (36, 375), stone)
+
+    # Right platform for Enemy Goblin (x=840..1200, y=375)
+    canvas.paste(stone, (840, 375), stone)
+    canvas.paste(stone, (876, 375), stone)
 
     out_p = os.path.join(dest_dir, out_name)
     canvas.convert("RGB").save(out_p, "PNG", quality=95)
@@ -210,14 +238,14 @@ def build_stage_2():
     paste_img(canvas, "chestKey.png", (50, 220))
     paste_img(canvas, "doorClosed.png", (80, 370))
 
-    # Single clean Bobby jump frame (NO spritesheet tiling!)
-    paste_img(canvas, "bobby_jump_1.png", (330, 220))
+    # Bob standing heroically on ice platform at (324, 280) with battle axe (220+60=280), ZERO artifacts!
+    paste_img(canvas, "axe1R.png", (330, 220))
 
-    # 4 Magma demons with health bars
+    # 4 Magma demons with health bars (enemy2_frame height=76, feet firmly on ice platforms)
     draw = ImageDraw.Draw(canvas)
-    for ex, ey in [(100, 205), (100, 55), (350, 55), (570, 55)]:
+    for ex, ey in [(100, 204), (100, 54), (350, 54), (570, 54)]:
         paste_img(canvas, "enemy2_frame.png", (ex, ey))
-        draw_health_bar(draw, ex + 15, ey - 10, 0.75, 55, 5)
+        draw_health_bar(draw, ex + 10, ey - 10, 0.75, 50, 5)
 
     out_p = os.path.join(dest_dir, "scene_stage_2.png")
     canvas.convert("RGB").save(out_p, "PNG", quality=95)
@@ -249,18 +277,18 @@ def build_stage_3():
     paste_img(canvas, "Level3Floating.png", (850, 340))
     paste_img(canvas, "Level3Floating.png", (40, 220))
 
-    # Door at the far right
-    paste_img(canvas, "doorClosed.png", (1075, 55))
+    # Door at the far right resting on BossPlatForm (150 - 105 = 45), clear & unblocked
+    paste_img(canvas, "doorClosed.png", (1080, 45))
 
-    # Bobby with Iron Shield
+    # Bobby with Iron Shield on startingPlatForm (490 - 60 = 430)
     paste_img(canvas, "axe1Shield2R.png", (50, 430))
 
-    # 4 Minions
-    for mx, my in [(200, 225), (280, 225), (700, 45), (620, 45)]:
+    # 4 Minions using cleaned enemy2_frame (feet on level3MediumPlatForm)
+    for mx, my in [(200, 224), (280, 224), (700, 44), (620, 44)]:
         paste_img(canvas, "enemy2_frame.png", (mx, my))
 
-    # FINAL BOSS GUARDIAN standing proudly guarding the door at (970, 45)
-    paste_img(canvas, "enemy_boss_frame.png", (970, 45))
+    # FINAL BOSS GUARDIAN standing proudly guarding the door at (960, 50) on BossPlatForm (150 - 100 = 50)
+    paste_img(canvas, "enemy_boss_frame.png", (960, 50))
 
     # Centered Boss Health Bar
     draw = ImageDraw.Draw(canvas)
@@ -381,6 +409,7 @@ def build_victory_and_death():
 
 if __name__ == "__main__":
     extract_single_rock()
+    extract_clean_enemy_sprites()
     build_stage_1(with_bobby=True, out_name="scene_stage_1.png")
     build_arena_backdrop(out_name="scene_arena_backdrop.png")
     if os.path.exists(fonts_dir):
