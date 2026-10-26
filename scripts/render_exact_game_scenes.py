@@ -27,6 +27,15 @@ def draw_health_bar(draw, x, y, hp_pct=1.0, width=50, height=6):
     if active_w > 0:
         draw.rectangle([x, y, x + active_w, y + height], fill=(220, 38, 38, 255))
 
+def extract_single_rock():
+    p = os.path.join(dest_dir, "rockthrow.png")
+    if os.path.exists(p):
+        im = Image.open(p)
+        f0 = im.crop((0, 0, 20, 20))
+        out_p = os.path.join(dest_dir, "rock_single.png")
+        f0.save(out_p, "PNG")
+        print(f"Extracted single rock to {out_p}")
+
 # -------------------------------------------------------------
 # 1. SCENE START MENU
 # -------------------------------------------------------------
@@ -107,6 +116,52 @@ def build_stage_1(with_bobby=True, out_name="scene_stage_1.png"):
             continue
         paste_img(canvas, "enemy1_frame.png", (ex, ey))
         draw_health_bar(draw, ex + 10, ey - 10, 1.0, 50, 5)
+
+    out_p = os.path.join(dest_dir, out_name)
+    canvas.convert("RGB").save(out_p, "PNG", quality=95)
+    print(f"Saved {out_p}")
+
+# -------------------------------------------------------------
+# 2B. SCENE AUTONOMOUS ARENA BACKDROP (CLEAN CHASM DUEL)
+# -------------------------------------------------------------
+def build_arena_backdrop(out_name="scene_arena_backdrop.png"):
+    """
+    Renders an uncluttered, cinematic combat arena across a central lava chasm:
+    - Authentic background skyline (lvl1_bg.png)
+    - Atmospheric ruined skyscrapers in background (destroyedbuilding4.png, destroyedbuilding2.png)
+    - Top border flat stones
+    - Left battle platform at y ~ 375 for Bobby (largebrownstone.png + brownplatform.png)
+    - Right battle platform at y ~ 375 for Enemy Goblin (orangeplatform.png + largeorangestone.png)
+    - Center lava chasm (x ~ 380 to 820) with bubbling lava at y ~ 530 and bedrock below
+    - ZERO clutter: NO static goblins, NO car, NO chest, NO door, NO dead tree, NO middle pillar!
+    """
+    canvas = Image.new("RGBA", (1200, 575), (0, 0, 0, 255))
+    bg = Image.open(os.path.join(dest_dir, "lvl1_bg.png")).convert("RGBA")
+    canvas.paste(bg.resize((1200, 575)), (0, 0))
+
+    # Atmospheric background skyscrapers (distant layer)
+    paste_img(canvas, "destroyedbuilding4.png", (30, -209))
+    paste_img(canvas, "destroyedbuilding2.png", (625, -135))
+
+    # Top border flat stones
+    for bx in range(0, 1200, 137):
+        paste_img(canvas, "brownflatplatform.png", (bx, 0))
+
+    # Dark volcanic bedrock beneath the lava pit
+    paste_img(canvas, "largebrownstone.png", (324, 550))
+    paste_img(canvas, "largebrownstone.png", (648, 550))
+
+    # Left battle platform at y = 375 for Bobby (solid stone terrain + overhanging ledge)
+    paste_img(canvas, "largebrownstone.png", (0, 375))
+    paste_img(canvas, "brownplatform.png", (300, 375))
+
+    # Right battle platform at y = 375 for Enemy Goblin
+    paste_img(canvas, "orangeplatform.png", (820, 375))
+    paste_img(canvas, "largeorangestone.png", (880, 375))
+
+    # Lava pool across center chasm floor
+    for lx in [280, 422, 564, 706, 848]:
+        paste_img(canvas, "lava.png", (lx, 530))
 
     out_p = os.path.join(dest_dir, out_name)
     canvas.convert("RGB").save(out_p, "PNG", quality=95)
@@ -317,11 +372,13 @@ def build_victory_and_death():
     print(f"Saved {out_d}")
 
 if __name__ == "__main__":
-    build_start_menu()
+    extract_single_rock()
     build_stage_1(with_bobby=True, out_name="scene_stage_1.png")
-    build_stage_1(with_bobby=False, out_name="scene_arena_backdrop.png")
-    build_stage_2()
-    build_stage_3()
-    build_shop()
-    build_victory_and_death()
+    build_arena_backdrop(out_name="scene_arena_backdrop.png")
+    if os.path.exists(fonts_dir):
+        build_start_menu()
+        build_stage_2()
+        build_stage_3()
+        build_shop()
+        build_victory_and_death()
     print("ALL SCENES RE-RENDERED WITH 100% PYGAME FIDELITY!")

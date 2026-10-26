@@ -3,8 +3,22 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 
-const distDir = path.join(__dirname, "dist");
-const artifactDir = "C:\\Users\\ruife\\.gemini\\antigravity\\brain\\af2ac9c5-3336-4351-8fdd-f6ec4c654133";
+const distDir = path.resolve(__dirname, "..", "dist");
+const artifactDirs = [
+  "C:\\Users\\ruife\\.gemini\\antigravity\\brain\\af2ac9c5-3336-4351-8fdd-f6ec4c654133",
+  "C:\\Users\\ruife\\.gemini\\antigravity\\brain\\8d3dace4-b12c-4d0e-989e-eacb13ed58a9"
+];
+
+function saveScreenshot(page, filename) {
+  return Promise.all(
+    artifactDirs.map(dir => {
+      if (fs.existsSync(dir)) {
+        return page.screenshot({ path: path.join(dir, filename) });
+      }
+      return Promise.resolve();
+    })
+  );
+}
 
 // Simple static server for dist
 const mimeTypes = {
@@ -54,10 +68,20 @@ server.listen(4174, async () => {
     if (await arena.count() > 0) {
       await arena.scrollIntoViewIfNeeded();
       await page.waitForTimeout(1000);
-      await page.screenshot({
-        path: path.join(artifactDir, "pw_autonomous_combat_arena.png"),
-      });
+      await saveScreenshot(page, "pw_autonomous_combat_arena.png");
       console.log("Captured pw_autonomous_combat_arena.png");
+
+      // Trigger manual throw and capture in-flight projectile combat
+      const throwBtn = page.getByRole("button", { name: "[SPACE] Force Axe Chuck" });
+      if (await throwBtn.count() > 0) {
+        await throwBtn.click();
+        await page.waitForTimeout(400); // in-flight clash
+        await saveScreenshot(page, "pw_autonomous_combat_clash.png");
+        console.log("Captured pw_autonomous_combat_clash.png");
+        await page.waitForTimeout(600); // hit & coin pop
+        await saveScreenshot(page, "pw_autonomous_combat_hit.png");
+        console.log("Captured pw_autonomous_combat_hit.png");
+      }
     }
 
     // 2. Locate Campaign Gallery
@@ -80,9 +104,7 @@ server.listen(4174, async () => {
         if (await btn.count() > 0) {
           await btn.click();
           await page.waitForTimeout(600);
-          await page.screenshot({
-            path: path.join(artifactDir, filename),
-          });
+          await saveScreenshot(page, filename);
           console.log(`Captured ${filename}`);
         }
       }

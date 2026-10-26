@@ -165,6 +165,28 @@ function AutonomousCombatArena() {
     setStep(0);
   };
 
+  // Keyboard shortcut triggers for Space (chuck axe) and ArrowUp (jump)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
+        (e.target as HTMLElement)?.isContentEditable
+      ) {
+        return;
+      }
+      if (e.code === "Space") {
+        e.preventDefault();
+        triggerManualThrow();
+      } else if (e.code === "ArrowUp") {
+        e.preventDefault();
+        triggerManualJump();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   return (
     <div className="editorial-card p-6 md:p-8 space-y-6 overflow-hidden relative">
       {/* Header with Circling Axe Showcase */}
@@ -274,16 +296,14 @@ function AutonomousCombatArena() {
         <motion.div
           animate={
             step === 0
-              ? { left: toX(150), top: toY(380) }
+              ? { left: toX(120), top: toY(315), scaleX: 1 }
               : step === 1
-              ? { left: toX(300), top: toY(270) }
-              : step === 2 || step === 3
-              ? { left: toX(360), top: toY(380) }
-              : step === 4
-              ? { left: toX(360), top: toY(380) }
-              : { left: toX(60), top: toY(380) }
+              ? { left: toX(260), top: toY(220), scaleX: 1 }
+              : step === 2 || step === 3 || step === 4
+              ? { left: toX(320), top: toY(315), scaleX: 1 }
+              : { left: toX(80), top: toY(315), scaleX: -1 }
           }
-          transition={{ duration: 0.9, ease: "easeInOut" }}
+          transition={{ duration: 0.8, ease: "easeInOut" }}
           style={{ width: toW(74), height: toH(60) }}
           className="absolute z-20 flex flex-col items-center pointer-events-none"
         >
@@ -304,13 +324,13 @@ function AutonomousCombatArena() {
         <AnimatePresence>
           {(step === 2 || step === 3 || step === 4) && (
             <motion.div
-              initial={{ left: toX(410), top: toY(390), opacity: 1, scale: 0.8 }}
+              initial={{ left: toX(365), top: toY(335), opacity: 1, scale: 0.9 }}
               animate={
                 step === 2
-                  ? { left: toX(680), top: toY(370), rotate: 720 }
+                  ? { left: toX(590), top: toY(335), rotate: 720 }
                   : step === 3
-                  ? { left: toX(690), top: toY(365), rotate: 1080 }
-                  : { left: toX(860), top: toY(310), rotate: 1440, opacity: 0 }
+                  ? { left: toX(860), top: toY(325), rotate: 1440 }
+                  : { left: toX(880), top: toY(320), rotate: 1800, opacity: 0 }
               }
               exit={{ opacity: 0 }}
               transition={{ duration: 0.7, ease: "linear" }}
@@ -328,17 +348,21 @@ function AutonomousCombatArena() {
 
         {/* ==================== ENEMY ROCK PROJECTILE ==================== */}
         <AnimatePresence>
-          {step === 2 && (
+          {(step === 2 || step === 3) && (
             <motion.div
-              initial={{ left: toX(850), top: toY(330), opacity: 1 }}
-              animate={{ left: toX(680), top: toY(370), rotate: -360 }}
+              initial={{ left: toX(860), top: toY(330), opacity: 1, rotate: 0 }}
+              animate={
+                step === 2
+                  ? { left: toX(610), top: toY(335), rotate: -360 }
+                  : { left: toX(640), top: toY(520), rotate: -720, opacity: 0 }
+              }
               exit={{ opacity: 0, scale: 0 }}
               transition={{ duration: 0.7, ease: "linear" }}
               style={{ width: toW(20), height: toH(20) }}
               className="absolute z-25 pointer-events-none drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]"
             >
               <img
-                src="/images/projects/enginerea/rockthrow.png"
+                src="/images/projects/enginerea/rock_single.png"
                 alt="Enemy Rock"
                 className="w-full h-full object-contain"
               />
@@ -351,23 +375,23 @@ function AutonomousCombatArena() {
           {isDeflecting && (
             <motion.div
               initial={{ scale: 0.4, opacity: 0 }}
-              animate={{ scale: [1, 1.4, 1], opacity: 1 }}
+              animate={{ scale: [1, 1.35, 1], opacity: 1 }}
               exit={{ opacity: 0, scale: 0.5 }}
               transition={{ duration: 0.4 }}
-              style={{ left: toX(670), top: toY(350) }}
+              style={{ left: toX(550), top: toY(305) }}
               className="absolute z-35 flex items-center justify-center pointer-events-none"
             >
-              <div className="absolute w-12 h-12 rounded-full bg-amber-400/40 animate-ping" />
-              <div className="relative px-2 py-0.5 rounded bg-black/90 border border-amber-400 text-[11px] font-mono font-extrabold text-amber-300 shadow-[0_0_15px_rgba(245,158,11,1)]">
+              <div className="absolute w-14 h-14 rounded-full bg-amber-400/40 animate-ping" />
+              <div className="relative px-2.5 py-1 rounded bg-black/95 border border-amber-400 text-xs font-mono font-extrabold text-amber-300 shadow-[0_0_20px_rgba(245,158,11,1)]">
                 ⚡ DEFLECTED!
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* ==================== ENEMY PATROL GOBLIN (855, 284) ==================== */}
+        {/* ==================== ENEMY PATROL GOBLIN (860, 285) ==================== */}
         <div
-          style={{ left: toX(855), top: toY(284), width: toW(74), height: toH(90) }}
+          style={{ left: toX(860), top: toY(285), width: toW(74), height: toH(90) }}
           className="absolute z-20 flex flex-col items-center pointer-events-none"
         >
           {/* Health Bar */}
@@ -381,10 +405,10 @@ function AutonomousCombatArena() {
           <motion.div
             animate={
               isHit
-                ? { x: [0, 10, -6, 0], filter: ["brightness(1)", "brightness(2.8)", "brightness(1)"] }
-                : { y: [0, -2, 0] }
+                ? { x: [0, 14, -8, 4, 0], filter: ["brightness(1)", "brightness(3)", "brightness(1)"] }
+                : { y: [0, -3, 0] }
             }
-            transition={isHit ? { duration: 0.3 } : { repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
+            transition={isHit ? { duration: 0.35 } : { repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
             className="relative w-full h-full"
           >
             <img
@@ -396,8 +420,8 @@ function AutonomousCombatArena() {
             {/* Floating Damage Number */}
             {isHit && (
               <motion.span
-                initial={{ opacity: 1, y: 0 }}
-                animate={{ opacity: 0, y: -30 }}
+                initial={{ opacity: 1, y: 0, scale: 1.2 }}
+                animate={{ opacity: 0, y: -32, scale: 1 }}
                 transition={{ duration: 0.7 }}
                 className="absolute -top-5 left-1 text-xs font-mono font-extrabold text-amber-300 drop-shadow-[0_2px_4px_rgba(0,0,0,1)]"
               >
@@ -411,13 +435,13 @@ function AutonomousCombatArena() {
         <AnimatePresence>
           {showCoinPop && (
             <motion.div
-              initial={{ left: toX(870), top: toY(310), opacity: 1 }}
-              animate={{ left: toX(50), top: toY(20), opacity: [1, 1, 0] }}
+              initial={{ left: toX(860), top: toY(300), opacity: 1, scale: 0.8 }}
+              animate={{ left: toX(120), top: toY(18), opacity: [1, 1, 0], scale: [0.8, 1.2, 0.9] }}
               transition={{ duration: 0.9, ease: "easeInOut" }}
-              className="absolute z-40 pointer-events-none flex items-center gap-1"
+              className="absolute z-40 pointer-events-none flex items-center gap-1.5"
             >
               <img src="/images/projects/enginerea/coin.png" alt="Coin" className="w-5 h-5 animate-spin" />
-              <span className="text-[11px] font-mono font-bold text-amber-300 drop-shadow-md">+15 G</span>
+              <span className="text-xs font-mono font-bold text-amber-300 drop-shadow-md">+15 G</span>
             </motion.div>
           )}
         </AnimatePresence>
