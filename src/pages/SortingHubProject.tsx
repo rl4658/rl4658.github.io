@@ -29,13 +29,14 @@ const sections = [
   ["benchmarks", "07 / Complexity analysis"],
 ] as const;
 
-/* Helper to generate random permutation 1..n without duplicates */
-function generatePermutation(n: number): number[] {
-  const set = new Set<number>();
-  while (set.size < n) {
-    set.add(Math.floor(Math.random() * n) + 1);
+/* Helper to generate deterministic random permutation 1..n without duplicates */
+function createPermutation(n: number): number[] {
+  const arr = Array.from({ length: n }, (_, i) => i + 1);
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
-  return Array.from(set);
+  return arr;
 }
 
 /* ------------------------------------------------------------------------- */
@@ -44,7 +45,7 @@ function generatePermutation(n: number): number[] {
 function InteractiveSortingSimulator() {
   const [arraySize, setArraySize] = useState<number>(64);
   const [algorithm, setAlgorithm] = useState<"Merge Sort" | "Selection Sort">("Merge Sort");
-  const [array, setArray] = useState<number[]>(() => generatePermutation(64));
+  const [array, setArray] = useState<number[]>(() => createPermutation(64));
   const [isSorting, setIsSorting] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [speed, setSpeed] = useState<number>(40); // ms delay
@@ -54,7 +55,7 @@ function InteractiveSortingSimulator() {
   const [writes, setWrites] = useState<number>(0);
   const [threadState, setThreadState] = useState<"IDLE" | "RUNNING" | "PAUSED">("IDLE");
 
-  const abortRef = useRef<boolean>(false);
+  const runIdRef = useRef<number>(0);
   const pauseRef = useRef<boolean>(false);
 
   // Sync pause ref
@@ -64,28 +65,37 @@ function InteractiveSortingSimulator() {
 
   // Regenerate array when array size changes
   const handleSizeChange = (newSize: number) => {
-    if (isSorting) {
-      abortRef.current = true;
-      setIsSorting(false);
-      setIsPaused(false);
-      setThreadState("IDLE");
-    }
+    runIdRef.current++;
+    setIsSorting(false);
+    setIsPaused(false);
+    setThreadState("IDLE");
     setArraySize(newSize);
-    setArray(generatePermutation(newSize));
+    setArray(createPermutation(newSize));
     setComparingIdx([]);
     setActiveIdx([]);
     setComparisons(0);
     setWrites(0);
   };
 
-  const handleReset = () => {
-    abortRef.current = true;
+  const handleAlgorithmChange = (newAlgo: "Merge Sort" | "Selection Sort") => {
+    runIdRef.current++;
+    setIsSorting(false);
+    setIsPaused(false);
+    setThreadState("IDLE");
+    setAlgorithm(newAlgo);
+    setComparingIdx([]);
+    setActiveIdx([]);
+  };
+
+  const handleReset = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    runIdRef.current++;
     setIsSorting(false);
     setIsPaused(false);
     setThreadState("IDLE");
     setArraySize(64);
     setAlgorithm("Merge Sort");
-    setArray(generatePermutation(64));
+    setArray(createPermutation(64));
     setComparingIdx([]);
     setActiveIdx([]);
     setComparisons(0);
@@ -93,14 +103,14 @@ function InteractiveSortingSimulator() {
   };
 
   const waitWithPause = useCallback(
-    async (ms: number) => {
+    async (ms: number, currentRunId: number) => {
       let elapsed = 0;
       const step = 10;
       while (elapsed < ms) {
-        if (abortRef.current) return;
+        if (runIdRef.current !== currentRunId) return;
         while (pauseRef.current) {
-          if (abortRef.current) return;
-          await new Promise((r) => setTimeout(r, 50));
+          if (runIdRef.current !== currentRunId) return;
+          await new Promise((r) => setTimeout(r, 40));
         }
         await new Promise((r) => setTimeout(r, step));
         elapsed += step;
@@ -111,13 +121,15 @@ function InteractiveSortingSimulator() {
 
   const startSort = async () => {
     if (isSorting) return;
-    abortRef.current = false;
+    const currentRunId = ++runIdRef.current;
     pauseRef.current = false;
     setIsSorting(true);
     setIsPaused(false);
     setThreadState("RUNNING");
     setComparisons(0);
     setWrites(0);
+    setComparingIdx([]);
+    setActiveIdx([]);
 
     const working = [...array];
     let cmpCount = 0;
@@ -126,18 +138,20 @@ function InteractiveSortingSimulator() {
     if (algorithm === "Selection Sort") {
       // Direct implementation of SelectionSort.java
       for (let i = 0; i < working.length - 1; i++) {
-        if (abortRef.current) break;
+        if (runIdRef.current !== currentRunId) return;
         let minIdx = i;
         for (let j = i + 1; j < working.length; j++) {
-          if (abortRef.current) break;
+          if (runIdRef.current !== currentRunId) return;
           cmpCount++;
           setComparisons(cmpCount);
           setComparingIdx([minIdx, j]);
-          await waitWithPause(speed);
+          await waitWithPause(speed, currentRunId);
+          if (runIdRef.current !== currentRunId) return;
           if (working[j] < working[minIdx]) {
             minIdx = j;
           }
         }
+        if (runIdRef.current !== currentRunId) return;
         if (minIdx !== i) {
           const temp = working[i];
           working[i] = working[minIdx];
@@ -146,20 +160,21 @@ function InteractiveSortingSimulator() {
           setWrites(writeCount);
           setArray([...working]);
           setActiveIdx([i, minIdx]);
-          await waitWithPause(speed);
+          await waitWithPause(speed, currentRunId);
+          if (runIdRef.current !== currentRunId) return;
         }
       }
     } else {
       // Direct implementation of MergeSort.java (In-Place Merge)
       async function mergeInPlace(l: number, m: number, r: number) {
-        if (abortRef.current) return;
+        if (runIdRef.current !== currentRunId) return;
         let left2 = m + 1;
         cmpCount++;
         setComparisons(cmpCount);
         if (working[m] <= working[left2]) return;
 
         while (l <= m && left2 <= r) {
-          if (abortRef.current) break;
+          if (runIdRef.current !== currentRunId) return;
           cmpCount++;
           setComparisons(cmpCount);
           setComparingIdx([l, left2]);
@@ -177,7 +192,8 @@ function InteractiveSortingSimulator() {
             setWrites(writeCount);
             setArray([...working]);
             setActiveIdx([l, left2]);
-            await waitWithPause(speed);
+            await waitWithPause(speed, currentRunId);
+            if (runIdRef.current !== currentRunId) return;
             l++;
             m++;
             left2++;
@@ -186,21 +202,25 @@ function InteractiveSortingSimulator() {
       }
 
       async function mergeSortRecursive(l: number, r: number) {
-        if (abortRef.current || l >= r) return;
+        if (runIdRef.current !== currentRunId || l >= r) return;
         const m = l + Math.floor((r - l) / 2);
         await mergeSortRecursive(l, m);
+        if (runIdRef.current !== currentRunId) return;
         await mergeSortRecursive(m + 1, r);
+        if (runIdRef.current !== currentRunId) return;
         await mergeInPlace(l, m, r);
       }
 
       await mergeSortRecursive(0, working.length - 1);
     }
 
-    setComparingIdx([]);
-    setActiveIdx([]);
-    setIsSorting(false);
-    setIsPaused(false);
-    setThreadState("IDLE");
+    if (runIdRef.current === currentRunId) {
+      setComparingIdx([]);
+      setActiveIdx([]);
+      setIsSorting(false);
+      setIsPaused(false);
+      setThreadState("IDLE");
+    }
   };
 
   return (
@@ -274,7 +294,7 @@ function InteractiveSortingSimulator() {
               const isActive = activeIdx.includes(idx);
               const heightPercent = (val / arraySize) * 100;
 
-              let barColor = "bg-[#ef4444]"; // Red as defined in JavaFX: rectangle[i].setFill(Color.RED)
+              let barColor = "bg-[#ef4444]";
               let shadow = "";
 
               if (isActive) {
@@ -346,11 +366,10 @@ function InteractiveSortingSimulator() {
             <select
               id="algorithm-select"
               value={algorithm}
-              disabled={isSorting}
               onChange={(e) =>
-                setAlgorithm(e.target.value as "Merge Sort" | "Selection Sort")
+                handleAlgorithmChange(e.target.value as "Merge Sort" | "Selection Sort")
               }
-              className="bg-black/80 border border-white/20 rounded-lg px-3 py-1.5 text-white font-mono text-xs focus:outline-none focus:border-white/50 disabled:opacity-50"
+              className="bg-black/80 border border-white/20 rounded-lg px-3 py-1.5 text-white font-mono text-xs focus:outline-none focus:border-white/50"
             >
               <option value="Merge Sort">Merge Sort</option>
               <option value="Selection Sort">Selection Sort</option>
@@ -369,9 +388,8 @@ function InteractiveSortingSimulator() {
               max="128"
               step="1"
               value={arraySize}
-              disabled={isSorting}
               onChange={(e) => handleSizeChange(Number(e.target.value))}
-              className="w-full accent-white h-1.5 bg-white/20 rounded cursor-pointer disabled:opacity-40"
+              className="w-full accent-white h-1.5 bg-white/20 rounded cursor-pointer"
             />
             <span className="text-white font-bold w-7 text-right">{arraySize}</span>
           </div>
@@ -414,7 +432,7 @@ function InteractiveSortingSimulator() {
 
             <button
               onClick={handleReset}
-              className="px-3 py-1.5 rounded-lg border border-white/20 bg-white/5 hover:bg-white/10 text-neutral-200 transition-colors flex items-center gap-1.5"
+              className="px-3 py-1.5 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 text-white font-bold transition-colors flex items-center gap-1.5 active:scale-95 shadow-[0_0_10px_rgba(255,255,255,0.05)]"
             >
               <RotateCcw size={13} />
               <span>Reset</span>
@@ -425,6 +443,7 @@ function InteractiveSortingSimulator() {
     </div>
   );
 }
+
 
 /* ------------------------------------------------------------------------- */
 /* Source Code Viewer Component                                              */

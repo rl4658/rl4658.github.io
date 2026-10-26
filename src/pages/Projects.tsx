@@ -127,48 +127,51 @@ const SortingHubWidget = () => {
   const navigate = useNavigate();
   const [arraySize, setArraySize] = useState<number>(64);
   const [algorithm, setAlgorithm] = useState<"Merge Sort" | "Selection Sort">("Merge Sort");
-  const [array, setArray] = useState<number[]>(() => {
-    const set = new Set<number>();
-    while (set.size < 64) {
-      set.add(Math.floor(Math.random() * 64) + 1);
+  
+  const createUnsortedArray = (n: number) => {
+    const arr = Array.from({ length: n }, (_, i) => i + 1);
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
     }
-    return Array.from(set);
-  });
+    return arr;
+  };
+
+  const [array, setArray] = useState<number[]>(() => createUnsortedArray(64));
   const [activeIdx, setActiveIdx] = useState<number[]>([]);
   const [comparingIdx, setComparingIdx] = useState<number[]>([]);
   const [isSorting, setIsSorting] = useState<boolean>(false);
   const [comparisons, setComparisons] = useState<number>(0);
   const [writes, setWrites] = useState<number>(0);
 
-  const abortRef = useRef<boolean>(false);
-
-  const generateUnsorted = (n: number) => {
-    const set = new Set<number>();
-    while (set.size < n) {
-      set.add(Math.floor(Math.random() * n) + 1);
-    }
-    return Array.from(set);
-  };
+  const runIdRef = useRef<number>(0);
 
   const handleSizeChange = (newSize: number) => {
-    if (isSorting) {
-      abortRef.current = true;
-      setIsSorting(false);
-    }
+    runIdRef.current++;
+    setIsSorting(false);
     setArraySize(newSize);
-    setArray(generateUnsorted(newSize));
+    setArray(createUnsortedArray(newSize));
     setActiveIdx([]);
     setComparingIdx([]);
     setComparisons(0);
     setWrites(0);
   };
 
-  const handleReset = () => {
-    abortRef.current = true;
+  const handleAlgorithmChange = (newAlgo: "Merge Sort" | "Selection Sort") => {
+    runIdRef.current++;
+    setIsSorting(false);
+    setAlgorithm(newAlgo);
+    setActiveIdx([]);
+    setComparingIdx([]);
+  };
+
+  const handleReset = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    runIdRef.current++;
     setIsSorting(false);
     setArraySize(64);
     setAlgorithm("Merge Sort");
-    setArray(generateUnsorted(64));
+    setArray(createUnsortedArray(64));
     setActiveIdx([]);
     setComparingIdx([]);
     setComparisons(0);
@@ -179,10 +182,12 @@ const SortingHubWidget = () => {
 
   const runSort = async () => {
     if (isSorting) return;
-    abortRef.current = false;
+    const currentRunId = ++runIdRef.current;
     setIsSorting(true);
     setComparisons(0);
     setWrites(0);
+    setActiveIdx([]);
+    setComparingIdx([]);
 
     const working = [...array];
     let cmp = 0;
@@ -192,18 +197,20 @@ const SortingHubWidget = () => {
     if (algorithm === "Selection Sort") {
       // Faithful to SelectionSort.java
       for (let i = 0; i < working.length - 1; i++) {
-        if (abortRef.current) break;
+        if (runIdRef.current !== currentRunId) return;
         let minIdx = i;
         for (let j = i + 1; j < working.length; j++) {
-          if (abortRef.current) break;
+          if (runIdRef.current !== currentRunId) return;
           cmp++;
           setComparisons(cmp);
           setComparingIdx([minIdx, j]);
           await delay(stepDelay);
+          if (runIdRef.current !== currentRunId) return;
           if (working[j] < working[minIdx]) {
             minIdx = j;
           }
         }
+        if (runIdRef.current !== currentRunId) return;
         if (minIdx !== i) {
           const temp = working[i];
           working[i] = working[minIdx];
@@ -213,19 +220,20 @@ const SortingHubWidget = () => {
           setArray([...working]);
           setActiveIdx([i, minIdx]);
           await delay(stepDelay);
+          if (runIdRef.current !== currentRunId) return;
         }
       }
     } else {
       // Faithful to MergeSort.java (In-Place Merge)
       async function mergeInPlace(l: number, m: number, r: number) {
-        if (abortRef.current) return;
+        if (runIdRef.current !== currentRunId) return;
         let left2 = m + 1;
         cmp++;
         setComparisons(cmp);
         if (working[m] <= working[left2]) return;
 
         while (l <= m && left2 <= r) {
-          if (abortRef.current) break;
+          if (runIdRef.current !== currentRunId) return;
           cmp++;
           setComparisons(cmp);
           setComparingIdx([l, left2]);
@@ -244,6 +252,7 @@ const SortingHubWidget = () => {
             setArray([...working]);
             setActiveIdx([l, left2]);
             await delay(stepDelay);
+            if (runIdRef.current !== currentRunId) return;
             l++;
             m++;
             left2++;
@@ -252,19 +261,23 @@ const SortingHubWidget = () => {
       }
 
       async function mergeSort(l: number, r: number) {
-        if (abortRef.current || l >= r) return;
+        if (runIdRef.current !== currentRunId || l >= r) return;
         const m = l + Math.floor((r - l) / 2);
         await mergeSort(l, m);
+        if (runIdRef.current !== currentRunId) return;
         await mergeSort(m + 1, r);
+        if (runIdRef.current !== currentRunId) return;
         await mergeInPlace(l, m, r);
       }
 
       await mergeSort(0, working.length - 1);
     }
 
-    setActiveIdx([]);
-    setComparingIdx([]);
-    setIsSorting(false);
+    if (runIdRef.current === currentRunId) {
+      setActiveIdx([]);
+      setComparingIdx([]);
+      setIsSorting(false);
+    }
   };
 
   return (
@@ -368,9 +381,8 @@ const SortingHubWidget = () => {
         <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
           <select
             value={algorithm}
-            disabled={isSorting}
-            onChange={(e) => setAlgorithm(e.target.value as "Merge Sort" | "Selection Sort")}
-            className="bg-black border border-white/20 rounded px-2 py-1 text-white text-[11px] font-mono focus:outline-none disabled:opacity-40"
+            onChange={(e) => handleAlgorithmChange(e.target.value as "Merge Sort" | "Selection Sort")}
+            className="bg-black border border-white/20 rounded px-2 py-1 text-white text-[11px] font-mono focus:outline-none"
           >
             <option value="Merge Sort">Merge Sort</option>
             <option value="Selection Sort">Selection Sort</option>
@@ -389,9 +401,8 @@ const SortingHubWidget = () => {
             max="128"
             step="1"
             value={arraySize}
-            disabled={isSorting}
             onChange={(e) => handleSizeChange(Number(e.target.value))}
-            className="w-full accent-white h-1 bg-white/20 rounded cursor-pointer disabled:opacity-40"
+            className="w-full accent-white h-1 bg-white/20 rounded cursor-pointer"
           />
           <span className="text-white text-[11px] font-bold w-6 text-right">{arraySize}</span>
         </div>
@@ -407,7 +418,7 @@ const SortingHubWidget = () => {
           </button>
           <button
             onClick={handleReset}
-            className="px-2.5 py-1 rounded bg-white/5 border border-white/10 hover:bg-white/15 text-neutral-300 text-[11px] transition-colors"
+            className="px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 border border-white/20 text-neutral-200 text-[11px] font-bold transition-colors active:scale-95 shadow-[0_0_10px_rgba(255,255,255,0.05)]"
           >
             Reset
           </button>
@@ -418,6 +429,7 @@ const SortingHubWidget = () => {
 };
 
 /* ------------------------------------------------------------------------- */
+
 /* 4. Enginerea Simulation Sandbox                                           */
 /* ------------------------------------------------------------------------- */
 const EnginereaWidget = () => {
