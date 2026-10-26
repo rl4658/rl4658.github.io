@@ -436,424 +436,79 @@ const SortingHubWidget = () => {
 
 /* ------------------------------------------------------------------------- */
 
-/* 4. Bobby: The Town of Enginerea Live Action-Platformer Widget             */
+/* 4. Bobby: The Town of Enginerea Preview Widget (Start Menu Showcase)       */
 /* ------------------------------------------------------------------------- */
 const EnginereaWidget = () => {
   const navigate = useNavigate();
-  const [viewMode, setViewMode] = useState<"arena" | "shop" | "stages">("arena");
-  const [stageId, setStageId] = useState<1 | 2 | 3>(1);
-
-  // Mini-game state
-  const [hp, setHp] = useState<number>(5);
-  const [coins, setCoins] = useState<number>(45);
-  const [axeTier, setAxeTier] = useState<1 | 2>(1);
-  const [shieldTier, setShieldTier] = useState<0 | 1 | 2>(0);
-  const [axesThrown, setAxesThrown] = useState<number>(0);
-  const [fireballsDeflected, setFireballsDeflected] = useState<number>(0);
-
-  // Animated positions for Bobby, projectile & enemy in arena
-  const [bobbyPos, setBobbyPos] = useState<{ x: number; y: number; jumping: boolean }>({ x: 40, y: 140, jumping: false });
-  const [axeAnim, setAxeAnim] = useState<{ x: number; y: number; active: boolean }>({ x: 0, y: 0, active: false });
-  const [enemyHealth, setEnemyHealth] = useState<number>(100);
-
-  // Handle Chuck Axe
-  const handleThrowAxe = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (axeAnim.active) return;
-    setAxesThrown((prev) => prev + 1);
-    setAxeAnim({ x: bobbyPos.x + 30, y: bobbyPos.y - 10, active: true });
-
-    let currentX = bobbyPos.x + 30;
-    const interval = setInterval(() => {
-      currentX += 20;
-      if (currentX > 320) {
-        clearInterval(interval);
-        setAxeAnim({ x: 0, y: 0, active: false });
-        setEnemyHealth((prev) => {
-          const next = prev - (axeTier === 2 ? 40 : 25);
-          if (next <= 0) {
-            setCoins((c) => c + 15);
-            return 100;
-          }
-          return next;
-        });
-        setFireballsDeflected((d) => d + 1);
-        setCoins((c) => c + 2);
-      } else {
-        setAxeAnim((prev) => ({ ...prev, x: currentX }));
-      }
-    }, 25);
-  };
-
-  // Handle Jump
-  const handleJump = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (bobbyPos.jumping) return;
-    setBobbyPos((p) => ({ ...p, y: 70, jumping: true }));
-    setTimeout(() => {
-      setBobbyPos((p) => ({ ...p, y: 140, jumping: false }));
-    }, 450);
-  };
 
   return (
-    <div className="flex flex-col h-[480px] sm:h-[520px] md:h-[560px] bg-neutral-950/90 p-5 justify-between relative group/widget">
-      {/* Widget Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-2">
-        <div className="flex items-center gap-2">
-          <img
-            src="/images/projects/enginerea/gameicon.png"
-            alt="Bobby Icon"
-            className="w-5 h-5 rounded object-contain"
-          />
-          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-xs font-mono text-white font-semibold uppercase tracking-wider">
-            Enginerea 150 FPS Engine
+    <div
+      onClick={() => navigate("/projects/enginerea")}
+      className="relative h-[480px] sm:h-[520px] md:h-[560px] w-full bg-black flex items-center justify-center p-6 overflow-hidden group/enginerea cursor-pointer"
+      title="Click to Explore Bobby: The Town of Enginerea Case Study"
+    >
+      {/* Background with Start Menu Stage Backdrop */}
+      <img
+        src="/images/projects/enginerea/main_screen.png"
+        alt="Bobby: The Town of Enginerea Start Menu Screen"
+        className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover/enginerea:scale-105 transition-transform duration-700"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/60 pointer-events-none" />
+
+      {/* Start Menu Capsule */}
+      <div className="relative z-10 w-full max-w-sm sm:max-w-md p-6 sm:p-8 rounded-3xl bg-neutral-950/80 border border-white/20 backdrop-blur-xl text-center shadow-[0_0_50px_rgba(0,0,0,0.8)] transition-all duration-300 group-hover/enginerea:border-white/50 group-hover/enginerea:shadow-[0_0_40px_rgba(255,255,255,0.08)]">
+        {/* Game Icon & Engine Badge */}
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 p-1 flex items-center justify-center shadow-inner">
+            <img
+              src="/images/projects/enginerea/gameicon.png"
+              alt="Bobby Icon"
+              className="w-7 h-7 object-contain"
+            />
+          </div>
+          <span className="px-2.5 py-1 rounded-full bg-white/10 text-neutral-300 border border-white/15 text-[10px] font-mono uppercase tracking-wider">
+            Pygame · 150 FPS Engine
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5">
-          <div className="flex bg-white/5 p-0.5 rounded-lg border border-white/10 text-[11px] font-mono">
-            <button
-              onClick={(e) => { e.stopPropagation(); setViewMode("arena"); }}
-              className={`px-2 py-0.5 rounded transition-colors ${viewMode === "arena" ? "bg-white/20 text-white font-bold" : "text-neutral-400 hover:text-white"}`}
-            >
-              Combat Arena
-            </button>
-            <button
-              onClick={(e) => { e.stopPropagation(); setViewMode("shop"); }}
-              className={`px-2 py-0.5 rounded transition-colors ${viewMode === "shop" ? "bg-white/20 text-white font-bold" : "text-neutral-400 hover:text-white"}`}
-            >
-              Shop [P]
-            </button>
-            <button
-              onClick={(e) => { e.stopPropagation(); setViewMode("stages"); }}
-              className={`px-2 py-0.5 rounded transition-colors ${viewMode === "stages" ? "bg-white/20 text-white font-bold" : "text-neutral-400 hover:text-white"}`}
-            >
-              Stages
-            </button>
-          </div>
+        {/* Title & Subtitle */}
+        <h4 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight uppercase font-mono">
+          Bobby: The Town of Enginerea
+        </h4>
+        <p className="text-xs text-neutral-400 mt-2 font-mono leading-relaxed max-w-xs mx-auto">
+          2D action-adventure platformer with AABB moving platform physics, spinning projectile deflections, and homing enemy AI.
+        </p>
 
+        {/* Start Menu Action Buttons */}
+        <div className="mt-6 space-y-2.5">
           <button
             onClick={(e) => {
               e.stopPropagation();
               navigate("/projects/enginerea");
             }}
-            className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-[11px] font-mono transition-colors"
+            className="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-neutral-200 text-black font-semibold text-xs font-mono flex items-center justify-center gap-2 shadow-lg transition-all duration-200 hover:scale-[1.02]"
           >
-            Case Study <ArrowRight size={12} />
+            <Play size={13} className="fill-black" />
+            Explore Case Study & Architecture
           </button>
-        </div>
-      </div>
 
-      {/* VIEW 1: COMBAT ARENA */}
-      {viewMode === "arena" && (
-        <div className="flex-1 flex flex-col justify-between mb-2">
-          {/* Top HUD */}
-          <div className="flex items-center justify-between px-3 py-1.5 bg-black/60 rounded-lg border border-white/10 text-[11px] font-mono text-neutral-300">
-            <div className="flex items-center gap-3">
-              <span className="flex items-center gap-1 text-red-400 font-bold">
-                <Heart size={12} /> {hp}/5 HP
-              </span>
-              <span className="flex items-center gap-1 text-amber-300 font-bold">
-                <Coins size={12} /> {coins} G
-              </span>
+          <div className="grid grid-cols-2 gap-2 text-[11px] font-mono text-neutral-400">
+            <div className="py-1.5 px-2.5 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center gap-1.5">
+              <span>3 Campaign Stages</span>
             </div>
-            <div className="flex items-center gap-2 text-neutral-400">
-              <span>Axe: <strong className="text-white">Tier {axeTier}</strong></span>
-              <span>Shield: <strong className="text-white">{shieldTier === 2 ? "Metal" : shieldTier === 1 ? "Wood" : "None"}</strong></span>
-            </div>
-          </div>
-
-          {/* Interactive Arena Canvas / Stage View */}
-          <div className="relative flex-1 my-2 rounded-xl overflow-hidden border border-white/10 bg-gradient-to-b from-[#0d1117] via-[#161b22] to-[#0a0c10] flex items-center justify-center">
-            {/* Background Stage Image with Low Opacity */}
-            <img
-              src="/images/projects/enginerea/lvl1_bg.png"
-              alt="Level 1 Stage"
-              className="absolute inset-0 w-full h-full object-cover opacity-30 pointer-events-none"
-            />
-
-            {/* Platforms */}
-            <div className="absolute left-6 bottom-10 w-28 h-3.5 bg-neutral-800 border border-neutral-600 rounded-sm" />
-            <motion.div
-              animate={{ x: [0, 40, 0] }}
-              transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-              className="absolute left-36 bottom-14 w-28 h-3.5 bg-neutral-700 border border-neutral-500 rounded-sm shadow-sm"
-            />
-            <div className="absolute right-6 bottom-10 w-32 h-3.5 bg-neutral-800 border border-neutral-600 rounded-sm" />
-
-            {/* Bottom Hazard */}
-            <div className="absolute inset-x-0 bottom-0 h-2 bg-red-600/60 border-t border-red-500" />
-
-            {/* Bobby Character */}
-            <div
-              style={{
-                transform: `translate(${bobbyPos.x}px, ${bobbyPos.y - 100}px)`,
-                transition: bobbyPos.jumping ? "transform 0.22s ease-out" : "transform 0.22s ease-in",
-              }}
-              className="absolute left-0 bottom-14 z-10 flex flex-col items-center pointer-events-none"
-            >
-              <img
-                src="/images/projects/enginerea/bobby.png"
-                alt="Bobby"
-                className="w-10 h-12 object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]"
-              />
-            </div>
-
-            {/* Flying Axe Projectile */}
-            {axeAnim.active && (
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ repeat: Infinity, duration: 0.25, ease: "linear" }}
-                style={{
-                  left: `${axeAnim.x}px`,
-                  bottom: `${140 - bobbyPos.y + 70}px`,
-                }}
-                className="absolute z-20 pointer-events-none"
-              >
-                <img
-                  src="/images/projects/enginerea/axeAnimation.png"
-                  alt="Axe"
-                  className="w-6 h-6 object-contain"
-                />
-              </motion.div>
-            )}
-
-            {/* Monster / Target */}
-            <div className="absolute right-12 bottom-14 z-10 flex flex-col items-center pointer-events-none">
-              <div className="w-12 h-1.5 bg-black/80 rounded-full border border-white/20 mb-1 overflow-hidden">
-                <div
-                  className="h-full bg-red-500 transition-all duration-200"
-                  style={{ width: `${enemyHealth}%` }}
-                />
-              </div>
-              <motion.div
-                animate={{ y: [0, -4, 0] }}
-                transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut" }}
-                className="w-10 h-10 rounded-full bg-red-600 border border-red-400 flex items-center justify-center text-white text-xs font-bold shadow-[0_0_15px_rgba(239,68,68,0.4)]"
-              >
-                👾
-              </motion.div>
-            </div>
-          </div>
-
-          {/* Action Bar */}
-          <div className="flex items-center justify-between gap-2 pt-1 text-xs font-mono">
-            <div className="flex gap-2">
-              <button
-                onClick={handleThrowAxe}
-                className="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-200 flex items-center gap-1.5 transition-colors font-medium"
-              >
-                <Swords size={13} />
-                Chuck Axe
-              </button>
-              <button
-                onClick={handleJump}
-                className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20 text-white flex items-center gap-1.5 transition-colors font-medium"
-              >
-                Jump
-              </button>
-              <button
-                onClick={(e) => { e.stopPropagation(); setViewMode("shop"); }}
-                className="px-3 py-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-sky-200 flex items-center gap-1.5 transition-colors font-medium"
-              >
-                <Shield size={13} />
-                Shop
-              </button>
-            </div>
-            <div className="text-[11px] text-neutral-400">
-              Deflections: <strong className="text-emerald-400">{fireballsDeflected}</strong>
+            <div className="py-1.5 px-2.5 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center gap-1.5">
+              <span>Modular Shop Loadouts</span>
             </div>
           </div>
         </div>
-      )}
 
-      {/* VIEW 2: SHOP LOADOUT */}
-      {viewMode === "shop" && (
-        <div className="flex-1 flex flex-col justify-between mb-2 space-y-2">
-          <div className="flex items-center justify-between px-3 py-1.5 bg-black/60 rounded-lg border border-white/10 text-[11px] font-mono">
-            <span className="text-neutral-300">Shop Vault:</span>
-            <span className="text-amber-300 font-bold">{coins} Gold Coins</span>
-          </div>
-
-          {/* Shop Upgrade Grid */}
-          <div className="grid grid-cols-2 gap-2 text-xs font-mono">
-            {/* Axe Upgrade */}
-            <div className="p-2.5 rounded-xl bg-neutral-900/60 border border-white/10 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <img src="/images/projects/enginerea/AxeButton.png" alt="Axe" className="w-8 h-8 object-contain" />
-                <div>
-                  <div className="text-white font-medium text-[11px]">Steel Axe</div>
-                  <div className="text-[10px] text-neutral-400">+6 ATK</div>
-                </div>
-              </div>
-              <button
-                disabled={axeTier === 2 || coins < 50}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (coins >= 50 && axeTier !== 2) {
-                    setCoins((c) => c - 50);
-                    setAxeTier(2);
-                  }
-                }}
-                className={`px-2 py-1 rounded text-[10px] ${
-                  axeTier === 2 ? "bg-white/10 text-neutral-400" : coins >= 50 ? "bg-amber-500/20 text-amber-200 border border-amber-500/40" : "bg-white/5 text-neutral-500"
-                }`}
-              >
-                {axeTier === 2 ? "Max" : "50 G"}
-              </button>
-            </div>
-
-            {/* Wood Shield */}
-            <div className="p-2.5 rounded-xl bg-neutral-900/60 border border-white/10 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <img src="/images/projects/enginerea/Shield1Button.png" alt="Wood Shield" className="w-8 h-8 object-contain" />
-                <div>
-                  <div className="text-white font-medium text-[11px]">Wood Shield</div>
-                  <div className="text-[10px] text-neutral-400">+3 Def</div>
-                </div>
-              </div>
-              <button
-                disabled={shieldTier >= 1 || coins < 30}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (coins >= 30 && shieldTier === 0) {
-                    setCoins((c) => c - 30);
-                    setShieldTier(1);
-                  }
-                }}
-                className={`px-2 py-1 rounded text-[10px] ${
-                  shieldTier >= 1 ? "bg-white/10 text-neutral-400" : coins >= 30 ? "bg-amber-500/20 text-amber-200 border border-amber-500/40" : "bg-white/5 text-neutral-500"
-                }`}
-              >
-                {shieldTier >= 1 ? "Owned" : "30 G"}
-              </button>
-            </div>
-
-            {/* Metal Shield */}
-            <div className="p-2.5 rounded-xl bg-neutral-900/60 border border-white/10 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <img src="/images/projects/enginerea/Shield2Button.png" alt="Metal Shield" className="w-8 h-8 object-contain" />
-                <div>
-                  <div className="text-white font-medium text-[11px]">Iron Shield</div>
-                  <div className="text-[10px] text-neutral-400">+5 Def</div>
-                </div>
-              </div>
-              <button
-                disabled={shieldTier === 2 || coins < 40}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (coins >= 40 && shieldTier !== 2) {
-                    setCoins((c) => c - 40);
-                    setShieldTier(2);
-                  }
-                }}
-                className={`px-2 py-1 rounded text-[10px] ${
-                  shieldTier === 2 ? "bg-white/10 text-neutral-400" : coins >= 40 ? "bg-amber-500/20 text-amber-200 border border-amber-500/40" : "bg-white/5 text-neutral-500"
-                }`}
-              >
-                {shieldTier === 2 ? "Equipped" : "40 G"}
-              </button>
-            </div>
-
-            {/* Health Upgrade */}
-            <div className="p-2.5 rounded-xl bg-neutral-900/60 border border-white/10 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <img src="/images/projects/enginerea/HealthUpgradeBtn.png" alt="Health" className="w-8 h-8 object-contain" />
-                <div>
-                  <div className="text-white font-medium text-[11px]">Vitality +1</div>
-                  <div className="text-[10px] text-neutral-400">+1 Max HP</div>
-                </div>
-              </div>
-              <button
-                disabled={coins < 10}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (coins >= 10) {
-                    setCoins((c) => c - 10);
-                    setHp((h) => h + 1);
-                  }
-                }}
-                className={`px-2 py-1 rounded text-[10px] ${
-                  coins >= 10 ? "bg-amber-500/20 text-amber-200 border border-amber-500/40" : "bg-white/5 text-neutral-500"
-                }`}
-              >
-                10 G
-              </button>
-            </div>
-          </div>
-
-          <button
-            onClick={(e) => { e.stopPropagation(); setViewMode("arena"); }}
-            className="w-full py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white text-xs font-mono transition-colors"
-          >
-            ← Return to Combat Arena
-          </button>
+        {/* Footnote */}
+        <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-[10px] font-mono text-neutral-500">
+          <span>Python 3.10 · Pygame</span>
+          <span className="text-amber-400/80 flex items-center gap-1">
+            Start Menu Preview <ArrowRight size={10} />
+          </span>
         </div>
-      )}
-
-      {/* VIEW 3: STAGES */}
-      {viewMode === "stages" && (
-        <div className="flex-1 flex flex-col justify-between mb-2 space-y-2">
-          <div className="flex gap-2">
-            {[1, 2, 3].map((lvl) => (
-              <button
-                key={lvl}
-                onClick={(e) => { e.stopPropagation(); setStageId(lvl as 1 | 2 | 3); }}
-                className={`flex-1 py-1 rounded text-[11px] font-mono transition-colors ${
-                  stageId === lvl ? "bg-white/20 text-white font-bold" : "text-neutral-400 hover:text-white"
-                }`}
-              >
-                Stage {lvl}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex-1 relative rounded-xl overflow-hidden border border-white/10 bg-black min-h-[160px]">
-            <img
-              src={
-                stageId === 1
-                  ? "/images/projects/enginerea/lvl1_bg.png"
-                  : stageId === 2
-                  ? "/images/projects/enginerea/lvl2_bg.png"
-                  : "/images/projects/enginerea/player_view.png"
-              }
-              alt={`Stage ${stageId}`}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex items-end p-3">
-              <span className="text-[11px] font-mono text-neutral-200">
-                {stageId === 1 && "Stage 1: Ruined Village — Basic patrol enemies & platform jumps"}
-                {stageId === 2 && "Stage 2: Magma Caverns — Moving platforms over deadly lava"}
-                {stageId === 3 && "Stage 3: Town Hall Rebuild — Boss showdown & victory key"}
-              </span>
-            </div>
-          </div>
-
-          <button
-            onClick={(e) => { e.stopPropagation(); setViewMode("arena"); }}
-            className="w-full py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white text-xs font-mono transition-colors"
-          >
-            ← Back to Combat Arena
-          </button>
-        </div>
-      )}
-
-      {/* Footer Info */}
-      <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-neutral-400">
-        <span className="flex items-center gap-1.5">
-          <Gamepad2 size={13} className="text-amber-400" />
-          AABB Physics · 150 FPS Pygame Loop
-        </span>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate("/projects/enginerea");
-          }}
-          className="text-white hover:text-amber-300 transition-colors flex items-center gap-1"
-        >
-          Read Blog Deep Dive →
-        </button>
       </div>
     </div>
   );

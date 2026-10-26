@@ -1,9 +1,5 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState } from "react";
 import {
-  Play,
-  RotateCcw,
-  Check,
-  Copy,
   Gamepad2,
   Shield,
   Zap,
@@ -15,6 +11,11 @@ import {
   Swords,
   ChevronRight,
   Sparkles,
+  Terminal,
+  Play,
+  RotateCcw,
+  Check,
+  Copy,
 } from "lucide-react";
 import EngineeringArticle, {
   ArticleSection,
@@ -27,990 +28,202 @@ const sections = [
   ["game-loop", "02 / Game loop & state machine"],
   ["kinematics", "03 / Kinematics & collision"],
   ["projectiles", "04 / Projectiles & homing AI"],
-  ["interactive-arena", "05 / Interactive combat lab"],
+  ["campaign-gallery", "05 / Campaign stages & shop gallery"],
   ["source-code", "06 / Source code review"],
   ["telemetry", "07 / Performance & telemetry"],
+  ["run-locally", "08 / Run locally in Pygame"],
 ] as const;
 
 /* ------------------------------------------------------------------------- */
-/* Interactive Combat & Shop Simulator                                       */
+/* Visual Gameplay & Stage Gallery Component                                 */
 /* ------------------------------------------------------------------------- */
-interface Projectile {
-  id: number;
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  rotation: number;
-  type: "player-axe" | "enemy-fireball";
-}
+function CampaignVisualGallery() {
+  const [selectedView, setSelectedView] = useState<
+    "start-menu" | "stage-1" | "stage-2" | "stage-3" | "shop" | "victory"
+  >("start-menu");
 
-interface Enemy {
-  id: number;
-  x: number;
-  y: number;
-  hp: number;
-  maxHp: number;
-  direction: 1 | -1;
-  shootCooldown: number;
-}
-
-interface Platform {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  moving?: boolean;
-  vx?: number;
-  minX?: number;
-  maxX?: number;
-}
-
-function InteractiveEnginereaLab() {
-  const [activeTab, setActiveTab] = useState<"combat" | "shop" | "stages">("combat");
-
-  // Player stats
-  const [playerHp, setPlayerHp] = useState<number>(5);
-  const [playerMaxHp, setPlayerMaxHp] = useState<number>(5);
-  const [coins, setCoins] = useState<number>(65);
-  const [attackPower, setAttackPower] = useState<number>(3);
-  const [speed, setSpeed] = useState<number>(5);
-  const [equippedAxe, setEquippedAxe] = useState<1 | 2>(1);
-  const [equippedShield, setEquippedShield] = useState<0 | 1 | 2>(0);
-
-  // Telemetry metrics
-  const [axesChucked, setAxesChucked] = useState<number>(0);
-  const [fireballsDeflected, setFireballsDeflected] = useState<number>(0);
-  const [enemiesDefeated, setEnemiesDefeated] = useState<number>(0);
-
-  // Selected stage preview
-  const [selectedStage, setSelectedStage] = useState<1 | 2 | 3>(1);
-
-  // Canvas / Simulation state
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const animFrameRef = useRef<number | null>(null);
-
-  // Simulation physics refs (avoids re-binding loop)
-  const simState = useRef({
-    bobby: {
-      x: 80,
-      y: 200,
-      vx: 0,
-      vy: 0,
-      w: 36,
-      h: 44,
-      onGround: false,
-      facing: 1 as 1 | -1,
+  const views = {
+    "start-menu": {
+      title: "Title & Main Menu Screen",
+      stageBadge: "Menu · 1200x600 Display",
+      src: "/images/projects/enginerea/main_screen.png",
+      caption:
+        "The game initialization screen introducing Bobby the Builder standing before the dystopian ruined skyline of Enginerea with Start, Help, and Quit buttons.",
     },
-    projectiles: [] as Projectile[],
-    enemies: [
-      { id: 1, x: 380, y: 196, hp: 6, maxHp: 6, direction: -1 as 1 | -1, shootCooldown: 60 },
-      { id: 2, x: 500, y: 116, hp: 4, maxHp: 4, direction: 1 as 1 | -1, shootCooldown: 120 },
-    ] as Enemy[],
-    platforms: [
-      { x: 30, y: 250, w: 180, h: 20 },
-      { x: 250, y: 240, w: 160, h: 20, moving: true, vx: 1.2, minX: 230, maxX: 330 },
-      { x: 440, y: 160, w: 160, h: 20 },
-      { x: 30, y: 130, w: 120, h: 20 },
-    ] as Platform[],
-    nextProjId: 1,
-    keys: { left: false, right: false },
-  });
+    "stage-1": {
+      title: "Stage 01: Ruined Village Entrance",
+      stageBadge: "Act I · Ruined Viaducts",
+      src: "/images/projects/enginerea/lvl1_bg.png",
+      caption:
+        "Act I establishes core platforming mechanics: jumping across fractured stone bridges, patrolling goblin enemies, and preliminary building material chests.",
+    },
+    "stage-2": {
+      title: "Stage 02: Magma Caverns & Moving Platforms",
+      stageBadge: "Act II · Magma Hazards",
+      src: "/images/projects/enginerea/lvl2_bg.png",
+      caption:
+        "Act II introduces moving platform adhesion physics over instant-death lava chutes. Bobby must time jumps while deflecting incoming fireballs from floating enemies.",
+    },
+    "stage-3": {
+      title: "Stage 03: Town Hall Ruins & Boss Showdown",
+      stageBadge: "Act III · Climax & Boss Fight",
+      src: "/images/projects/enginerea/player_view.png",
+      caption:
+        "The final confrontation in the ruined Town Hall district. Bobby faces the armored underworld guardian to recover the master reconstruction chest key.",
+    },
+    "shop": {
+      title: "In-Game Modal Shop (Shop.py)",
+      stageBadge: "System · Equipment Store",
+      src: "/images/projects/enginerea/ShopBg.png",
+      caption:
+        "Pressing [P] freezes the real-time game loop and launches the interactive equipment store to purchase battle axes, reinforced shields, and stat upgrades.",
+    },
+    "victory": {
+      title: "Victory: Rebuilt Town Hall",
+      stageBadge: "Ending · Town Restored",
+      src: "/images/projects/enginerea/vikingHouse.png",
+      caption:
+        "With the guardian defeated and the chest key recovered, Bobby reconstructs the Enginerea Town Hall and the engine compiles full match telemetry.",
+    },
+  };
 
-  // Action: Player Chuck Axe
-  const handleChuckAxe = useCallback(() => {
-    const s = simState.current;
-    const axeSpeed = 9;
-    s.projectiles.push({
-      id: s.nextProjId++,
-      x: s.bobby.x + (s.bobby.facing === 1 ? s.bobby.w + 4 : -12),
-      y: s.bobby.y + 12,
-      vx: s.bobby.facing * axeSpeed,
-      vy: -1.2,
-      rotation: 0,
-      type: "player-axe",
-    });
-    setAxesChucked((c) => c + 1);
-  }, []);
-
-  // Action: Player Jump
-  const handleJump = useCallback(() => {
-    const b = simState.current.bobby;
-    if (b.onGround) {
-      b.vy = -11;
-      b.onGround = false;
-    }
-  }, []);
-
-  // Reset Arena
-  const handleResetArena = useCallback(() => {
-    simState.current.bobby = {
-      x: 80,
-      y: 200,
-      vx: 0,
-      vy: 0,
-      w: 36,
-      h: 44,
-      onGround: false,
-      facing: 1,
-    };
-    simState.current.projectiles = [];
-    simState.current.enemies = [
-      { id: Date.now(), x: 380, y: 196, hp: 6, maxHp: 6, direction: -1, shootCooldown: 60 },
-      { id: Date.now() + 1, x: 500, y: 116, hp: 4, maxHp: 4, direction: 1, shootCooldown: 120 },
-    ];
-    setPlayerHp(playerMaxHp);
-  }, [playerMaxHp]);
-
-  // Main Canvas Animation Loop
-  useEffect(() => {
-    if (activeTab !== "combat") return;
-
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let running = true;
-
-    const render = () => {
-      if (!running) return;
-      const s = simState.current;
-      const b = s.bobby;
-
-      // --- 1. UPDATE MOVING PLATFORMS ---
-      s.platforms.forEach((plat) => {
-        if (plat.moving && plat.vx !== undefined && plat.minX !== undefined && plat.maxX !== undefined) {
-          plat.x += plat.vx;
-          if (plat.x > plat.maxX || plat.x < plat.minX) {
-            plat.vx = -plat.vx;
-          }
-        }
-      });
-
-      // --- 2. UPDATE BOBBY KINEMATICS ---
-      // Horizontal control
-      if (s.keys.left) {
-        b.vx = -speed;
-        b.facing = -1;
-      } else if (s.keys.right) {
-        b.vx = speed;
-        b.facing = 1;
-      } else {
-        b.vx *= 0.7; // friction
-        if (Math.abs(b.vx) < 0.1) b.vx = 0;
-      }
-
-      b.x += b.vx;
-
-      // Boundaries
-      if (b.x < 10) b.x = 10;
-      if (b.x > canvas.width - b.w - 10) b.x = canvas.width - b.w - 10;
-
-      // Gravity: jumpingSpeed -= 2 clamp
-      b.vy += 0.55;
-      if (b.vy > 9) b.vy = 9;
-      b.y += b.vy;
-
-      // Platform collisions (AABB)
-      let landed = false;
-      s.platforms.forEach((plat) => {
-        // Landing on top
-        if (
-          b.x + b.w > plat.x &&
-          b.x < plat.x + plat.w &&
-          b.y + b.h >= plat.y &&
-          b.y + b.h <= plat.y + 14 &&
-          b.vy >= 0
-        ) {
-          b.y = plat.y - b.h;
-          b.vy = 0;
-          landed = true;
-
-          // Moving platform adhesion: shift with platform vx
-          if (plat.moving && plat.vx !== undefined) {
-            b.x += plat.vx;
-          }
-        }
-      });
-      b.onGround = landed;
-
-      // Pit floor hazard
-      if (b.y > canvas.height - 30) {
-        b.y = 80;
-        b.x = 80;
-        b.vy = 0;
-        setPlayerHp((h) => Math.max(1, h - 1));
-      }
-
-      // --- 3. ENEMY PATROL & HOMING FIREBALLS ---
-      s.enemies.forEach((enemy) => {
-        enemy.x += enemy.direction * 0.8;
-        if (enemy.x > 560 || enemy.x < 320) enemy.direction = (enemy.direction * -1) as 1 | -1;
-
-        enemy.shootCooldown -= 1;
-        if (enemy.shootCooldown <= 0) {
-          enemy.shootCooldown = 110;
-          // Calculate homing vector towards Bobby
-          const dx = b.x + b.w / 2 - enemy.x;
-          const dy = b.y + b.h / 2 - enemy.y;
-          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-          const speedFactor = 3.2;
-
-          s.projectiles.push({
-            id: s.nextProjId++,
-            x: enemy.x,
-            y: enemy.y + 10,
-            vx: (dx / dist) * speedFactor,
-            vy: (dy / dist) * speedFactor,
-            rotation: 0,
-            type: "enemy-fireball",
-          });
-        }
-      });
-
-      // --- 4. UPDATE PROJECTILES & COLLISION DETECTION ---
-      const nextProjs: Projectile[] = [];
-
-      s.projectiles.forEach((p) => {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.rotation += p.type === "player-axe" ? 18 : 6;
-
-        // Out of bounds check
-        if (p.x < -20 || p.x > canvas.width + 20 || p.y < -20 || p.y > canvas.height + 20) {
-          return;
-        }
-
-        // Projectile deflection: Player Axe vs Enemy Fireball
-        if (p.type === "player-axe") {
-          let hitFireball = false;
-          s.projectiles.forEach((other) => {
-            if (other.type === "enemy-fireball") {
-              const d = Math.hypot(p.x - other.x, p.y - other.y);
-              if (d < 18) {
-                hitFireball = true;
-                other.x = -999; // destroy
-                setFireballsDeflected((dCount) => dCount + 1);
-                setCoins((c) => c + 2); // Deflection bonus!
-              }
-            }
-          });
-
-          // Check hit against enemies
-          let hitEnemy = false;
-          s.enemies.forEach((enemy) => {
-            if (
-              p.x >= enemy.x &&
-              p.x <= enemy.x + 32 &&
-              p.y >= enemy.y &&
-              p.y <= enemy.y + 36
-            ) {
-              hitEnemy = true;
-              enemy.hp -= attackPower;
-              if (enemy.hp <= 0) {
-                enemy.hp = enemy.maxHp;
-                enemy.x = 350 + Math.random() * 150;
-                setEnemiesDefeated((ed) => ed + 1);
-                setCoins((c) => c + 15);
-              }
-            }
-          });
-
-          if (!hitFireball && !hitEnemy) {
-            nextProjs.push(p);
-          }
-        } else {
-          // Enemy Fireball vs Bobby
-          if (
-            p.x >= b.x &&
-            p.x <= b.x + b.w &&
-            p.y >= b.y &&
-            p.y <= b.y + b.h
-          ) {
-            // Shield damage reduction
-            const damageMitigation = equippedShield === 2 ? 2 : equippedShield === 1 ? 1 : 0;
-            const netDamage = Math.max(1, 2 - damageMitigation);
-            setPlayerHp((h) => Math.max(0, h - netDamage));
-            return;
-          }
-          if (p.x > -100) {
-            nextProjs.push(p);
-          }
-        }
-      });
-      s.projectiles = nextProjs;
-
-      // --- 5. RENDER SCENE ---
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Background gradient
-      const bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      bgGrad.addColorStop(0, "#0a0c10");
-      bgGrad.addColorStop(1, "#14171f");
-      ctx.fillStyle = bgGrad;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Grid guidelines
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.03)";
-      ctx.lineWidth = 1;
-      for (let x = 0; x < canvas.width; x += 40) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-      }
-      for (let y = 0; y < canvas.height; y += 40) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-      }
-
-      // Platforms
-      s.platforms.forEach((plat) => {
-        ctx.fillStyle = plat.moving ? "#2a3447" : "#1e2330";
-        ctx.strokeStyle = plat.moving ? "#526e99" : "#3b4459";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.roundRect(plat.x, plat.y, plat.w, plat.h, 4);
-        ctx.fill();
-        ctx.stroke();
-
-        // Platform top highlight
-        ctx.fillStyle = plat.moving ? "#688bbd" : "#55627a";
-        ctx.fillRect(plat.x + 2, plat.y, plat.w - 4, 3);
-      });
-
-      // Bottom lava hazard
-      ctx.fillStyle = "rgba(239, 68, 68, 0.25)";
-      ctx.fillRect(0, canvas.height - 18, canvas.width, 18);
-      ctx.strokeStyle = "rgba(239, 68, 68, 0.6)";
-      ctx.strokeRect(0, canvas.height - 18, canvas.width, 18);
-      ctx.fillStyle = "#f87171";
-      ctx.font = "10px monospace";
-      ctx.fillText("LAVA HAZARD ZONE // RESPAWN CHECKPOINT", 16, canvas.height - 6);
-
-      // Bobby Character
-      ctx.save();
-      ctx.translate(b.x + b.w / 2, b.y + b.h / 2);
-      if (b.facing === -1) ctx.scale(-1, 1);
-
-      // Body (Bobby the Builder)
-      ctx.fillStyle = "#f59e0b"; // Yellow tunic / builder overalls
-      ctx.fillRect(-12, -8, 24, 26);
-
-      // Head
-      ctx.fillStyle = "#fcd34d";
-      ctx.beginPath();
-      ctx.arc(0, -14, 10, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Builder Helmet / Cap
-      ctx.fillStyle = "#d97706";
-      ctx.fillRect(-11, -24, 22, 10);
-
-      // Shield on back/front
-      if (equippedShield > 0) {
-        ctx.fillStyle = equippedShield === 2 ? "#94a3b8" : "#854d0e";
-        ctx.strokeStyle = equippedShield === 2 ? "#e2e8f0" : "#a16207";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(-10, 4, 9, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-      }
-
-      // Hand holding Axe
-      ctx.fillStyle = equippedAxe === 2 ? "#38bdf8" : "#cbd5e1";
-      ctx.fillRect(8, 0, 10, 3);
-      ctx.fillStyle = "#78350f";
-      ctx.fillRect(14, -8, 4, 18);
-
-      ctx.restore();
-
-      // Enemies
-      s.enemies.forEach((enemy) => {
-        ctx.save();
-        ctx.translate(enemy.x + 16, enemy.y + 18);
-        if (enemy.direction === -1) ctx.scale(-1, 1);
-
-        // Monster sprite
-        ctx.fillStyle = "#dc2626";
-        ctx.beginPath();
-        ctx.arc(0, 0, 14, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Eyes
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(2, -4, 4, 4);
-        ctx.fillStyle = "#000000";
-        ctx.fillRect(4, -3, 2, 2);
-
-        // Horns
-        ctx.fillStyle = "#7f1d1d";
-        ctx.beginPath();
-        ctx.moveTo(-6, -12);
-        ctx.lineTo(-2, -20);
-        ctx.lineTo(2, -12);
-        ctx.fill();
-
-        ctx.restore();
-
-        // Health bar
-        ctx.fillStyle = "rgba(0,0,0,0.6)";
-        ctx.fillRect(enemy.x, enemy.y - 10, 32, 5);
-        ctx.fillStyle = "#ef4444";
-        ctx.fillRect(enemy.x, enemy.y - 10, (enemy.hp / enemy.maxHp) * 32, 5);
-      });
-
-      // Projectiles
-      s.projectiles.forEach((p) => {
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate((p.rotation * Math.PI) / 180);
-
-        if (p.type === "player-axe") {
-          // Spinning Double Axe
-          ctx.fillStyle = equippedAxe === 2 ? "#0284c7" : "#64748b";
-          ctx.strokeStyle = equippedAxe === 2 ? "#38bdf8" : "#cbd5e1";
-          ctx.lineWidth = 1.5;
-          // Blade left
-          ctx.beginPath();
-          ctx.arc(-6, 0, 7, 0.5 * Math.PI, 1.5 * Math.PI);
-          ctx.fill();
-          ctx.stroke();
-          // Blade right
-          ctx.beginPath();
-          ctx.arc(6, 0, 7, 1.5 * Math.PI, 0.5 * Math.PI);
-          ctx.fill();
-          ctx.stroke();
-          // Handle
-          ctx.fillStyle = "#78350f";
-          ctx.fillRect(-2, -10, 4, 20);
-        } else {
-          // Homing Fireball
-          ctx.fillStyle = "#f97316";
-          ctx.shadowColor = "#ef4444";
-          ctx.shadowBlur = 10;
-          ctx.beginPath();
-          ctx.arc(0, 0, 6, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = "#fef08a";
-          ctx.beginPath();
-          ctx.arc(0, 0, 3, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.shadowBlur = 0;
-        }
-
-        ctx.restore();
-      });
-
-      animFrameRef.current = requestAnimationFrame(render);
-    };
-
-    animFrameRef.current = requestAnimationFrame(render);
-
-    return () => {
-      running = false;
-      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
-    };
-  }, [activeTab, attackPower, speed, equippedAxe, equippedShield]);
-
-  // Keyboard navigation listener inside simulator
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (activeTab !== "combat") return;
-      if (e.code === "ArrowLeft" || e.code === "KeyA") {
-        simState.current.keys.left = true;
-      } else if (e.code === "ArrowRight" || e.code === "KeyD") {
-        simState.current.keys.right = true;
-      } else if (e.code === "ArrowUp" || e.code === "KeyW") {
-        handleJump();
-      } else if (e.code === "Space" || e.code === "KeyF") {
-        e.preventDefault();
-        handleChuckAxe();
-      } else if (e.code === "KeyP") {
-        setActiveTab("shop");
-      }
-    };
-
-    const onKeyUp = (e: KeyboardEvent) => {
-      if (e.code === "ArrowLeft" || e.code === "KeyA") {
-        simState.current.keys.left = false;
-      } else if (e.code === "ArrowRight" || e.code === "KeyD") {
-        simState.current.keys.right = false;
-      }
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    window.addEventListener("keyup", onKeyUp);
-    return () => {
-      window.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("keyup", onKeyUp);
-    };
-  }, [activeTab, handleJump, handleChuckAxe]);
+  const current = views[selectedView];
 
   return (
     <div className="editorial-card p-6 md:p-8 space-y-6">
-      {/* Header & Sub-Navigation */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-white/10">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center overflow-hidden">
-            <img
-              src="/images/projects/enginerea/gameicon.png"
-              alt="Bobby icon"
-              className="w-7 h-7 object-contain"
-            />
-          </div>
-          <div>
-            <h3 className="text-base font-medium text-white flex items-center gap-2">
-              Enginerea Real-Time Engine Sandbox
-              <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                150 FPS Pygame Loop
-              </span>
-            </h3>
-            <p className="text-xs text-neutral-400 font-mono">
-              Live physics, moving AABB platforms, homing projectile deflection & shop upgrades
-            </p>
-          </div>
+      {/* Tab Switcher */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10">
+        <div>
+          <h3 className="text-base font-medium text-white flex items-center gap-2">
+            Visual Gameplay Showcase
+            <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-white/10 text-neutral-300 border border-white/15">
+              Pygame Assets
+            </span>
+          </h3>
+          <p className="text-xs text-neutral-400 font-mono mt-0.5">
+            Stage environments, start menu, and equipment interfaces extracted from game assets
+          </p>
         </div>
 
-        {/* Tab switcher */}
-        <div className="flex items-center gap-1.5 p-1 bg-white/5 rounded-xl border border-white/10 text-xs font-mono">
-          <button
-            onClick={() => setActiveTab("combat")}
-            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
-              activeTab === "combat"
-                ? "bg-white/15 text-white shadow-sm font-semibold"
-                : "text-neutral-400 hover:text-white"
-            }`}
-          >
-            <Crosshair size={13} />
-            Combat Arena
-          </button>
-          <button
-            onClick={() => setActiveTab("shop")}
-            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
-              activeTab === "shop"
-                ? "bg-white/15 text-white shadow-sm font-semibold"
-                : "text-neutral-400 hover:text-white"
-            }`}
-          >
-            <Shield size={13} />
-            In-Game Shop [P]
-          </button>
-          <button
-            onClick={() => setActiveTab("stages")}
-            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
-              activeTab === "stages"
-                ? "bg-white/15 text-white shadow-sm font-semibold"
-                : "text-neutral-400 hover:text-white"
-            }`}
-          >
-            <Gamepad2 size={13} />
-            Stages 1-3
-          </button>
+        <div className="flex flex-wrap gap-1.5 p-1 bg-white/5 rounded-xl border border-white/10 text-xs font-mono">
+          {(
+            [
+              ["start-menu", "Start Menu"],
+              ["stage-1", "Stage 1"],
+              ["stage-2", "Stage 2"],
+              ["stage-3", "Stage 3 (Boss)"],
+              ["shop", "Shop [P]"],
+              ["victory", "Victory"],
+            ] as const
+          ).map(([key, label]) => (
+            <button
+              key={key}
+              onClick={() => setSelectedView(key)}
+              className={`px-3 py-1.5 rounded-lg transition-all ${
+                selectedView === key
+                  ? "bg-white/20 text-white font-semibold shadow-sm"
+                  : "text-neutral-400 hover:text-white"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* TAB 1: COMBAT ARENA */}
-      {activeTab === "combat" && (
-        <div className="space-y-4">
-          {/* Top HUD: Hearts, Coins, Stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-neutral-900/60 p-3 rounded-xl border border-white/10 text-xs font-mono">
-            <div className="flex items-center gap-2">
-              <Heart size={15} className="text-red-400 shrink-0" />
-              <div>
-                <div className="text-[10px] text-neutral-400 uppercase">Bobby HP</div>
-                <div className="text-white font-bold">
-                  {playerHp} / {playerMaxHp}
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Coins size={15} className="text-amber-400 shrink-0" />
-              <div>
-                <div className="text-[10px] text-neutral-400 uppercase">Coins Collected</div>
-                <div className="text-amber-300 font-bold">{coins} gold</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Swords size={15} className="text-sky-400 shrink-0" />
-              <div>
-                <div className="text-[10px] text-neutral-400 uppercase">Attack / Shield</div>
-                <div className="text-white font-bold">
-                  {attackPower} ATK · {equippedShield === 2 ? "Metal" : equippedShield === 1 ? "Wood" : "None"}
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Zap size={15} className="text-emerald-400 shrink-0" />
-              <div>
-                <div className="text-[10px] text-neutral-400 uppercase">Speed Velocity</div>
-                <div className="text-emerald-300 font-bold">{speed} px/frame</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Canvas Viewport */}
-          <div className="relative rounded-xl overflow-hidden border border-white/10 bg-black aspect-[16/8] sm:aspect-[16/7]">
-            <canvas
-              ref={canvasRef}
-              width={640}
-              height={300}
-              className="w-full h-full block cursor-crosshair"
-              onClick={handleChuckAxe}
-            />
-
-            {/* Overlaid quick instruction pill */}
-            <div className="absolute top-3 left-3 bg-black/80 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10 text-[11px] font-mono text-neutral-300 flex items-center gap-2 pointer-events-none">
-              <span>Keys: [A/D] Move · [W] Jump · [Space/Click] Throw Axe · [P] Shop</span>
-            </div>
-
-            {/* Reset button inside arena */}
-            <button
-              onClick={handleResetArena}
-              className="absolute top-3 right-3 bg-black/80 hover:bg-neutral-800 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10 text-[11px] font-mono text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors"
-            >
-              <RotateCcw size={12} />
-              Reset Arena
-            </button>
-          </div>
-
-          {/* Interactive controls bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                onClick={handleChuckAxe}
-                className="px-4 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-200 text-xs font-mono font-medium flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
-              >
-                <img
-                  src="/images/projects/enginerea/axeAnimation.png"
-                  alt="Axe"
-                  className="w-4 h-4 object-contain"
-                />
-                Chuck Axe [Space]
-              </button>
-              <button
-                onClick={handleJump}
-                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white text-xs font-mono font-medium flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
-              >
-                Jump [W]
-              </button>
-              <button
-                onClick={() => setActiveTab("shop")}
-                className="px-4 py-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-sky-200 text-xs font-mono font-medium flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
-              >
-                <Shield size={14} />
-                Open Upgrade Shop [P]
-              </button>
-            </div>
-
-            <div className="flex items-center gap-4 text-xs font-mono text-neutral-400">
-              <span>Axes Chucked: <strong className="text-white">{axesChucked}</strong></span>
-              <span>Deflections: <strong className="text-emerald-400">{fireballsDeflected}</strong></span>
-              <span>Kills: <strong className="text-amber-400">{enemiesDefeated}</strong></span>
-            </div>
+      {/* Main Image Display */}
+      <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-black aspect-[16/8] sm:aspect-[16/8]">
+        <img
+          src={current.src}
+          alt={current.title}
+          className={`w-full h-full ${
+            selectedView === "victory" ? "object-contain p-8 bg-neutral-950" : "object-cover object-center"
+          }`}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex items-end p-5 md:p-6 pointer-events-none">
+          <div className="max-w-2xl">
+            <span className="px-2.5 py-0.5 rounded text-[10px] font-mono bg-white/20 text-white border border-white/30 uppercase tracking-wider">
+              {current.stageBadge}
+            </span>
+            <h4 className="text-lg md:text-xl font-bold text-white mt-1.5 font-sans">
+              {current.title}
+            </h4>
+            <p className="text-xs text-neutral-300 font-mono mt-1 leading-relaxed">
+              {current.caption}
+            </p>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* TAB 2: IN-GAME SHOP */}
-      {activeTab === "shop" && (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between bg-neutral-900/60 p-4 rounded-xl border border-white/10">
-            <div className="flex items-center gap-3">
-              <img
-                src="/images/projects/enginerea/coin.png"
-                alt="Coin"
-                className="w-6 h-6 object-contain"
-              />
-              <div>
-                <span className="text-xs text-neutral-400 font-mono">Current Gold Vault</span>
-                <p className="text-xl font-bold text-amber-300 font-mono">{coins} Coins</p>
-              </div>
-            </div>
-            <button
-              onClick={() => setActiveTab("combat")}
-              className="px-4 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-200 text-xs font-mono font-semibold flex items-center gap-1.5 transition-all"
-            >
-              Resume Combat <ChevronRight size={14} />
-            </button>
-          </div>
+      {/* Equipment & Stat Upgrades Sub-Grid (Visible on Shop view or always) */}
+      <div className="space-y-3 pt-2">
+        <h4 className="text-xs font-mono uppercase tracking-wider text-neutral-400 flex items-center gap-2">
+          <Shield size={13} />
+          In-Game Equipment Arsenal & Stat Upgrades (Shop.py)
+        </h4>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Equipment Upgrades */}
-            <div className="space-y-3">
-              <h4 className="text-xs font-mono uppercase tracking-wider text-neutral-400 flex items-center gap-2">
-                <Shield size={13} />
-                Armour & Weapon Arsenal (Shop.py)
-              </h4>
-
-              {/* Tier 2 Battle Axe */}
-              <div className="p-4 rounded-xl bg-neutral-900/40 border border-white/10 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-lg bg-neutral-800 border border-white/10 flex items-center justify-center p-1.5">
-                    <img
-                      src="/images/projects/enginerea/AxeButton.png"
-                      alt="Battle Axe"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <div>
-                    <h5 className="text-sm font-medium text-white">Steel Battle Axe (Tier 2)</h5>
-                    <p className="text-xs text-neutral-400 font-mono">
-                      +6 Attack Damage · Heavy cleave & deflection
-                    </p>
-                  </div>
-                </div>
-                <button
-                  disabled={equippedAxe === 2 || coins < 50}
-                  onClick={() => {
-                    if (coins >= 50 && equippedAxe !== 2) {
-                      setCoins((c) => c - 50);
-                      setEquippedAxe(2);
-                      setAttackPower((p) => p + 6);
-                    }
-                  }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
-                    equippedAxe === 2
-                      ? "bg-white/10 text-neutral-400 border border-white/10 cursor-default"
-                      : coins >= 50
-                      ? "bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/40"
-                      : "bg-white/5 text-neutral-500 border border-white/5 cursor-not-allowed"
-                  }`}
-                >
-                  {equippedAxe === 2 ? "Equipped" : "50 Coins"}
-                </button>
-              </div>
-
-              {/* Wooden Shield */}
-              <div className="p-4 rounded-xl bg-neutral-900/40 border border-white/10 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-lg bg-neutral-800 border border-white/10 flex items-center justify-center p-1.5">
-                    <img
-                      src="/images/projects/enginerea/Shield1Button.png"
-                      alt="Wooden Shield"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <div>
-                    <h5 className="text-sm font-medium text-white">Reinforced Wooden Shield</h5>
-                    <p className="text-xs text-neutral-400 font-mono">
-                      +3 Armour · Absorbs 1 projectile damage
-                    </p>
-                  </div>
-                </div>
-                <button
-                  disabled={equippedShield >= 1 || coins < 30}
-                  onClick={() => {
-                    if (coins >= 30 && equippedShield === 0) {
-                      setCoins((c) => c - 30);
-                      setEquippedShield(1);
-                    }
-                  }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
-                    equippedShield >= 1
-                      ? "bg-white/10 text-neutral-400 border border-white/10 cursor-default"
-                      : coins >= 30
-                      ? "bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/40"
-                      : "bg-white/5 text-neutral-500 border border-white/5 cursor-not-allowed"
-                  }`}
-                >
-                  {equippedShield >= 1 ? "Owned" : "30 Coins"}
-                </button>
-              </div>
-
-              {/* Metal Shield */}
-              <div className="p-4 rounded-xl bg-neutral-900/40 border border-white/10 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-lg bg-neutral-800 border border-white/10 flex items-center justify-center p-1.5">
-                    <img
-                      src="/images/projects/enginerea/Shield2Button.png"
-                      alt="Metal Shield"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <div>
-                    <h5 className="text-sm font-medium text-white">Viking Iron Shield</h5>
-                    <p className="text-xs text-neutral-400 font-mono">
-                      +5 Armour · Absorbs 2 projectile damage
-                    </p>
-                  </div>
-                </div>
-                <button
-                  disabled={equippedShield === 2 || coins < 40}
-                  onClick={() => {
-                    if (coins >= 40 && equippedShield !== 2) {
-                      setCoins((c) => c - 40);
-                      setEquippedShield(2);
-                    }
-                  }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
-                    equippedShield === 2
-                      ? "bg-white/10 text-neutral-400 border border-white/10 cursor-default"
-                      : coins >= 40
-                      ? "bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/40"
-                      : "bg-white/5 text-neutral-500 border border-white/5 cursor-not-allowed"
-                  }`}
-                >
-                  {equippedShield === 2 ? "Equipped" : "40 Coins"}
-                </button>
-              </div>
-            </div>
-
-            {/* Stat Enhancements */}
-            <div className="space-y-3">
-              <h4 className="text-xs font-mono uppercase tracking-wider text-neutral-400 flex items-center gap-2">
-                <Zap size={13} />
-                Stat Attributes (Character.py)
-              </h4>
-
-              {/* Attack +1 */}
-              <div className="p-4 rounded-xl bg-neutral-900/40 border border-white/10 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-lg bg-neutral-800 border border-white/10 flex items-center justify-center p-1.5">
-                    <img
-                      src="/images/projects/enginerea/AttackUpgradeBtn.png"
-                      alt="Attack Upgrade"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <div>
-                    <h5 className="text-sm font-medium text-white">Brawn Strength +1</h5>
-                    <p className="text-xs text-neutral-400 font-mono">Current: {attackPower} damage per strike</p>
-                  </div>
-                </div>
-                <button
-                  disabled={coins < 10}
-                  onClick={() => {
-                    if (coins >= 10) {
-                      setCoins((c) => c - 10);
-                      setAttackPower((p) => p + 1);
-                    }
-                  }}
-                  className="px-3 py-1.5 rounded-lg text-xs font-mono font-medium bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/40 transition-all"
-                >
-                  10 Coins
-                </button>
-              </div>
-
-              {/* Health +1 */}
-              <div className="p-4 rounded-xl bg-neutral-900/40 border border-white/10 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-lg bg-neutral-800 border border-white/10 flex items-center justify-center p-1.5">
-                    <img
-                      src="/images/projects/enginerea/HealthUpgradeBtn.png"
-                      alt="Health Upgrade"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <div>
-                    <h5 className="text-sm font-medium text-white">Vitality Heart +1</h5>
-                    <p className="text-xs text-neutral-400 font-mono">Current Max: {playerMaxHp} HP</p>
-                  </div>
-                </div>
-                <button
-                  disabled={coins < 10}
-                  onClick={() => {
-                    if (coins >= 10) {
-                      setCoins((c) => c - 10);
-                      setPlayerMaxHp((m) => m + 1);
-                      setPlayerHp((h) => h + 1);
-                    }
-                  }}
-                  className="px-3 py-1.5 rounded-lg text-xs font-mono font-medium bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/40 transition-all"
-                >
-                  10 Coins
-                </button>
-              </div>
-
-              {/* Speed +1 (Sorc Shoes) */}
-              <div className="p-4 rounded-xl bg-neutral-900/40 border border-white/10 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-lg bg-neutral-800 border border-white/10 flex items-center justify-center p-1.5">
-                    <img
-                      src="/images/projects/enginerea/SorcShoesUpgradeBtn.png"
-                      alt="Speed Upgrade"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <div>
-                    <h5 className="text-sm font-medium text-white">Sorcerer Running Shoes +1</h5>
-                    <p className="text-xs text-neutral-400 font-mono">Current: {speed} px/frame velocity</p>
-                  </div>
-                </div>
-                <button
-                  disabled={coins < 10}
-                  onClick={() => {
-                    if (coins >= 10) {
-                      setCoins((c) => c - 10);
-                      setSpeed((s) => s + 1);
-                    }
-                  }}
-                  className="px-3 py-1.5 rounded-lg text-xs font-mono font-medium bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/40 transition-all"
-                >
-                  10 Coins
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 3: STAGES GALLERY */}
-      {activeTab === "stages" && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 border-b border-white/10 pb-3">
-            {[1, 2, 3].map((lvl) => (
-              <button
-                key={lvl}
-                onClick={() => setSelectedStage(lvl as 1 | 2 | 3)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
-                  selectedStage === lvl
-                    ? "bg-white/20 text-white font-bold"
-                    : "text-neutral-400 hover:text-white"
-                }`}
-              >
-                Stage 0{lvl}: {lvl === 1 ? "Ruined Village" : lvl === 2 ? "Magma Caverns" : "Town Hall Boss Arena"}
-              </button>
-            ))}
-          </div>
-
-          <div className="relative rounded-xl overflow-hidden border border-white/10 bg-black aspect-[16/9]">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+          <div className="p-3 rounded-xl bg-neutral-900/40 border border-white/10 flex flex-col items-center text-center space-y-1.5">
             <img
-              src={
-                selectedStage === 1
-                  ? "/images/projects/enginerea/lvl1_bg.png"
-                  : selectedStage === 2
-                  ? "/images/projects/enginerea/lvl2_bg.png"
-                  : "/images/projects/enginerea/player_view.png"
-              }
-              alt={`Stage ${selectedStage}`}
-              className="w-full h-full object-cover"
+              src="/images/projects/enginerea/AxeButton.png"
+              alt="Steel Axe"
+              className="w-10 h-10 object-contain"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-5">
-              <div>
-                <span className="text-xs font-mono text-amber-400">
-                  {selectedStage === 1
-                    ? "Stage 01 · Ruined Village Entrance"
-                    : selectedStage === 2
-                    ? "Stage 02 · The Magma Caverns & Moving Platforms"
-                    : "Stage 03 · Rebuilding the Town Hall & Boss Showdown"}
-                </span>
-                <p className="text-xs text-neutral-300 font-mono mt-1 max-w-xl">
-                  {selectedStage === 1
-                    ? "Bobby navigates fractured stone bridges, introduces basic patrol enemies, and recovers preliminary building materials."
-                    : selectedStage === 2
-                    ? "High-intensity vertical platforming over instant-death lava chasms with bidirectional floating platforms."
-                    : "The climax: face the guardian boss, secure the Town Hall master key, and restore Enginerea to its former glory."}
-                </p>
-              </div>
-            </div>
+            <span className="text-[11px] font-medium text-white">Steel Axe</span>
+            <span className="text-[10px] font-mono text-amber-300">50 Coins · +6 ATK</span>
+          </div>
+
+          <div className="p-3 rounded-xl bg-neutral-900/40 border border-white/10 flex flex-col items-center text-center space-y-1.5">
+            <img
+              src="/images/projects/enginerea/Shield1Button.png"
+              alt="Wood Shield"
+              className="w-10 h-10 object-contain"
+            />
+            <span className="text-[11px] font-medium text-white">Wood Shield</span>
+            <span className="text-[10px] font-mono text-amber-300">30 Coins · +3 Def</span>
+          </div>
+
+          <div className="p-3 rounded-xl bg-neutral-900/40 border border-white/10 flex flex-col items-center text-center space-y-1.5">
+            <img
+              src="/images/projects/enginerea/Shield2Button.png"
+              alt="Iron Shield"
+              className="w-10 h-10 object-contain"
+            />
+            <span className="text-[11px] font-medium text-white">Iron Shield</span>
+            <span className="text-[10px] font-mono text-amber-300">40 Coins · +5 Def</span>
+          </div>
+
+          <div className="p-3 rounded-xl bg-neutral-900/40 border border-white/10 flex flex-col items-center text-center space-y-1.5">
+            <img
+              src="/images/projects/enginerea/AttackUpgradeBtn.png"
+              alt="Attack Upgrade"
+              className="w-10 h-10 object-contain"
+            />
+            <span className="text-[11px] font-medium text-white">Strength +1</span>
+            <span className="text-[10px] font-mono text-neutral-400">10 Coins · +1 DMG</span>
+          </div>
+
+          <div className="p-3 rounded-xl bg-neutral-900/40 border border-white/10 flex flex-col items-center text-center space-y-1.5">
+            <img
+              src="/images/projects/enginerea/HealthUpgradeBtn.png"
+              alt="Health Upgrade"
+              className="w-10 h-10 object-contain"
+            />
+            <span className="text-[11px] font-medium text-white">Vitality +1</span>
+            <span className="text-[10px] font-mono text-neutral-400">10 Coins · +1 HP</span>
+          </div>
+
+          <div className="p-3 rounded-xl bg-neutral-900/40 border border-white/10 flex flex-col items-center text-center space-y-1.5">
+            <img
+              src="/images/projects/enginerea/SorcShoesUpgradeBtn.png"
+              alt="Speed Upgrade"
+              className="w-10 h-10 object-contain"
+            />
+            <span className="text-[11px] font-medium text-white">Speed Shoes</span>
+            <span className="text-[10px] font-mono text-neutral-400">10 Coins · +1 Spd</span>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -1230,6 +443,19 @@ def victoryScreen(screen, match_telemetry):
 /* Main Engineering Page Component                                           */
 /* ------------------------------------------------------------------------- */
 export default function EnginereaProject() {
+  const [copiedClone, setCopiedClone] = useState(false);
+
+  const cloneCommand = `git clone https://github.com/rl4658/enginerea.git
+cd enginerea
+pip install pygame
+python main.py`;
+
+  const handleCopyClone = () => {
+    navigator.clipboard.writeText(cloneCommand);
+    setCopiedClone(true);
+    setTimeout(() => setCopiedClone(false), 2000);
+  };
+
   return (
     <EngineeringArticle
       title="Bobby: The Town of Enginerea — 2D Action Platformer & Physics Engine"
@@ -1412,19 +638,18 @@ export default function EnginereaProject() {
         </div>
       </ArticleSection>
 
-      {/* SECTION 05: INTERACTIVE COMBAT LAB */}
+      {/* SECTION 05: CAMPAIGN GALLERY */}
       <ArticleSection
-        id="interactive-arena"
+        id="campaign-gallery"
         number="05"
-        title="Interactive combat & shop laboratory"
+        title="Campaign stages & in-game shop gallery"
       >
         <div className="space-y-4">
           <p className="text-neutral-300 text-sm leading-relaxed">
-            Test the live mechanics directly in this browser simulation: jump across moving platforms, chuck spinning
-            axes at patrolling enemies, deflect incoming homing fireballs for bonus coins, and open the shop modal to
-            equip tier 1/2 shields and axes!
+            High-resolution visual showcase of the campaign environments, start menu, shop system, and victory
+            telemetry directly from the Pygame asset pipeline:
           </p>
-          <InteractiveEnginereaLab />
+          <CampaignVisualGallery />
         </div>
       </ArticleSection>
 
@@ -1486,6 +711,66 @@ export default function EnginereaProject() {
               2. <strong>Sprite Compositing:</strong> Naming assets dynamically (<code className="text-amber-300 font-mono">StandingAxe&#123;axe&#125;Shield&#123;shield&#125;.png</code>) enabled modular character loadout rendering without maintaining dozens of pre-baked duplicate animations.<br />
               3. <strong>Kinematic Adhesion:</strong> Passing platform velocity vectors during collision resolution solved moving platform slipping with minimal CPU overhead.
             </p>
+          </div>
+        </div>
+      </ArticleSection>
+
+      {/* SECTION 08: RUN LOCALLY IN PYGAME */}
+      <ArticleSection
+        id="run-locally"
+        number="08"
+        title="Play & run locally in Pygame"
+      >
+        <div className="space-y-6 text-neutral-300 leading-relaxed">
+          <p>
+            Because Pygame utilizes native C-bindings (SDL2) for high-performance audio mixing and 150 FPS desktop
+            refresh loops, the authentic intended way to experience Bobby: The Town of Enginerea is to clone and run
+            it locally:
+          </p>
+
+          <div className="editorial-card p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-white font-medium text-sm">
+                <Terminal size={16} className="text-amber-400" />
+                Quickstart Installation (3 Commands)
+              </div>
+              <button
+                onClick={handleCopyClone}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono text-neutral-300 hover:text-white bg-white/5 hover:bg-white/10 transition-colors"
+              >
+                {copiedClone ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
+                {copiedClone ? "Copied" : "Copy Commands"}
+              </button>
+            </div>
+
+            <pre className="p-4 rounded-xl bg-black/80 font-mono text-xs text-amber-200 border border-white/10 leading-relaxed overflow-x-auto">
+              <code>{cloneCommand}</code>
+            </pre>
+
+            <div className="grid sm:grid-cols-2 gap-4 pt-2">
+              <div className="p-4 rounded-xl bg-neutral-900/40 border border-white/5 space-y-2">
+                <h5 className="text-xs font-mono uppercase tracking-wider text-neutral-300 font-bold">
+                  System Requirements
+                </h5>
+                <ul className="text-xs text-neutral-400 font-mono space-y-1">
+                  <li>• Python 3.8+ (Tested on 3.10)</li>
+                  <li>• Pygame 2.1.0+ (<code className="text-neutral-300">pip install pygame</code>)</li>
+                  <li>• Windows, macOS, or Linux</li>
+                </ul>
+              </div>
+
+              <div className="p-4 rounded-xl bg-neutral-900/40 border border-white/5 space-y-2">
+                <h5 className="text-xs font-mono uppercase tracking-wider text-neutral-300 font-bold">
+                  Keyboard Controls
+                </h5>
+                <ul className="text-xs text-neutral-400 font-mono space-y-1">
+                  <li>• <kbd className="px-1 py-0.5 rounded bg-white/10 text-white">[← / →]</kbd> or <kbd className="px-1 py-0.5 rounded bg-white/10 text-white">[A / D]</kbd>: Move Bobby</li>
+                  <li>• <kbd className="px-1 py-0.5 rounded bg-white/10 text-white">[↑]</kbd> or <kbd className="px-1 py-0.5 rounded bg-white/10 text-white">[W]</kbd>: Jump</li>
+                  <li>• <kbd className="px-1 py-0.5 rounded bg-white/10 text-white">[Space]</kbd> or <kbd className="px-1 py-0.5 rounded bg-white/10 text-white">[F]</kbd>: Chuck Axe</li>
+                  <li>• <kbd className="px-1 py-0.5 rounded bg-white/10 text-white">[P]</kbd>: Pause & Open Shop</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </ArticleSection>
