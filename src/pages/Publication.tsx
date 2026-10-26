@@ -14,26 +14,9 @@ const hardware = [
 ];
 function Figure({ file, alt, caption, isCad }: { file: string; alt: string; caption: string; isCad?: boolean }) {
   return (
-    <figure className="research-figure group">
-      <div className={`flex-1 flex items-center justify-center p-4 sm:p-6 min-h-[260px] ${isCad ? "bg-gradient-to-b from-white/[0.04] to-transparent" : "bg-black/40"}`}>
-        {isCad ? (
-          <img
-            src={`/images/publication/${file}`}
-            alt={alt}
-            loading="lazy"
-            className="w-full h-auto max-h-[360px] object-contain drop-shadow-[0_12px_30px_rgba(0,0,0,0.6)] transition-transform duration-300 group-hover:scale-[1.02]"
-          />
-        ) : (
-          <div className="w-full max-w-4xl bg-white p-2.5 sm:p-4 rounded-xl shadow-md border border-neutral-200">
-            <img
-              src={`/images/publication/${file}`}
-              alt={alt}
-              loading="lazy"
-              className="w-full h-auto max-h-[440px] object-contain rounded-lg"
-            />
-          </div>
-        )}
-      </div>
+    <figure className="research-figure">
+      <img src={`/images/publication/${file}`} alt={alt} loading="lazy"
+        className={`block w-full h-auto object-contain ${isCad ? "bg-transparent" : ""}`} />
       <figcaption className="research-caption">{caption}</figcaption>
     </figure>
   );

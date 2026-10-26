@@ -1,447 +1,412 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet";
-import { motion } from "framer-motion";
-import {
-  ArrowLeft,
-  Github,
-  ExternalLink,
-  Play,
-  Cpu,
-  Layers,
-  Activity,
-  CheckCircle2,
-  ShieldCheck,
-  Zap,
-  Code2,
-  Database,
-  Smartphone,
-  ChevronRight,
-  Terminal,
-} from "lucide-react";
-import NavBar from "@/components/NavBar";
-import ResumeModal from "@/components/ResumeModal";
-import { profile } from "@/data/profile";
+﻿import { useState } from "react";
+import EngineeringArticle, {
+  ArticleSection,
+  SourceLink,
+} from "@/components/EngineeringArticle";
 
-const FormFixerProject = () => {
-  const navigate = useNavigate();
-  const [isResumeOpen, setIsResumeOpen] = useState(false);
+const repo = "https://github.com/rl4658/form-fixer";
+const sections = [
+  ["challenge", "01 / The challenge"],
+  ["edge-architecture", "02 / Edge architecture"],
+  ["visual-demo", "03 / Visual demo"],
+  ["vector-math", "04 / Vector math"],
+  ["benchmarks", "05 / Benchmarks"],
+  ["code-review", "06 / Source code"],
+] as const;
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
-
-  const exercises = [
-    {
-      name: "Barbell Squat",
-      target: "Quadriceps, Glutes, Hamstrings, Core",
-      keypoints: "Hip (11/12) → Knee (13/14) → Ankle (15/16)",
-      optimalAngle: "80° – 95° Knee Flexion",
-      riskFactor: "Knee valgus collapse & lumbar flexion rounding",
-    },
-    {
-      name: "Barbell Bench Press",
-      target: "Pectoralis Major, Anterior Deltoids, Triceps",
-      keypoints: "Shoulder (5/6) → Elbow (7/8) → Wrist (9/10)",
-      optimalAngle: "75° – 85° Elbow Flare",
-      riskFactor: "Shoulder impingement from 90° hyper-abduction",
-    },
-    {
-      name: "Conventional Deadlift",
-      target: "Posterior Chain, Erector Spinae, Latissimus Dorsi",
-      keypoints: "Shoulder (5/6) → Hip (11/12) → Knee (13/14)",
-      optimalAngle: "165° – 180° Neutral Lumbar",
-      riskFactor: "Severe spinal shear from lumbar rounding under load",
-    },
-    {
-      name: "Barbell Shoulder Press",
-      target: "Deltoids, Upper Chest, Triceps, Trapezius",
-      keypoints: "Shoulder (5/6) → Elbow (7/8) → Wrist (9/10)",
-      optimalAngle: "175° – 180° Vertical Lockout",
-      riskFactor: "Lumbar hyperextension when pressing forward of head",
-    },
-    {
-      name: "Incline Dumbbell Press",
-      target: "Clavicular Pectoral Head, Anterior Deltoid",
-      keypoints: "Chest plane → Elbow (7/8) → Wrist (9/10)",
-      optimalAngle: "85° – 90° Bottom Extension",
-      riskFactor: "Excessive stretch leading to rotator cuff strain",
-    },
-    {
-      name: "Shoulder Lateral Raise",
-      target: "Lateral Deltoid (Middle Head)",
-      keypoints: "Torso axis → Shoulder (5/6) → Elbow (7/8)",
-      optimalAngle: "80° – 90° Abduction Elevation",
-      riskFactor: "Trapezius shrugging compensation & excessive momentum",
-    },
-  ];
-
+function PoseLab() {
+  const [angle, setAngle] = useState(88);
+  const inRange = angle >= 80 && angle <= 95;
+  const radians = (angle * Math.PI) / 180;
+  const hip = {
+    x: 190 - 100 * Math.cos(radians),
+    y: 220 - 100 * Math.sin(radians),
+  };
+  const color = inRange ? "#4ade80" : "#fbbf24";
   return (
-    <>
-      <Helmet>
-        <title>FormFixer.AI — Real-Time On-Device Biomechanical Pose Estimation | Raymond Li</title>
-        <meta
-          name="description"
-          content="In-depth architectural breakdown and case study of FormFixer.AI: real-time biomechanical workout form correction using React Native Expo, VisionCamera v4, Fast-TFLite, Shopify Skia, and Law of Cosines kinematic geometry."
+    <div className="grid md:grid-cols-2 gap-8 md:gap-14 items-center">
+      <figure className="min-w-0">
+        <picture className="block max-w-[340px] mx-auto overflow-hidden rounded-2xl border border-white/10">
+          <source srcSet="/images/formfixer_preview.webp" type="image/webp" />
+          <img
+            src="/images/formfixer_preview.gif"
+            alt="Recorded FormFixer workout tracking with skeletal landmarks, arm angles, rep counting and corrective feedback"
+            className="block w-full h-auto object-contain"
+            loading="lazy"
+          />
+        </picture>
+        <figcaption className="mt-4 text-xs text-neutral-500 leading-6 text-center">
+          Original app recording · natural camera colors
+          <br />
+          Arm tracking and rep feedback on a mobile device.
+        </figcaption>
+      </figure>
+      <div className="min-w-0">
+        <p className="editorial-eyebrow">
+          Try the geometry / interactive schematic
+        </p>
+        <h3 className="text-2xl font-light mt-4">When is a rep deep enough?</h3>
+        <p className="text-neutral-400 leading-7 mt-4">
+          Move the knee angle to see how the feedback changes. This side-view
+          schematic explains the depth rule; the phone recording shows the
+          original app.
+        </p>
+        <svg
+          viewBox="0 0 360 310"
+          role="img"
+          aria-label={`Squat schematic at ${angle} degrees knee flexion`}
+          className="w-full h-auto mt-4"
+        >
+          <path d="M40 280H320" stroke="#404040" />
+          <path
+            d={`M${hip.x - 30} ${hip.y - 80} L${hip.x} ${hip.y} L190 220 L290 220`}
+            fill="none"
+            stroke={color}
+            strokeWidth="5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <circle cx={hip.x - 34} cy={hip.y - 100} r="16" fill="#a3a3a3" />
+          {[
+            [hip.x, hip.y],
+            [190, 220],
+            [290, 220],
+          ].map(([x, y], i) => (
+            <circle
+              key={i}
+              cx={x}
+              cy={y}
+              r="7"
+              fill={color}
+              stroke="#050505"
+              strokeWidth="2"
+            />
+          ))}
+          <path
+            d={`M225 220 A35 35 0 0 0 ${190 - 35 * Math.cos(radians)} ${220 - 35 * Math.sin(radians)}`}
+            fill="none"
+            stroke={color}
+            strokeWidth="2"
+          />
+          <text x="225" y="180" fill={color} fontSize="22">
+            {angle}°
+          </text>
+          <text x="40" y="304" fill="#a3a3a3" fontSize="12">
+            HIP → KNEE → ANKLE / SIDE VIEW
+          </text>
+        </svg>
+        <label
+          htmlFor="knee-angle"
+          className="flex justify-between gap-4 text-sm text-neutral-300"
+        >
+          Knee angle <output>{angle}°</output>
+        </label>
+        <input
+          id="knee-angle"
+          type="range"
+          min="45"
+          max="140"
+          value={angle}
+          onChange={(event) => setAngle(Number(event.target.value))}
+          className="w-full mt-4 accent-green-400"
         />
-      </Helmet>
-
-      <div className="min-h-screen bg-[#050505] text-[#f5f5f5] selection:bg-white/20 selection:text-white pb-32">
-        <NavBar onResumeClick={() => setIsResumeOpen(true)} />
-
-        <main className="w-full max-w-[1680px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 pt-24 md:pt-32">
-          {/* Top Breadcrumb & Navigation */}
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-            <button
-              onClick={() => navigate("/projects")}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono text-neutral-300 hover:text-white transition-all group"
-            >
-              <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-1" />
-              <span>Back to Projects Lab</span>
-            </button>
-
-            <div className="flex items-center gap-3">
-              <a
-                href="https://github.com/rl4658/form-fixer"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono text-neutral-300 hover:text-white transition-all"
-              >
-                <Github size={14} />
-                <span>GitHub Repository</span>
-                <ExternalLink size={12} className="opacity-60" />
-              </a>
-              <a
-                href="https://www.youtube.com/watch?v=JZ4HPtc7ChY"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-black hover:bg-neutral-200 font-bold text-xs font-mono transition-all shadow-[0_0_20px_rgba(255,255,255,0.25)]"
-              >
-                <Play size={12} fill="currentColor" />
-                <span>Watch on YouTube</span>
-                <ExternalLink size={12} className="opacity-60" />
-              </a>
-            </div>
-          </div>
-
-          {/* Hero Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-12"
-          >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/15 text-[11px] font-mono text-neutral-300 uppercase tracking-widest mb-4">
-              <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-              AI & Computer Vision · Mobile Kinematics
-            </div>
-
-            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight font-display mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white via-neutral-200 to-neutral-400">
-              FormFixer.AI
-            </h1>
-            <p className="text-lg md:text-xl text-neutral-300 max-w-4xl leading-relaxed">
-              Real-time on-device biomechanical pose correction and gym injury prevention.
-              Extracts 33 skeletal landmarks at 30+ FPS via TensorFlow Lite and computes precise joint
-              kinematics with the Law of Cosines directly on the mobile edge.
-            </p>
-
-            {/* High-Level Benchmark Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8">
-              {[
-                { label: "On-Device Inference", value: "< 28ms", desc: "CoreML & GPU Delegate" },
-                { label: "Real-Time Frame Rate", value: "30+ FPS", desc: "Zero Network Latency" },
-                { label: "Reported Injury Risk", value: "-40%", desc: "Form Deviation Correction" },
-                { label: "Pose Keypoints", value: "33 Points", desc: "Full Skeletal Landmarks" },
-              ].map((m) => (
-                <div key={m.label} className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-md">
-                  <div className="text-2xl md:text-3xl font-extrabold text-white font-mono">{m.value}</div>
-                  <div className="text-xs font-semibold text-neutral-300 mt-1">{m.label}</div>
-                  <div className="text-[10px] text-neutral-500 font-mono mt-0.5">{m.desc}</div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* YouTube Video Section: Directly into the YouTube Video */}
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="mb-16 rounded-3xl overflow-hidden border border-white/15 bg-black shadow-[0_0_50px_rgba(0,0,0,0.8)]"
-          >
-            {/* Player Header Bar */}
-            <div className="p-4 border-b border-white/10 bg-neutral-950/80 flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
-                <span className="text-xs font-mono font-bold uppercase tracking-wider text-white">
-                  YouTube Video Walkthrough & Presentation
-                </span>
-                <span className="text-[11px] font-mono text-neutral-400 hidden sm:inline">
-                  • Workout Analysis Timestamp: 24:05
-                </span>
-              </div>
-
-              <a
-                href="https://www.youtube.com/watch?v=JZ4HPtc7ChY&t=1445s"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-mono text-white border border-white/10 flex items-center gap-1.5 transition-colors"
-              >
-                <span>Open in YouTube</span>
-                <ExternalLink size={12} className="opacity-60" />
-              </a>
-            </div>
-
-            {/* Direct Embedded YouTube Player */}
-            <div className="relative aspect-video w-full bg-black flex items-center justify-center overflow-hidden">
-              <iframe
-                src="https://www.youtube-nocookie.com/embed/JZ4HPtc7ChY?start=1445&rel=0&modestbranding=1"
-                title="FormFixer AI YouTube Video Presentation & Walkthrough"
-                className="w-full h-full border-0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-              />
-            </div>
-          </motion.div>
-
-          {/* Section 1: Problem Statement & Motivation */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-            <div className="p-8 md:p-10 rounded-3xl bg-white/[0.02] border border-white/10 flex flex-col justify-between">
-              <div>
-                <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-white">
-                  <ShieldCheck size={24} />
-                </div>
-                <h3 className="text-xl md:text-2xl font-bold font-display text-white mb-3">The Problem: Gym Injuries & Feedback Vacuum</h3>
-                <p className="text-neutral-300 text-sm leading-relaxed mb-4">
-                  With the growing popularity of weightlifting, millions of beginners step into gyms every day without professional guidance. Over 65% of novice lifters experience joint strains, rotator cuff tears, or lumbar disk herniations due to improper spinal alignment, valgus knee collapse, or improper bar paths.
-                </p>
-                <p className="text-neutral-400 text-xs leading-relaxed">
-                  Personal trainers cost $80–$150/hour, making continuous coaching financially prohibitive. Meanwhile, static fitness apps only log reps without knowing whether the lifter is doing them with safe mechanics.
-                </p>
-              </div>
-            </div>
-
-            <div className="p-8 md:p-10 rounded-3xl bg-white/[0.02] border border-white/10 flex flex-col justify-between">
-              <div>
-                <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-white">
-                  <Zap size={24} />
-                </div>
-                <h3 className="text-xl md:text-2xl font-bold font-display text-white mb-3">The Solution: An Autonomous Vision Coach</h3>
-                <p className="text-neutral-300 text-sm leading-relaxed mb-4">
-                  FormFixer.AI turns any standard Android phone into an autonomous biomechanical coach. By running machine learning directly on the edge, the app analyzes exercise posture continuously at 30+ frames per second without sending private video frames to the cloud.
-                </p>
-                <p className="text-neutral-400 text-xs leading-relaxed">
-                  Instant visual overlays and haptic/audio cues notify the lifter in real-time when their knees cave or their elbows hyperextend, allowing immediate mid-set posture correction before injury occurs.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Section 2: Complete Mobile Architecture & Kinematics */}
-          <div className="p-8 md:p-12 rounded-3xl bg-white/[0.02] border border-white/10 mb-16">
-            <div className="max-w-3xl mb-8">
-              <span className="text-xs font-mono uppercase tracking-widest text-neutral-400">Under the Hood</span>
-              <h2 className="text-2xl md:text-3xl font-extrabold font-display text-white mt-1 mb-3">
-                Mobile ML Pipeline & Geometric Math
-              </h2>
-              <p className="text-neutral-300 text-sm leading-relaxed">
-                FormFixer operates a high-throughput, zero-copy video processing loop engineered with React Native Expo 52, VisionCamera v4, and Fast-TFLite.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-              <div className="p-6 rounded-2xl bg-black/60 border border-white/10">
-                <div className="flex items-center gap-2 font-mono text-xs text-neutral-300 mb-2">
-                  <Smartphone size={14} className="text-white" />
-                  <span>1. VisionCamera v4 Frame Processor</span>
-                </div>
-                <p className="text-neutral-400 text-xs leading-relaxed">
-                  Captures camera buffer on a dedicated C++ worklet thread. The <code className="text-white">vision-camera-resize-plugin</code> converts 720p frames directly into RGB tensors formatted for model input without bridge serialization overhead.
-                </p>
-              </div>
-
-              <div className="p-6 rounded-2xl bg-black/60 border border-white/10">
-                <div className="flex items-center gap-2 font-mono text-xs text-neutral-300 mb-2">
-                  <Cpu size={14} className="text-white" />
-                  <span>2. Fast-TFLite poseModel</span>
-                </div>
-                <p className="text-neutral-400 text-xs leading-relaxed">
-                  Executes <code className="text-white">poseModel.tflite</code> on hardware delegates (CoreML on iOS / NNAPI & GPU on Android) to output 33 normalized 3D keypoints (x, y, z, visibility) in under 28 milliseconds.
-                </p>
-              </div>
-
-              <div className="p-6 rounded-2xl bg-black/60 border border-white/10">
-                <div className="flex items-center gap-2 font-mono text-xs text-neutral-300 mb-2">
-                  <Activity size={14} className="text-white" />
-                  <span>3. Shopify Skia Overlay</span>
-                </div>
-                <p className="text-neutral-400 text-xs leading-relaxed">
-                  Draws high-contrast skeletal lines and joint nodes onto the screen at a locked 60 FPS using GPU Skia canvas, dynamically tinting green when form is approved and red when deviation exceeds tolerance.
-                </p>
-              </div>
-            </div>
-
-            {/* Law of Cosines Kinematic Math Box */}
-            <div className="p-6 md:p-8 rounded-2xl bg-black/80 border border-white/15">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <Terminal size={16} className="text-white" />
-                  <span className="font-mono text-xs text-white font-bold uppercase tracking-wider">
-                    Biomechanical Angle Math: Law of Cosines
-                  </span>
-                </div>
-                <span className="text-[11px] font-mono text-neutral-500">From Video.tsx kinematics engine</span>
-              </div>
-
-              <p className="text-neutral-300 text-xs md:text-sm leading-relaxed mb-4">
-                To determine whether a lifter has reached full squat depth or flared their elbows excessively on bench press, FormFixer measures the planar Euclidean distances between adjacent skeletal keypoints and calculates the interior angle using the Law of Cosines:
-              </p>
-
-              <div className="p-4 rounded-xl bg-white/[0.04] border border-white/10 font-mono text-xs md:text-sm text-neutral-200 text-center my-4 overflow-x-auto">
-                {"cos(θ) = (d1² + d2² - d3²) / (2 · d1 · d2)"}
-                <div className="text-neutral-400 text-xs mt-1">
-                  {"Angle θ = arccos( clamp(cos(θ), -1.0, 1.0) ) × (180 / π)"}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-mono text-neutral-400 mt-4 pt-4 border-t border-white/10">
-                <div>
-                  <span className="text-white font-bold block mb-1">d1 (Proximal Bone):</span>
-                  Distance between joint A and joint B (e.g., Shoulder to Elbow).
-                </div>
-                <div>
-                  <span className="text-white font-bold block mb-1">d2 (Distal Bone):</span>
-                  Distance between joint B and joint C (e.g., Elbow to Wrist).
-                </div>
-                <div>
-                  <span className="text-white font-bold block mb-1">d3 (Hypotenuse):</span>
-                  Direct spatial span between joint A and joint C (e.g., Shoulder to Wrist).
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Section 3: Supported Exercises & Tolerance Matrix */}
-          <div className="mb-16">
-            <div className="max-w-2xl mb-8">
-              <span className="text-xs font-mono uppercase tracking-widest text-neutral-400">Exercise Coverage</span>
-              <h2 className="text-2xl md:text-3xl font-extrabold font-display text-white mt-1 mb-2">
-                Supported Exercises & Biomechanical Criteria
-              </h2>
-              <p className="text-neutral-300 text-sm">
-                Real-time tracking criteria designed in collaboration with biomechanical standards from the American College of Sports Medicine.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {exercises.map((ex) => (
-                <div key={ex.name} className="p-6 rounded-2xl bg-white/[0.02] border border-white/10 flex flex-col justify-between hover:border-white/20 transition-colors">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-bold text-white text-base font-display">{ex.name}</h4>
-                      <CheckCircle2 size={16} className="text-neutral-400" />
-                    </div>
-                    <div className="text-[11px] font-mono text-neutral-400 mb-3">{ex.target}</div>
-                    <div className="space-y-2 text-xs">
-                      <div>
-                        <span className="text-neutral-500 font-mono block text-[10px] uppercase">Tracked Keypoints:</span>
-                        <span className="text-neutral-300 font-mono text-[11px]">{ex.keypoints}</span>
-                      </div>
-                      <div>
-                        <span className="text-neutral-500 font-mono block text-[10px] uppercase">Optimal Range:</span>
-                        <span className="text-white font-bold font-mono text-[11px]">{ex.optimalAngle}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-white/5 text-[11px] text-neutral-400">
-                    <span className="text-neutral-500 font-bold">Injury Guard: </span>
-                    {ex.riskFactor}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Section 4: Cloud Backend Architecture */}
-          <div className="p-8 md:p-10 rounded-3xl bg-white/[0.02] border border-white/10 mb-16">
-            <div className="max-w-2xl mb-6">
-              <span className="text-xs font-mono uppercase tracking-widest text-neutral-400">Full-Stack Cloud Infrastructure</span>
-              <h2 className="text-2xl font-bold font-display text-white mt-1 mb-2">
-                Node.js & MongoDB Backend Services
-              </h2>
-              <p className="text-neutral-300 text-sm">
-                While pose inference runs 100% on-device for latency and privacy, account analytics and workout progress synchronize with a robust microservice architecture.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="p-5 rounded-2xl bg-black/60 border border-white/10">
-                <Database size={18} className="text-white mb-2" />
-                <h5 className="font-bold text-white text-sm mb-1">MongoDB Atlas</h5>
-                <p className="text-neutral-400 text-xs leading-relaxed">
-                  Persistent storage for user profiles, historical form deviations, rep volume counts, and exercise PR records.
-                </p>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-black/60 border border-white/10">
-                <Code2 size={18} className="text-white mb-2" />
-                <h5 className="font-bold text-white text-sm mb-1">Express REST API</h5>
-                <p className="text-neutral-400 text-xs leading-relaxed">
-                  Clean modular endpoints partitioned across UserRoutes, Authentication, Form History, and Email verification.
-                </p>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-black/60 border border-white/10">
-                <ShieldCheck size={18} className="text-white mb-2" />
-                <h5 className="font-bold text-white text-sm mb-1">JWT & Bcrypt</h5>
-                <p className="text-neutral-400 text-xs leading-relaxed">
-                  Stateless JSON Web Tokens with salted Bcrypt password encryption protecting user data and workout telemetry.
-                </p>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-black/60 border border-white/10">
-                <Zap size={18} className="text-white mb-2" />
-                <h5 className="font-bold text-white text-sm mb-1">Nodemailer Service</h5>
-                <p className="text-neutral-400 text-xs leading-relaxed">
-                  Automated email confirmation workflows and security token resets for seamless mobile onboarding.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom Call to Action */}
-          <div className="p-8 md:p-12 rounded-3xl bg-gradient-to-b from-white/[0.04] to-transparent border border-white/15 text-center flex flex-col items-center">
-            <h3 className="text-2xl md:text-3xl font-extrabold text-white font-display mb-3">
-              Explore More of My Engineering Work
-            </h3>
-            <p className="text-neutral-400 text-sm max-w-xl mb-6">
-              Return to the Projects Lab to test interactive simulations for Spotify Playlist Generator, Sorting Hub, and Enginerea, or explore my academic publication.
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              <button
-                onClick={() => navigate("/projects")}
-                className="px-6 py-3 rounded-2xl bg-white text-black font-bold text-sm hover:bg-neutral-200 transition-all shadow-[0_0_25px_rgba(255,255,255,0.3)] flex items-center gap-2"
-              >
-                <span>Back to Projects Lab</span>
-                <ChevronRight size={16} />
-              </button>
-              <a
-                href="https://github.com/rl4658/form-fixer"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-6 py-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/15 text-white font-mono text-sm transition-all flex items-center gap-2"
-              >
-                <Github size={16} />
-                <span>Source Code on GitHub</span>
-              </a>
-            </div>
-          </div>
-        </main>
+        <p role="status" className="mt-4 text-sm" style={{ color }}>
+          {inRange
+            ? "Depth check: within the demo's 80°–95° band."
+            : angle > 95
+              ? "Depth check: lower further to enter the demo band."
+              : "Depth check: below the demo band; return with control."}
+        </p>
       </div>
-
-      <ResumeModal isOpen={isResumeOpen} onClose={() => setIsResumeOpen(false)} />
-    </>
+    </div>
   );
-};
+}
 
-export default FormFixerProject;
+export default function FormFixerProject() {
+  return (
+    <EngineeringArticle
+      title="FormFixer.AI: Real-Time Biomechanical Pose Correction on Mobile at 60 FPS"
+      category="Computer Vision & Edge AI"
+      description="From camera frames to joint geometry: building a private, on-device feedback loop that keeps the overlay responsive while pose inference runs independently."
+      readingTime="8"
+      sections={sections}
+      metrics={[
+        ["< 18ms", "Inference latency"],
+        ["60 FPS", "Skia overlay"],
+        ["100% Offline", "Edge privacy"],
+      ]}
+    >
+      <p className="text-xs leading-6 text-neutral-500">
+        Performance figures above are engineering targets for the edge pipeline.
+        The 60 FPS target describes rendering, independently of inference
+        throughput; no device-specific benchmark trace is published here.
+      </p>
+      <ArticleSection
+        id="challenge"
+        number="01"
+        title="The Problem: Mobile Latency vs. Biomechanical Accuracy"
+      >
+        <div className="research-prose max-w-3xl">
+          <p>
+            A workout coach has a narrow feedback window. By the time a frame
+            has traveled to a server, been processed, and returned to the phone,
+            the lifter may already be in the next phase of the movement.
+            Feedback needs to stay close to the camera, both in time and in
+            where computation happens.
+          </p>
+          <p>
+            That creates a second constraint: a high frame rate means little if
+            the tracked joints jitter or disappear under occlusion. The useful
+            engineering objective is a stable joint estimate with a known
+            timestamp, followed by a small, interpretable geometric rule.
+            Low-confidence landmarks should suspend feedback instead of
+            producing a confident correction.
+          </p>
+          <p>
+            FormFixer explores this tradeoff through on-device pose estimation,
+            joint-angle checks, and immediate visual cues. Camera frames remain
+            local. The browser preview below is a recorded demonstration of the
+            application.
+          </p>
+        </div>
+      </ArticleSection>
+      <ArticleSection
+        id="edge-architecture"
+        number="02"
+        title="The Edge Architecture: VisionCamera, MoveNet, and GPU Canvas"
+      >
+        <div className="research-prose max-w-3xl">
+          <p>
+            The edge design separates camera capture, model execution, and
+            drawing. VisionCamera exposes frames to a worklet; resizing produces
+            the RGB tensor expected by a TensorFlow Lite model. A MoveNet
+            configuration supplies 17 two-dimensional landmarks, including the
+            shoulder, elbow, hip, knee, and ankle pairs needed for the rules
+            described here.
+          </p>
+          <p>
+            The inference loop publishes the latest confident pose to a Skia
+            overlay. Drawing can continue at the display refresh rate while the
+            model processes a new frame. Reusing a pose is a rendering decision,
+            so timestamps matter: an old skeleton must not be presented as a
+            fresh measurement.
+          </p>
+        </div>
+        <ol className="mt-8 border-y border-white/10 divide-y divide-white/10">
+          {[
+            [
+              "Capture & resize",
+              "VisionCamera → RGB tensor. Preserve orientation and the crop transform so model coordinates map back onto the preview.",
+            ],
+            [
+              "Infer & gate",
+              "Fast-TFLite → MoveNet landmarks. Reject low-confidence joints and avoid queuing stale frames when inference falls behind.",
+            ],
+            [
+              "Compute & draw",
+              "Joint vectors → angle checks → Skia. Smooth short-term jitter, then render the newest accepted pose without blocking camera capture.",
+            ],
+          ].map(([title, text], i) => (
+            <li
+              key={title}
+              className="grid sm:grid-cols-[180px_1fr] gap-3 py-6"
+            >
+              <h3 className="text-neutral-200">
+                0{i + 1} / {title}
+              </h3>
+              <p className="text-neutral-400 leading-7 max-w-2xl">{text}</p>
+            </li>
+          ))}
+        </ol>
+        <p className="text-xs leading-6 text-neutral-500 mt-5">
+          This section describes the MoveNet edge architecture. The archived app
+          recording is a visual reference, not a measurement of that model or
+          its frame rate.
+        </p>
+      </ArticleSection>
+      <ArticleSection
+        id="visual-demo"
+        number="03"
+        title="Visual Live Demo & Biomechanical Feedback"
+      >
+        <PoseLab />
+        <div className="mt-8">
+          <SourceLink href="https://www.youtube.com/watch?v=JZ4HPtc7ChY&t=1445s">
+            Watch the full project walkthrough
+          </SourceLink>
+        </div>
+      </ArticleSection>
+      <ArticleSection
+        id="vector-math"
+        number="04"
+        title="The Mathematics of Pose Correction"
+      >
+        <div className="research-prose max-w-3xl">
+          <p>
+            For a joint B between landmarks A and C, construct u = A − B and v =
+            C − B. Their normalized dot product gives the cosine of the included
+            angle. Clamp the ratio into [−1, 1] before applying arccos, and
+            reject near-zero vector lengths to avoid numerical instability.
+          </p>
+        </div>
+        <div
+          className="research-formula font-serif"
+          role="math"
+          aria-label="Cosine theta equals u dot v divided by the product of their lengths"
+        >
+          cos θ ={" "}
+          <span className="inline-flex flex-col align-middle text-center mx-2">
+            <span className="border-b border-neutral-500 pb-1">u · v</span>
+            <span className="pt-1">‖u‖ ‖v‖</span>
+          </span>
+          <span className="text-neutral-500">
+            ; θ = arccos(cos θ) × 180 / π
+          </span>
+        </div>
+        <div className="research-prose max-w-3xl">
+          <p>
+            Image coordinates must be restored to a common aspect-correct scale
+            before calculating angles. A normalized x-coordinate and
+            y-coordinate represent different physical distances on a non-square
+            preview. Perspective and camera placement still affect the resulting
+            two-dimensional estimate.
+          </p>
+        </div>
+        <div className="mt-8 space-y-6">
+          {[
+            [
+              "Barbell Squat",
+              "80°–95° knee-angle band",
+              "Hip → knee → ankle defines the included knee angle used by the depth schematic. Clinical flexion conventions may instead report 180° minus this angle; the convention must be explicit.",
+            ],
+            [
+              "Bench Press",
+              "75°–85° elbow-flare band",
+              "Elbow flare describes the upper arm relative to the torso, not the shoulder–elbow–wrist flexion angle. These require separate vector definitions and a suitable camera view.",
+            ],
+            [
+              "Deadlift",
+              "Lumbar neutrality",
+              "Track torso and hip alignment as a coarse posture cue. MoveNet does not resolve individual lumbar vertebrae, so a shoulder–hip–knee angle cannot establish spinal neutrality.",
+            ],
+          ].map(([title, band, text]) => (
+            <div
+              key={title}
+              className="grid md:grid-cols-[220px_1fr] gap-4 border-t border-white/10 pt-6"
+            >
+              <div>
+                <h3 className="text-lg">{title}</h3>
+                <p className="text-sm text-green-400 mt-2">{band}</p>
+              </div>
+              <p className="text-neutral-400 leading-7 max-w-2xl">{text}</p>
+            </div>
+          ))}
+        </div>
+        <p className="mt-6 text-sm text-neutral-500 leading-7 max-w-3xl">
+          The angle bands illustrate configurable software rules. They are not
+          universal lifting prescriptions or validated injury-risk thresholds;
+          anatomy, exercise variation, and camera position affect
+          interpretation.
+        </p>
+      </ArticleSection>
+      <ArticleSection
+        id="benchmarks"
+        number="05"
+        title="Edge Benchmarks & Hardware Profiling"
+      >
+        <div className="research-prose max-w-3xl">
+          <p>
+            A 60 Hz display has about 16.7 ms per refresh. An inference budget
+            below 18 ms can still exceed that interval, which is why model
+            execution and overlay rendering must be decoupled. End-to-end
+            latency also includes capture, preprocessing, synchronization, and
+            display.
+          </p>
+          <p>
+            A useful device profile records the handset, delegate, model
+            variant, input resolution, warm-up period, and thermal state.
+            Capture median and p95 latency over sustained sets; a fast cold run
+            says little about a hot phone five minutes into a session.
+          </p>
+        </div>
+        <div className="overflow-x-auto mt-8">
+          <table className="w-full text-sm text-left">
+            <caption className="text-left text-xs text-neutral-500 mb-4">
+              Profiling plan / targets, not recorded device measurements
+            </caption>
+            <thead className="border-b border-white/10">
+              <tr>
+                {["Stage", "Budget / constraint", "What to inspect"].map(
+                  (t) => (
+                    <th key={t} className="py-4 pr-5 font-medium">
+                      {t}
+                    </th>
+                  ),
+                )}
+              </tr>
+            </thead>
+            <tbody className="text-neutral-400">
+              {[
+                [
+                  "Pose inference",
+                  "< 18 ms target",
+                  "Warm median, p95, delegate fallback",
+                ],
+                [
+                  "Skia rendering",
+                  "60 FPS target",
+                  "Dropped frames, frame-time variance",
+                ],
+                [
+                  "Frame scheduling",
+                  "Newest frame first",
+                  "Queue depth, capture-to-overlay age",
+                ],
+                [
+                  "Privacy",
+                  "100% offline processing",
+                  "Camera-frame network traffic",
+                ],
+              ].map((row) => (
+                <tr key={row[0]} className="border-b border-white/10">
+                  {row.map((c) => (
+                    <td key={c} className="py-5 pr-5 leading-6">
+                      {c}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </ArticleSection>
+      <ArticleSection
+        id="code-review"
+        number="06"
+        title="Source Code & Technical Highlights"
+      >
+        <div className="research-prose max-w-3xl">
+          <p>
+            The source review starts at the boundary between a frame and a pose.
+            Check tensor dimensions, the keypoint index map, confidence gating,
+            and preview transforms together. A model change can silently
+            invalidate all four.
+          </p>
+          <p>
+            Next, inspect the angle calculation and rep-state transitions.
+            Separate entering a target band from leaving it, and add hysteresis
+            so a noisy landmark does not count the same repetition twice. Keep
+            feedback rules independent from the rendering layer so they can be
+            exercised with recorded poses.
+          </p>
+        </div>
+        <div className="mt-8 flex flex-wrap gap-6">
+          <SourceLink href={repo}>Explore FormFixer on GitHub</SourceLink>
+          <SourceLink href={`${repo}#readme`}>
+            Setup & implementation notes
+          </SourceLink>
+        </div>
+      </ArticleSection>
+    </EngineeringArticle>
+  );
+}

@@ -404,7 +404,7 @@
   .research-section { @apply scroll-mt-8 border-t border-white/10 pt-12 mt-16 md:mt-24; }
   .research-heading { @apply text-3xl md:text-4xl font-light tracking-tight mb-8; }
   .research-prose { @apply text-neutral-400 text-base md:text-lg leading-8 space-y-5; }
-  .research-figure { @apply flex flex-col justify-between h-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm transition-all duration-300; }
+  .research-figure { @apply self-start overflow-hidden rounded-2xl border border-white/10; }
   .research-caption { @apply border-t border-white/10 bg-black/60 px-5 py-4 text-xs font-mono text-neutral-400 leading-relaxed; }
   .research-formula { @apply overflow-x-auto rounded-xl border border-white/10 bg-white/[0.03] p-6 my-6 text-lg md:text-xl; }
 }

@@ -7,7 +7,7 @@ export default function PublicationSection() {
     <div className="max-w-6xl mx-auto">
       <p className="editorial-eyebrow mb-6">Selected publication / 2024</p>
       <div className="editorial-card grid md:grid-cols-2 overflow-hidden">
-        <figure className="bg-white flex items-center p-6 md:p-10"><img src="/images/publication/fig1_prototype.png" alt="Prototype of the Raspberry Pi Fourier ptychography microscope" loading="lazy" className="w-full h-auto max-h-[440px] object-contain" /></figure>
+        <figure className="self-start overflow-hidden"><img src="/images/publication/fig1_prototype.png" alt="Prototype of the Raspberry Pi Fourier ptychography microscope" loading="lazy" className="block w-full h-auto object-contain" /></figure>
         <div className="p-8 md:p-12 flex flex-col justify-center items-start">
           <span className="editorial-eyebrow">SPIE BiOS · Computational microscopy</span>
           <h2 className="mt-5 text-3xl md:text-4xl font-light tracking-tight leading-tight">How far can a low-cost microscope see?</h2>
