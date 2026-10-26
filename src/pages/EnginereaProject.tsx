@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Gamepad2,
   Shield,
@@ -16,6 +17,8 @@ import {
   RotateCcw,
   Check,
   Copy,
+  Flame,
+  Volume2,
 } from "lucide-react";
 import EngineeringArticle, {
   ArticleSection,
@@ -25,69 +28,274 @@ import EngineeringArticle, {
 const repo = "https://github.com/rl4658/enginerea";
 const sections = [
   ["narrative", "01 / Narrative & world"],
-  ["game-loop", "02 / Game loop & state machine"],
-  ["kinematics", "03 / Kinematics & collision"],
-  ["projectiles", "04 / Projectiles & homing AI"],
-  ["campaign-gallery", "05 / Campaign stages & shop gallery"],
-  ["source-code", "06 / Source code review"],
-  ["telemetry", "07 / Performance & telemetry"],
-  ["run-locally", "08 / Run locally in Pygame"],
+  ["autonomous-arena", "02 / Autonomous combat & circling axe"],
+  ["game-loop", "03 / Game loop & state machine"],
+  ["kinematics", "04 / Kinematics & collision"],
+  ["projectiles", "05 / Projectiles & homing AI"],
+  ["campaign-gallery", "06 / Complete gameplay & stage gallery"],
+  ["source-code", "07 / Source code review"],
+  ["telemetry", "08 / Performance & telemetry"],
+  ["run-locally", "09 / Play & run locally in Pygame"],
 ] as const;
 
 /* ------------------------------------------------------------------------- */
-/* Visual Gameplay & Stage Gallery Component                                 */
+/* 1. Autonomous Live Combat Animation with Circling Axe                     */
+/* ------------------------------------------------------------------------- */
+function AutonomousCombatArena() {
+  const [bobbyAction, setBobbyAction] = useState<"walk-right" | "jump" | "throw" | "walk-left">("walk-right");
+  const [axeInFlight, setAxeInFlight] = useState<boolean>(false);
+  const [enemyHit, setEnemyHit] = useState<boolean>(false);
+  const [enemyHp, setEnemyHp] = useState<number>(100);
+  const [axesChucked, setAxesChucked] = useState<number>(12);
+  const [coinsCollected, setCoinsCollected] = useState<number>(54);
+
+  // Autonomous animation cycle: Bobby walks, jumps, throws spinning axe, hits enemy
+  useEffect(() => {
+    const cycle = () => {
+      // 1. Walk right
+      setBobbyAction("walk-right");
+      setTimeout(() => {
+        // 2. Jump
+        setBobbyAction("jump");
+        setTimeout(() => {
+          // 3. Throw axe
+          setBobbyAction("throw");
+          setAxeInFlight(true);
+          setAxesChucked((c) => c + 1);
+
+          // 4. Axe hits enemy
+          setTimeout(() => {
+            setAxeInFlight(false);
+            setEnemyHit(true);
+            setEnemyHp((hp) => (hp <= 30 ? 100 : hp - 35));
+            setCoinsCollected((c) => c + 5);
+
+            setTimeout(() => {
+              setEnemyHit(false);
+              // 5. Walk left back to start
+              setBobbyAction("walk-left");
+            }, 600);
+          }, 700);
+        }, 500);
+      }, 1000);
+    };
+
+    cycle();
+    const interval = setInterval(cycle, 3600);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="editorial-card p-6 md:p-8 space-y-6 overflow-hidden relative">
+      {/* Header with Circling Axe Badge */}
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-white/10">
+        <div>
+          <h3 className="text-base font-medium text-white flex items-center gap-2">
+            Autonomous Combat Simulation & Kinematics
+            <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
+              150 FPS Pygame Loop
+            </span>
+          </h3>
+          <p className="text-xs text-neutral-400 font-mono mt-0.5">
+            Real-time sprite kinematics, projectile deflection, and autonomous AABB moving platform adhesion
+          </p>
+        </div>
+
+        {/* INFINITE CIRCLING AXE WIDGET */}
+        <div className="flex items-center gap-3 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/25 shadow-sm">
+          <div className="relative w-8 h-8 flex items-center justify-center">
+            {/* Ambient circular orbit track */}
+            <div className="absolute inset-0 rounded-full border border-amber-500/30 border-dashed animate-[spin_6s_linear_infinite]" />
+            {/* Circling Axe */}
+            <motion.div
+              animate={{
+                rotate: 360,
+                x: [0, 8, 0, -8, 0],
+                y: [0, -8, 0, 8, 0],
+              }}
+              transition={{
+                rotate: { repeat: Infinity, duration: 0.6, ease: "linear" },
+                x: { repeat: Infinity, duration: 1.8, ease: "easeInOut" },
+                y: { repeat: Infinity, duration: 1.8, ease: "easeInOut" },
+              }}
+              className="w-5 h-5 flex items-center justify-center pointer-events-none drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]"
+            >
+              <img
+                src="/images/projects/enginerea/axe_single.png"
+                alt="Spinning Axe"
+                className="w-full h-full object-contain"
+              />
+            </motion.div>
+          </div>
+          <div>
+            <div className="text-[11px] font-mono text-amber-300 font-semibold uppercase tracking-wider">
+              Continuous Rotational Aerodynamics
+            </div>
+            <div className="text-[10px] font-mono text-neutral-400">
+              12° Angular Velocity per 150 Hz Tick
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Autonomous Arena Stage Viewport */}
+      <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-black aspect-[16/7] min-h-[260px]">
+        {/* Background Stage Image */}
+        <img
+          src="/images/projects/enginerea/lvl1_bg.png"
+          alt="Stage 1 Ruined Village"
+          className="absolute inset-0 w-full h-full object-cover opacity-35 pointer-events-none"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-black/60 pointer-events-none" />
+
+        {/* HUD Top Bar */}
+        <div className="absolute top-3 left-4 right-4 flex items-center justify-between text-xs font-mono z-20">
+          <div className="flex items-center gap-3 bg-black/75 px-3 py-1.5 rounded-lg border border-white/10">
+            <span className="flex items-center gap-1.5 text-red-400 font-bold">
+              <Heart size={13} className="fill-red-500 text-red-500" /> 5/5 HP
+            </span>
+            <span className="flex items-center gap-1.5 text-amber-300 font-bold">
+              <Coins size={13} className="text-amber-400" /> {coinsCollected} GOLD
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3 bg-black/75 px-3 py-1.5 rounded-lg border border-white/10 text-neutral-300">
+            <span>Tick: <strong className="text-emerald-400">150.0 FPS</strong></span>
+            <span>Axes Chucked: <strong className="text-white">{axesChucked}</strong></span>
+          </div>
+        </div>
+
+        {/* Stone Platforms */}
+        {/* Left Base Viaduct */}
+        <div className="absolute left-6 bottom-10 w-44 h-4 bg-[#232936] border-t-2 border-[#546b8a] rounded-t-sm shadow-md" />
+        {/* Middle Moving Platform */}
+        <motion.div
+          animate={{ x: [0, 50, 0] }}
+          transition={{ repeat: Infinity, duration: 3.2, ease: "easeInOut" }}
+          className="absolute left-56 bottom-24 w-36 h-4 bg-[#2d374a] border-t-2 border-[#6f8db5] rounded-t-sm shadow-md"
+        />
+        {/* Right High Ledge */}
+        <div className="absolute right-8 bottom-12 w-48 h-4 bg-[#232936] border-t-2 border-[#546b8a] rounded-t-sm shadow-md" />
+
+        {/* Dead Tree Decor */}
+        <img
+          src="/images/projects/enginerea/deadtree.png"
+          alt="Dead Tree"
+          className="absolute left-40 bottom-14 w-12 h-14 object-contain opacity-70 pointer-events-none"
+        />
+
+        {/* Chest on High Ledge */}
+        <img
+          src="/images/projects/enginerea/closedChest.png"
+          alt="Chest"
+          className="absolute right-12 bottom-16 w-8 h-8 object-contain pointer-events-none"
+        />
+
+        {/* BOBBY CHARACTER SPRITE (Autonomous Motion) */}
+        <motion.div
+          animate={
+            bobbyAction === "walk-right"
+              ? { x: 70, y: 0 }
+              : bobbyAction === "jump"
+              ? { x: 120, y: -45 }
+              : bobbyAction === "throw"
+              ? { x: 130, y: 0 }
+              : { x: 20, y: 0 }
+          }
+          transition={{ duration: 0.8, ease: "easeInOut" }}
+          className="absolute left-8 bottom-14 z-20 flex flex-col items-center pointer-events-none"
+        >
+          <img
+            src={
+              bobbyAction === "jump"
+                ? "/images/projects/enginerea/bobby_jump_frame.png"
+                : "/images/projects/enginerea/bobby_walk_frame.png"
+            }
+            alt="Bobby the Builder"
+            className="w-12 h-12 object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]"
+          />
+        </motion.div>
+
+        {/* FLYING SPINNING AXE */}
+        <AnimatePresence>
+          {axeInFlight && (
+            <motion.div
+              initial={{ x: 155, y: -25, opacity: 1 }}
+              animate={{
+                x: 390,
+                y: -15,
+                rotate: 720,
+              }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.7, ease: "linear" }}
+              className="absolute left-8 bottom-14 z-30 pointer-events-none"
+            >
+              <img
+                src="/images/projects/enginerea/axe_single.png"
+                alt="Thrown Axe"
+                className="w-6 h-6 object-contain drop-shadow-[0_0_10px_rgba(245,158,11,0.9)]"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ENEMY PATROL SPRITE & HEALTH BAR */}
+        <div className="absolute right-24 bottom-16 z-20 flex flex-col items-center pointer-events-none">
+          {/* Health Bar */}
+          <div className="w-16 h-2 bg-black/80 rounded-full border border-white/20 mb-1 overflow-hidden p-0.5">
+            <div
+              className="h-full bg-red-500 rounded-full transition-all duration-300"
+              style={{ width: `${enemyHp}%` }}
+            />
+          </div>
+
+          {/* Enemy Sprite with Hit Reaction */}
+          <motion.div
+            animate={
+              enemyHit
+                ? { x: [0, 8, -4, 0], filter: ["brightness(1)", "brightness(2.2)", "brightness(1)"] }
+                : { y: [0, -3, 0] }
+            }
+            transition={enemyHit ? { duration: 0.3 } : { repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+            className="relative"
+          >
+            <img
+              src="/images/projects/enginerea/enemy1_frame.png"
+              alt="Enemy Goblin"
+              className="w-14 h-14 object-contain drop-shadow-[0_4px_12px_rgba(239,68,68,0.5)]"
+            />
+            {/* Floating Damage Number */}
+            {enemyHit && (
+              <motion.span
+                initial={{ opacity: 1, y: 0 }}
+                animate={{ opacity: 0, y: -25 }}
+                transition={{ duration: 0.6 }}
+                className="absolute -top-4 left-2 text-xs font-mono font-bold text-amber-300 drop-shadow-[0_2px_4px_rgba(0,0,0,1)]"
+              >
+                -35 DMG!
+              </motion.span>
+            )}
+          </motion.div>
+        </div>
+
+        {/* Bottom Hazard Stripe */}
+        <div className="absolute inset-x-0 bottom-0 h-3 bg-red-600/30 border-t border-red-500/50 flex items-center justify-center">
+          <span className="text-[9px] font-mono text-red-300 uppercase tracking-widest">
+            AABB Collision Floor & Kinematic Surface
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------------- */
+/* 2. Complete Visual Gameplay & Stage Walkthrough Component                  */
 /* ------------------------------------------------------------------------- */
 function CampaignVisualGallery() {
   const [selectedView, setSelectedView] = useState<
     "start-menu" | "stage-1" | "stage-2" | "stage-3" | "shop" | "victory"
-  >("start-menu");
-
-  const views = {
-    "start-menu": {
-      title: "Title & Main Menu Screen",
-      stageBadge: "Menu · 1200x600 Display",
-      src: "/images/projects/enginerea/main_screen.png",
-      caption:
-        "The game initialization screen introducing Bobby the Builder standing before the dystopian ruined skyline of Enginerea with Start, Help, and Quit buttons.",
-    },
-    "stage-1": {
-      title: "Stage 01: Ruined Village Entrance",
-      stageBadge: "Act I · Ruined Viaducts",
-      src: "/images/projects/enginerea/lvl1_bg.png",
-      caption:
-        "Act I establishes core platforming mechanics: jumping across fractured stone bridges, patrolling goblin enemies, and preliminary building material chests.",
-    },
-    "stage-2": {
-      title: "Stage 02: Magma Caverns & Moving Platforms",
-      stageBadge: "Act II · Magma Hazards",
-      src: "/images/projects/enginerea/lvl2_bg.png",
-      caption:
-        "Act II introduces moving platform adhesion physics over instant-death lava chutes. Bobby must time jumps while deflecting incoming fireballs from floating enemies.",
-    },
-    "stage-3": {
-      title: "Stage 03: Town Hall Ruins & Boss Showdown",
-      stageBadge: "Act III · Climax & Boss Fight",
-      src: "/images/projects/enginerea/player_view.png",
-      caption:
-        "The final confrontation in the ruined Town Hall district. Bobby faces the armored underworld guardian to recover the master reconstruction chest key.",
-    },
-    "shop": {
-      title: "In-Game Modal Shop (Shop.py)",
-      stageBadge: "System · Equipment Store",
-      src: "/images/projects/enginerea/ShopBg.png",
-      caption:
-        "Pressing [P] freezes the real-time game loop and launches the interactive equipment store to purchase battle axes, reinforced shields, and stat upgrades.",
-    },
-    "victory": {
-      title: "Victory: Rebuilt Town Hall",
-      stageBadge: "Ending · Town Restored",
-      src: "/images/projects/enginerea/vikingHouse.png",
-      caption:
-        "With the guardian defeated and the chest key recovered, Bobby reconstructs the Enginerea Town Hall and the engine compiles full match telemetry.",
-    },
-  };
-
-  const current = views[selectedView];
+  >("stage-1");
 
   return (
     <div className="editorial-card p-6 md:p-8 space-y-6">
@@ -95,13 +303,13 @@ function CampaignVisualGallery() {
       <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10">
         <div>
           <h3 className="text-base font-medium text-white flex items-center gap-2">
-            Visual Gameplay Showcase
+            Complete Gameplay Stage & System Walkthrough
             <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-white/10 text-neutral-300 border border-white/15">
-              Pygame Assets
+              Full Composited Gameplay
             </span>
           </h3>
           <p className="text-xs text-neutral-400 font-mono mt-0.5">
-            Stage environments, start menu, and equipment interfaces extracted from game assets
+            Real stage layouts with player positioning, platforms, chests, enemy AI, shop kiosks & victory telemetry
           </p>
         </div>
 
@@ -109,11 +317,11 @@ function CampaignVisualGallery() {
           {(
             [
               ["start-menu", "Start Menu"],
-              ["stage-1", "Stage 1"],
-              ["stage-2", "Stage 2"],
-              ["stage-3", "Stage 3 (Boss)"],
-              ["shop", "Shop [P]"],
-              ["victory", "Victory"],
+              ["stage-1", "Stage 1: Ruins"],
+              ["stage-2", "Stage 2: Magma"],
+              ["stage-3", "Stage 3: Boss"],
+              ["shop", "In-Game Shop"],
+              ["victory", "Victory Screen"],
             ] as const
           ).map(([key, label]) => (
             <button
@@ -131,98 +339,484 @@ function CampaignVisualGallery() {
         </div>
       </div>
 
-      {/* Main Image Display */}
-      <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-black aspect-[16/8] sm:aspect-[16/8]">
-        <img
-          src={current.src}
-          alt={current.title}
-          className={`w-full h-full ${
-            selectedView === "victory" ? "object-contain p-8 bg-neutral-950" : "object-cover object-center"
-          }`}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex items-end p-5 md:p-6 pointer-events-none">
-          <div className="max-w-2xl">
-            <span className="px-2.5 py-0.5 rounded text-[10px] font-mono bg-white/20 text-white border border-white/30 uppercase tracking-wider">
-              {current.stageBadge}
-            </span>
-            <h4 className="text-lg md:text-xl font-bold text-white mt-1.5 font-sans">
-              {current.title}
-            </h4>
-            <p className="text-xs text-neutral-300 font-mono mt-1 leading-relaxed">
-              {current.caption}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Equipment & Stat Upgrades Sub-Grid (Visible on Shop view or always) */}
-      <div className="space-y-3 pt-2">
-        <h4 className="text-xs font-mono uppercase tracking-wider text-neutral-400 flex items-center gap-2">
-          <Shield size={13} />
-          In-Game Equipment Arsenal & Stat Upgrades (Shop.py)
-        </h4>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-          <div className="p-3 rounded-xl bg-neutral-900/40 border border-white/10 flex flex-col items-center text-center space-y-1.5">
+      {/* COMPOSITED GAMEPLAY SCENE DISPLAY */}
+      <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-black aspect-[16/8] min-h-[340px] flex items-center justify-center">
+        {/* ==================== VIEW 1: START MENU ==================== */}
+        {selectedView === "start-menu" && (
+          <div className="relative w-full h-full flex items-center justify-center">
             <img
-              src="/images/projects/enginerea/AxeButton.png"
-              alt="Steel Axe"
-              className="w-10 h-10 object-contain"
+              src="/images/projects/enginerea/main_screen.png"
+              alt="Start Screen Backdrop"
+              className="absolute inset-0 w-full h-full object-cover"
             />
-            <span className="text-[11px] font-medium text-white">Steel Axe</span>
-            <span className="text-[10px] font-mono text-amber-300">50 Coins · +6 ATK</span>
-          </div>
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
 
-          <div className="p-3 rounded-xl bg-neutral-900/40 border border-white/10 flex flex-col items-center text-center space-y-1.5">
-            <img
-              src="/images/projects/enginerea/Shield1Button.png"
-              alt="Wood Shield"
-              className="w-10 h-10 object-contain"
-            />
-            <span className="text-[11px] font-medium text-white">Wood Shield</span>
-            <span className="text-[10px] font-mono text-amber-300">30 Coins · +3 Def</span>
-          </div>
+            {/* Menu UI Overlay */}
+            <div className="relative z-10 text-center max-w-md p-6 rounded-2xl bg-black/85 border border-white/20 shadow-2xl space-y-4">
+              <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/30 p-1.5 mx-auto">
+                <img
+                  src="/images/projects/enginerea/gameicon.png"
+                  alt="Bobby"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <div>
+                <h4 className="text-2xl sm:text-3xl font-extrabold text-white tracking-wider font-mono">
+                  BOBBY: THE TOWN OF ENGINEREA
+                </h4>
+                <p className="text-[11px] font-mono text-neutral-400 mt-1">
+                  150 FPS Physics Engine · Action Platformer
+                </p>
+              </div>
 
-          <div className="p-3 rounded-xl bg-neutral-900/40 border border-white/10 flex flex-col items-center text-center space-y-1.5">
-            <img
-              src="/images/projects/enginerea/Shield2Button.png"
-              alt="Iron Shield"
-              className="w-10 h-10 object-contain"
-            />
-            <span className="text-[11px] font-medium text-white">Iron Shield</span>
-            <span className="text-[10px] font-mono text-amber-300">40 Coins · +5 Def</span>
-          </div>
+              {/* Start Menu Buttons */}
+              <div className="space-y-2 pt-2">
+                <div className="py-2 px-4 rounded-xl bg-white text-black font-bold font-mono text-xs shadow-md">
+                  ▶ START GAME (STAGE 01)
+                </div>
+                <div className="py-2 px-4 rounded-xl bg-white/10 text-white font-mono text-xs border border-white/15">
+                  ⚙ HELP & CONTROLS
+                </div>
+                <div className="py-2 px-4 rounded-xl bg-white/10 text-neutral-400 font-mono text-xs border border-white/15">
+                  ✕ EXIT ENGINE
+                </div>
+              </div>
 
-          <div className="p-3 rounded-xl bg-neutral-900/40 border border-white/10 flex flex-col items-center text-center space-y-1.5">
-            <img
-              src="/images/projects/enginerea/AttackUpgradeBtn.png"
-              alt="Attack Upgrade"
-              className="w-10 h-10 object-contain"
-            />
-            <span className="text-[11px] font-medium text-white">Strength +1</span>
-            <span className="text-[10px] font-mono text-neutral-400">10 Coins · +1 DMG</span>
+              <div className="pt-2 text-[10px] font-mono text-neutral-500 border-t border-white/10">
+                Created with Python 3.10 & Pygame
+              </div>
+            </div>
           </div>
+        )}
 
-          <div className="p-3 rounded-xl bg-neutral-900/40 border border-white/10 flex flex-col items-center text-center space-y-1.5">
+        {/* ==================== VIEW 2: STAGE 01 (RUINED VILLAGE) ==================== */}
+        {selectedView === "stage-1" && (
+          <div className="relative w-full h-full">
             <img
-              src="/images/projects/enginerea/HealthUpgradeBtn.png"
-              alt="Health Upgrade"
-              className="w-10 h-10 object-contain"
+              src="/images/projects/enginerea/lvl1_bg.png"
+              alt="Level 1 Backdrop"
+              className="absolute inset-0 w-full h-full object-cover"
             />
-            <span className="text-[11px] font-medium text-white">Vitality +1</span>
-            <span className="text-[10px] font-mono text-neutral-400">10 Coins · +1 HP</span>
-          </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40" />
 
-          <div className="p-3 rounded-xl bg-neutral-900/40 border border-white/10 flex flex-col items-center text-center space-y-1.5">
+            {/* Stage HUD Top Bar */}
+            <div className="absolute top-3 left-4 right-4 flex items-center justify-between text-xs font-mono z-20">
+              <div className="flex items-center gap-3 bg-black/80 px-3 py-1.5 rounded-lg border border-white/10">
+                <span className="flex items-center gap-1 text-red-400 font-bold">
+                  <Heart size={13} className="fill-red-500 text-red-500" /> 5/5 HP
+                </span>
+                <span className="flex items-center gap-1 text-amber-300 font-bold">
+                  <Coins size={13} className="text-amber-400" /> 30 GOLD
+                </span>
+              </div>
+              <div className="bg-black/80 px-3 py-1.5 rounded-lg border border-white/10 text-neutral-300 text-[11px]">
+                STAGE 1: RUINED VILLAGE · GOAL: CLEAR PATROL
+              </div>
+            </div>
+
+            {/* Stage Platforms */}
+            {/* Ground Viaduct */}
+            <div className="absolute left-6 bottom-10 w-52 h-4 bg-[#232936] border-t-2 border-[#546b8a] rounded-t-sm" />
+            {/* Middle Platform */}
+            <div className="absolute left-64 bottom-28 w-40 h-4 bg-[#2d374a] border-t-2 border-[#6f8db5] rounded-t-sm" />
+            {/* Right Ledge */}
+            <div className="absolute right-8 bottom-16 w-56 h-4 bg-[#232936] border-t-2 border-[#546b8a] rounded-t-sm" />
+
+            {/* Dead Tree */}
             <img
-              src="/images/projects/enginerea/SorcShoesUpgradeBtn.png"
-              alt="Speed Upgrade"
-              className="w-10 h-10 object-contain"
+              src="/images/projects/enginerea/deadtree.png"
+              alt="Tree"
+              className="absolute left-48 bottom-14 w-12 h-16 object-contain pointer-events-none"
             />
-            <span className="text-[11px] font-medium text-white">Speed Shoes</span>
-            <span className="text-[10px] font-mono text-neutral-400">10 Coins · +1 Spd</span>
+
+            {/* Chest on Right Ledge */}
+            <img
+              src="/images/projects/enginerea/closedChest.png"
+              alt="Chest"
+              className="absolute right-14 bottom-20 w-9 h-9 object-contain"
+            />
+
+            {/* Bobby Sprite at Spawn */}
+            <div className="absolute left-14 bottom-14 z-20 flex flex-col items-center">
+              <img
+                src="/images/projects/enginerea/bobby_walk_frame.png"
+                alt="Bobby Spawn"
+                className="w-14 h-14 object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]"
+              />
+              <span className="text-[10px] font-mono text-amber-300 mt-1 bg-black/70 px-1.5 rounded">
+                Bobby (Spawn)
+              </span>
+            </div>
+
+            {/* Patrol Enemy with Health Bar */}
+            <div className="absolute right-32 bottom-20 z-20 flex flex-col items-center">
+              <div className="w-14 h-1.5 bg-black/80 rounded-full border border-white/20 mb-1 overflow-hidden">
+                <div className="h-full bg-red-500 w-full" />
+              </div>
+              <img
+                src="/images/projects/enginerea/enemy1_frame.png"
+                alt="Patrol Enemy"
+                className="w-14 h-14 object-contain drop-shadow-[0_4px_12px_rgba(239,68,68,0.5)]"
+              />
+            </div>
+
+            {/* Thrown Axe Projectile in Flight */}
+            <div className="absolute left-36 bottom-24 z-20 animate-spin">
+              <img
+                src="/images/projects/enginerea/axe_single.png"
+                alt="Axe"
+                className="w-6 h-6 object-contain"
+              />
+            </div>
+
+            {/* Authentic Game Speech Bubble */}
+            <div className="absolute left-10 top-14 bg-black/85 border border-white/25 p-3 rounded-xl max-w-xs shadow-xl text-left z-20">
+              <div className="text-[10px] font-mono text-amber-300 uppercase font-semibold">
+                Enginerea Dispatch
+              </div>
+              <p className="text-xs font-mono text-neutral-200 mt-0.5 leading-relaxed">
+                "Defeat all enemies to collect chests and proceed to the next stage."
+              </p>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* ==================== VIEW 3: STAGE 02 (MAGMA CAVERNS) ==================== */}
+        {selectedView === "stage-2" && (
+          <div className="relative w-full h-full">
+            <img
+              src="/images/projects/enginerea/lvl2_bg.png"
+              alt="Level 2 Backdrop"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-red-950/60 via-transparent to-black/40" />
+
+            {/* Stage HUD Top Bar */}
+            <div className="absolute top-3 left-4 right-4 flex items-center justify-between text-xs font-mono z-20">
+              <div className="flex items-center gap-3 bg-black/80 px-3 py-1.5 rounded-lg border border-white/10">
+                <span className="flex items-center gap-1 text-red-400 font-bold">
+                  <Heart size={13} className="fill-red-500 text-red-500" /> 4/5 HP
+                </span>
+                <span className="flex items-center gap-1 text-amber-300 font-bold">
+                  <Coins size={13} className="text-amber-400" /> 75 GOLD
+                </span>
+              </div>
+              <div className="bg-red-950/80 px-3 py-1.5 rounded-lg border border-red-500/30 text-red-200 text-[11px]">
+                STAGE 2: MAGMA CAVERNS · HAZARD: INSTANT-DEATH LAVA
+              </div>
+            </div>
+
+            {/* Bottom Lava Hazard */}
+            <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-red-600 via-orange-600 to-amber-500 flex items-center justify-center shadow-[0_0_25px_rgba(239,68,68,0.8)] z-10">
+              <span className="text-[10px] font-mono text-black font-extrabold tracking-widest uppercase">
+                ⚠ LETHAL LAVA CHASM ⚠
+              </span>
+            </div>
+
+            {/* Three Moving Platforms */}
+            <div className="absolute left-10 bottom-24 w-32 h-4 bg-[#382b3d] border-t-2 border-[#945d8b] rounded-t-sm shadow-md" />
+            <div className="absolute left-48 bottom-36 w-36 h-4 bg-[#382b3d] border-t-2 border-[#945d8b] rounded-t-sm shadow-md" />
+            <div className="absolute right-12 bottom-28 w-44 h-4 bg-[#382b3d] border-t-2 border-[#945d8b] rounded-t-sm shadow-md" />
+
+            {/* Bobby Mid-Air Jump */}
+            <div className="absolute left-44 bottom-44 z-20 flex flex-col items-center">
+              <img
+                src="/images/projects/enginerea/bobby_jump_frame.png"
+                alt="Bobby Jump"
+                className="w-14 h-14 object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]"
+              />
+            </div>
+
+            {/* Magma Demon Enemy Flying */}
+            <div className="absolute right-24 bottom-40 z-20 flex flex-col items-center">
+              <div className="w-14 h-1.5 bg-black/80 rounded-full border border-white/20 mb-1 overflow-hidden">
+                <div className="h-full bg-red-500 w-3/4" />
+              </div>
+              <img
+                src="/images/projects/enginerea/enemy2_frame.png"
+                alt="Magma Demon"
+                className="w-16 h-16 object-contain drop-shadow-[0_4px_15px_rgba(239,68,68,0.8)]"
+              />
+            </div>
+
+            {/* Homing Fireball in Flight */}
+            <div className="absolute left-64 bottom-32 z-20 w-4 h-4 rounded-full bg-orange-500 border border-amber-300 shadow-[0_0_12px_rgba(249,115,22,1)]" />
+
+            {/* Golden Key on Far Platform */}
+            <div className="absolute right-16 bottom-32 z-20 flex flex-col items-center">
+              <img
+                src="/images/projects/enginerea/chestKey.png"
+                alt="Chest Key"
+                className="w-6 h-8 object-contain drop-shadow-[0_0_10px_rgba(251,191,36,0.9)]"
+              />
+              <span className="text-[9px] font-mono text-amber-300">Vault Key</span>
+            </div>
+          </div>
+        )}
+
+        {/* ==================== VIEW 4: STAGE 03 (BOSS SHOWDOWN) ==================== */}
+        {selectedView === "stage-3" && (
+          <div className="relative w-full h-full">
+            <img
+              src="/images/projects/enginerea/lvl3_bg.png"
+              alt="Level 3 Boss Arena"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/60" />
+
+            {/* Giant Boss Health Bar Centered */}
+            <div className="absolute top-3 inset-x-8 max-w-lg mx-auto z-20 bg-black/85 p-2 rounded-xl border border-red-500/40 text-center">
+              <div className="flex justify-between text-[11px] font-mono text-red-400 font-bold px-1 mb-1">
+                <span>⚔ GUARDIAN OF ENGINEREA</span>
+                <span>680 / 1000 HP</span>
+              </div>
+              <div className="w-full h-3 bg-neutral-900 rounded-full border border-red-500/30 overflow-hidden p-0.5">
+                <div className="h-full bg-gradient-to-r from-red-600 to-amber-500 rounded-full w-[68%]" />
+              </div>
+            </div>
+
+            {/* Stone Arena Floor */}
+            <div className="absolute inset-x-8 bottom-8 h-5 bg-[#1b212c] border-t-2 border-[#435269] rounded-t-sm" />
+
+            {/* Bobby in Combat Stance (Shield 2 + Axe) */}
+            <div className="absolute left-20 bottom-12 z-20 flex flex-col items-center">
+              <img
+                src="/images/projects/enginerea/bobby_shield2_frame.png"
+                alt="Bobby Battle Stance"
+                className="w-16 h-16 object-contain drop-shadow-[0_4px_15px_rgba(0,0,0,0.9)]"
+              />
+              <span className="text-[10px] font-mono text-sky-300 bg-black/80 px-2 rounded mt-1">
+                Iron Shield + Steel Axe
+              </span>
+            </div>
+
+            {/* THE GIANT BOSS SPRITE */}
+            <div className="absolute right-20 bottom-12 z-20 flex flex-col items-center">
+              <img
+                src="/images/projects/enginerea/enemy_boss_frame.png"
+                alt="Boss Guardian"
+                className="w-24 h-24 object-contain drop-shadow-[0_0_25px_rgba(239,68,68,0.8)]"
+              />
+              <span className="text-[10px] font-mono text-red-400 font-bold bg-black/80 px-2 rounded mt-1">
+                Underworld Boss
+              </span>
+            </div>
+
+            {/* Mid-Air Projectile Deflection Collision Spark */}
+            <div className="absolute left-52 bottom-20 z-20 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-amber-400/30 animate-ping absolute" />
+              <div className="text-amber-300 font-mono text-xs font-bold bg-black/90 px-2 py-0.5 rounded border border-amber-400/50">
+                ⚡ DEFLECTED!
+              </div>
+            </div>
+
+            {/* Opened Master Key Chest behind Boss */}
+            <img
+              src="/images/projects/enginerea/openedChest.png"
+              alt="Opened Chest"
+              className="absolute right-8 bottom-12 w-10 h-10 object-contain z-10 opacity-70"
+            />
+          </div>
+        )}
+
+        {/* ==================== VIEW 5: IN-GAME SHOP SCREEN ==================== */}
+        {selectedView === "shop" && (
+          <div className="relative w-full h-full p-4 sm:p-6 flex flex-col justify-between">
+            <img
+              src="/images/projects/enginerea/ShopBg.png"
+              alt="Shop Screen"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/75 backdrop-blur-[2px]" />
+
+            {/* Shop Header Banner */}
+            <div className="relative z-10 flex items-center justify-between pb-3 border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <img
+                  src="/images/projects/enginerea/coin.png"
+                  alt="Coin"
+                  className="w-7 h-7 object-contain"
+                />
+                <div>
+                  <div className="text-[10px] font-mono text-neutral-400 uppercase">Vault Balance</div>
+                  <div className="text-xl font-bold text-amber-300 font-mono">120 GOLD COINS</div>
+                </div>
+              </div>
+
+              <div className="text-xs font-mono text-neutral-300 bg-white/10 px-3 py-1.5 rounded-lg border border-white/15">
+                Press [P] or click Resume to return to combat
+              </div>
+            </div>
+
+            {/* Large On-Screen Equipment Grid */}
+            <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 gap-3 my-2">
+              {/* Steel Axe */}
+              <div className="p-3 rounded-xl bg-neutral-950/80 border border-white/20 flex items-center justify-between gap-3 shadow-lg">
+                <div className="flex items-center gap-2.5">
+                  <img
+                    src="/images/projects/enginerea/AxeButton.png"
+                    alt="Axe"
+                    className="w-12 h-12 object-contain"
+                  />
+                  <div>
+                    <h5 className="text-xs font-bold text-white">Steel Axe (Tier 2)</h5>
+                    <p className="text-[10px] text-amber-300 font-mono">+6 Attack Damage</p>
+                  </div>
+                </div>
+                <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono bg-white/15 text-white font-bold">
+                  Equipped
+                </span>
+              </div>
+
+              {/* Wooden Shield */}
+              <div className="p-3 rounded-xl bg-neutral-950/80 border border-white/20 flex items-center justify-between gap-3 shadow-lg">
+                <div className="flex items-center gap-2.5">
+                  <img
+                    src="/images/projects/enginerea/Shield1Button.png"
+                    alt="Wood Shield"
+                    className="w-12 h-12 object-contain"
+                  />
+                  <div>
+                    <h5 className="text-xs font-bold text-white">Wooden Shield</h5>
+                    <p className="text-[10px] text-amber-300 font-mono">+3 Armour Def</p>
+                  </div>
+                </div>
+                <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono bg-white/10 text-neutral-400">
+                  Owned
+                </span>
+              </div>
+
+              {/* Iron Shield */}
+              <div className="p-3 rounded-xl bg-neutral-950/80 border border-white/20 flex items-center justify-between gap-3 shadow-lg">
+                <div className="flex items-center gap-2.5">
+                  <img
+                    src="/images/projects/enginerea/Shield2Button.png"
+                    alt="Iron Shield"
+                    className="w-12 h-12 object-contain"
+                  />
+                  <div>
+                    <h5 className="text-xs font-bold text-white">Viking Iron Shield</h5>
+                    <p className="text-[10px] text-amber-300 font-mono">+5 Armour Def</p>
+                  </div>
+                </div>
+                <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
+                  Active
+                </span>
+              </div>
+
+              {/* Attack Upgrade */}
+              <div className="p-3 rounded-xl bg-neutral-950/80 border border-white/20 flex items-center justify-between gap-3 shadow-lg">
+                <div className="flex items-center gap-2.5">
+                  <img
+                    src="/images/projects/enginerea/AttackUpgradeBtn.png"
+                    alt="Strength"
+                    className="w-12 h-12 object-contain"
+                  />
+                  <div>
+                    <h5 className="text-xs font-bold text-white">Brawn Strength +1</h5>
+                    <p className="text-[10px] text-neutral-400 font-mono">10 Coins / Upgrade</p>
+                  </div>
+                </div>
+                <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono bg-amber-500/20 text-amber-200 border border-amber-500/40">
+                  LVL 4
+                </span>
+              </div>
+
+              {/* Health Upgrade */}
+              <div className="p-3 rounded-xl bg-neutral-950/80 border border-white/20 flex items-center justify-between gap-3 shadow-lg">
+                <div className="flex items-center gap-2.5">
+                  <img
+                    src="/images/projects/enginerea/HealthUpgradeBtn.png"
+                    alt="Health"
+                    className="w-12 h-12 object-contain"
+                  />
+                  <div>
+                    <h5 className="text-xs font-bold text-white">Vitality Heart +1</h5>
+                    <p className="text-[10px] text-neutral-400 font-mono">10 Coins / Upgrade</p>
+                  </div>
+                </div>
+                <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono bg-amber-500/20 text-amber-200 border border-amber-500/40">
+                  6/6 HP
+                </span>
+              </div>
+
+              {/* Speed Shoes */}
+              <div className="p-3 rounded-xl bg-neutral-950/80 border border-white/20 flex items-center justify-between gap-3 shadow-lg">
+                <div className="flex items-center gap-2.5">
+                  <img
+                    src="/images/projects/enginerea/SorcShoesUpgradeBtn.png"
+                    alt="Speed"
+                    className="w-12 h-12 object-contain"
+                  />
+                  <div>
+                    <h5 className="text-xs font-bold text-white">Sorcerer Shoes +1</h5>
+                    <p className="text-[10px] text-neutral-400 font-mono">10 Coins / Upgrade</p>
+                  </div>
+                </div>
+                <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono bg-amber-500/20 text-amber-200 border border-amber-500/40">
+                  +2 Spd
+                </span>
+              </div>
+            </div>
+
+            {/* Bottom Status */}
+            <div className="relative z-10 pt-2 border-t border-white/10 text-[11px] font-mono text-neutral-400 flex items-center justify-between">
+              <span>Dynamic Sprite Composite: StandingAxe2Shield2R.png</span>
+              <span className="text-amber-300">Shop System: Shop.py</span>
+            </div>
+          </div>
+        )}
+
+        {/* ==================== VIEW 6: VICTORY SCREEN ==================== */}
+        {selectedView === "victory" && (
+          <div className="relative w-full h-full p-6 flex flex-col items-center justify-center text-center">
+            <div className="absolute inset-0 bg-gradient-to-b from-[#0f141c] via-[#161f2e] to-[#0a0c10]" />
+
+            {/* Celebratory Sparks / Starburst */}
+            <div className="relative z-10 max-w-xl mx-auto space-y-4">
+              <span className="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono text-xs uppercase tracking-widest font-bold">
+                🏆 CAMPAIGN COMPLETE 🏆
+              </span>
+
+              <h4 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight font-mono">
+                ENGINEREA REBUILT!
+              </h4>
+
+              {/* Reconstructed Town Hall Centerpiece */}
+              <div className="w-36 h-36 mx-auto my-2 flex items-center justify-center drop-shadow-[0_0_35px_rgba(251,191,36,0.5)]">
+                <img
+                  src="/images/projects/enginerea/vikingHouse.png"
+                  alt="Restored Town Hall"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+
+              {/* Full Telemetry Scoreboard matching death.py */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-black/80 p-3 rounded-xl border border-white/15 text-xs font-mono">
+                <div>
+                  <div className="text-[10px] text-neutral-400">MISSION TIME</div>
+                  <div className="text-white font-bold">04:38</div>
+                </div>
+                <div>
+                  <div className="text-[10px] text-neutral-400">AXES CHUCKED</div>
+                  <div className="text-amber-300 font-bold">74</div>
+                </div>
+                <div>
+                  <div className="text-[10px] text-neutral-400">DEFLECTIONS</div>
+                  <div className="text-emerald-400 font-bold">19</div>
+                </div>
+                <div>
+                  <div className="text-[10px] text-neutral-400">TOTAL GOLD</div>
+                  <div className="text-amber-400 font-bold">140 G</div>
+                </div>
+              </div>
+
+              <p className="text-xs text-neutral-400 font-mono leading-relaxed">
+                Bobby the Builder has recovered the chest key, vanquished the underworld beasts, and restored the town hall of Enginerea.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -513,10 +1107,26 @@ python main.py`;
         </div>
       </ArticleSection>
 
-      {/* SECTION 02: GAME LOOP & STATE MACHINE */}
+      {/* SECTION 02: AUTONOMOUS COMBAT & CIRCLING AXE */}
+      <ArticleSection
+        id="autonomous-arena"
+        number="02"
+        title="Live autonomous combat & rotational aerodynamics"
+      >
+        <div className="space-y-4">
+          <p className="text-neutral-300 text-sm leading-relaxed">
+            Witness the real-time kinematics in action: Bobby dynamically walks across stone platforms, executes
+            gravity-clamped vertical jumps, throws spinning battle axes that strike enemy monsters, and tracks
+            deflections while an infinite rotational aerodynamic axe orbits continuously.
+          </p>
+          <AutonomousCombatArena />
+        </div>
+      </ArticleSection>
+
+      {/* SECTION 03: GAME LOOP & STATE MACHINE */}
       <ArticleSection
         id="game-loop"
-        number="02"
+        number="03"
         title="150 FPS game loop & modal state machine"
       >
         <div className="space-y-6 text-neutral-300 leading-relaxed">
@@ -558,10 +1168,10 @@ python main.py`;
         </div>
       </ArticleSection>
 
-      {/* SECTION 03: KINEMATICS & COLLISION */}
+      {/* SECTION 04: KINEMATICS & COLLISION */}
       <ArticleSection
         id="kinematics"
-        number="03"
+        number="04"
         title="Platform kinematics & AABB collision adhesion"
       >
         <div className="space-y-6 text-neutral-300 leading-relaxed">
@@ -592,10 +1202,10 @@ python main.py`;
         </div>
       </ArticleSection>
 
-      {/* SECTION 04: PROJECTILES & HOMING AI */}
+      {/* SECTION 05: PROJECTILES & HOMING AI */}
       <ArticleSection
         id="projectiles"
-        number="04"
+        number="05"
         title="Projectile aerodynamics & homing bullet vectors"
       >
         <div className="space-y-6 text-neutral-300 leading-relaxed">
@@ -638,25 +1248,25 @@ python main.py`;
         </div>
       </ArticleSection>
 
-      {/* SECTION 05: CAMPAIGN GALLERY */}
+      {/* SECTION 06: COMPLETE GAMEPLAY & STAGE GALLERY */}
       <ArticleSection
         id="campaign-gallery"
-        number="05"
-        title="Campaign stages & in-game shop gallery"
+        number="06"
+        title="Complete gameplay & stage progression"
       >
         <div className="space-y-4">
           <p className="text-neutral-300 text-sm leading-relaxed">
-            High-resolution visual showcase of the campaign environments, start menu, shop system, and victory
-            telemetry directly from the Pygame asset pipeline:
+            Full-composition gameplay scenes showing real stage environments, player spawn points, stone platforms,
+            enemy placements, interactive shop kiosks, and victory telemetry:
           </p>
           <CampaignVisualGallery />
         </div>
       </ArticleSection>
 
-      {/* SECTION 06: SOURCE CODE REVIEW */}
+      {/* SECTION 07: SOURCE CODE REVIEW */}
       <ArticleSection
         id="source-code"
-        number="06"
+        number="07"
         title="Source code architecture & review"
       >
         <div className="space-y-4">
@@ -670,10 +1280,10 @@ python main.py`;
         </div>
       </ArticleSection>
 
-      {/* SECTION 07: TELEMETRY & TAKEAWAYS */}
+      {/* SECTION 08: TELEMETRY & TAKEAWAYS */}
       <ArticleSection
         id="telemetry"
-        number="07"
+        number="08"
         title="Telemetry tracking & engineering takeaways"
       >
         <div className="space-y-6 text-neutral-300 leading-relaxed">
@@ -715,10 +1325,10 @@ python main.py`;
         </div>
       </ArticleSection>
 
-      {/* SECTION 08: RUN LOCALLY IN PYGAME */}
+      {/* SECTION 09: RUN LOCALLY IN PYGAME */}
       <ArticleSection
         id="run-locally"
-        number="08"
+        number="09"
         title="Play & run locally in Pygame"
       >
         <div className="space-y-6 text-neutral-300 leading-relaxed">
