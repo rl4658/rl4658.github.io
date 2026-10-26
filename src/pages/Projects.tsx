@@ -28,7 +28,7 @@ import { projects, profile, type Project } from "@/data/profile";
 import ResumeModal from "@/components/ResumeModal";
 import { TiltCard } from "@/components/animated";
 
-import ScrollWireframe from "@/components/animated/ScrollWireframe";
+import ProjectsAmbientCore from "@/components/animated/ProjectsAmbientCore";
 
 /* ------------------------------------------------------------------------- */
 /* 1. FormFixer AI Preview Widget (Enlarged Full-Bleed Phone Preview)        */
@@ -537,8 +537,10 @@ const Projects = () => {
 
         {/* Page Hero */}
         <main className="w-full max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 pt-8 pb-24">
-          <div className="text-center max-w-3xl mx-auto mb-10">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/15 text-white text-xs font-mono uppercase tracking-widest mb-4">
+          <div className="relative isolate text-center max-w-3xl mx-auto mb-16 py-16">
+            <ProjectsAmbientCore />
+            <div className="relative z-10">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/15 text-white text-xs font-mono uppercase tracking-widest mb-4">
               <Sparkles size={13} />
               Live Interactive Sandbox & Codebases
             </div>
@@ -548,9 +550,8 @@ const Projects = () => {
             <p className="mt-4 text-base md:text-lg text-neutral-400 font-light leading-relaxed">
               Explore live interactive working prototypes and full-stack systems. Click any card to inspect full architectural diagrams, performance metrics, and technical breakdowns.
             </p>
+            </div>
           </div>
-
-          <ScrollWireframe />
 
           {/* Filter & Search Bar */}
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-10 pb-6 border-b border-white/10">

@@ -124,34 +124,31 @@ export const profile = {
 };
 
 export const publication: Publication = {
-  title: "Optical resolution and MTF of a low-cost Fourier ptychography microscope using a Raspberry Pi computer",
-  authors: ["Raymond Li", "Robarts Research Institute & Western University Imaging Team"],
-  venue: "SPIE BiOS / Photonics West, Quantitative Phase Imaging",
-  date: "SPIE Digital Library",
+  title: "Optical Resolution and MTF of a Low-Cost Fourier Ptychography Microscope using a Raspberry Pi Computer",
+  authors: ["Haechan J. Yang", "William Wasswa", "Raymond Li", "Brandon Pautler", "Aiden Fry", "Rajan Leung", "David W. Holdsworth", "Ian A. Cunningham"],
+  venue: "Optics and Biophotonics in Low-Resource Settings X · SPIE BiOS",
+  date: "2024",
   doi: "10.1117/12.3003269",
-  url: "https://www.spiedigitallibrary.org/conference-proceedings-of-spie/12832/1283205/Optical-resolution-and-MTF-of-a-low-cost-Fourier-ptychography/10.1117/12.3003269.short",
-  abstract:
-    "Fourier ptychographic microscopy (FPM) is a computational imaging technique that overcomes the physical trade-off between field-of-view (FOV) and high optical resolution. In this research, we designed, built, and evaluated an ultra-low-cost computational microscope powered by a Raspberry Pi single-board computer and an addressable LED matrix array. By sequentially illuminating biological specimens from varying angular vectors and applying iterative phase-retrieval optimization in the Fourier spatial frequency domain, the system synthesized an effective numerical aperture far exceeding standard hardware limitations, achieving sub-micron optical resolution with verified Modulation Transfer Function (MTF) analysis at a fraction of clinical microscope costs ($10 unit hardware).",
+  url: "https://doi.org/10.1117/12.3003269",
+  abstract: "An affordable microscope is only useful if its imaging performance can be measured. This work evaluates a Raspberry Pi Fourier ptychography microscope built from components costing less than $200. A 196-LED array illuminates a specimen from different angles; Python reconstruction combines the resulting images. Resolution is assessed through the modulation transfer function (MTF), using least-squares fits to profiles of a 1951 USAF bar target. The on-axis image reaches 10% MTF at 300 cycles/mm, compared with a theoretical pupil limit of 280 cycles/mm. Reconstruction extends the 10% MTF frequency to 550 cycles/mm, about 1.8 times the on-axis result and near the sampling limit of 670 cycles/mm. The study offers a practical way to evaluate inexpensive computational microscopes being developed for point-of-care malaria diagnosis.",
   highlights: [
-    "Co-authored C++ firmware and modular Python imaging pipelines for automated LED angle calibration and image capture.",
-    "Engineered iterative phase retrieval algorithms to synthesize wide-field, high numerical aperture (NA) microscopy.",
-    "Conducted quantitative Modulation Transfer Function (MTF) analysis validating sub-micron resolving power.",
-    "Prototyped and deployed a functional $10 diagnostic microscope intended for low-resource global healthcare and field pathology.",
+    "Co-author on the SPIE paper evaluating the optical performance of a low-cost Fourier ptychography microscope.",
+    "Contributed modular Python imaging pipelines and C++ firmware during research at Robarts Research Institute.",
+    "Worked on Raspberry Pi hardware integration and debugging alongside the imaging research team.",
   ],
   metrics: [
-    { label: "Hardware Cost", value: "$10" },
-    { label: "Pipeline Scripts", value: "20+" },
-    { label: "Resolution Gain", value: "3.2x" },
-    { label: "Diagnostic Accuracy Gain", value: "+10%" },
+    { label: "Component cost", value: "<$200" },
+    { label: "10% MTF", value: "550 cycles/mm" },
+    { label: "Resolution gain", value: "1.8×" },
   ],
-  bibtex: `@inproceedings{li2024optical,
+  bibtex: `@inproceedings{yang2024optical,
   title={Optical resolution and MTF of a low-cost Fourier ptychography microscope using a Raspberry Pi computer},
-  author={Li, Raymond and others},
-  booktitle={Quantitative Phase Imaging X},
+  author={Yang, Haechan J. and Wasswa, William and Li, Raymond and Pautler, Brandon and Fry, Aiden and Leung, Rajan and Holdsworth, David W. and Cunningham, Ian A.},
+  booktitle={Optics and Biophotonics in Low-Resource Settings X},
   volume={12832},
   pages={1283205},
   year={2024},
-  organization={SPIE},
+  publisher={SPIE},
   doi={10.1117/12.3003269}
 }`,
 };
@@ -278,12 +275,12 @@ export const experiences: Experience[] = [
       "Automated a CI pipeline with 20+ modular Python scripts, improving diagnostic processing accuracy by 10%.",
     highlights: [
       "Automated a CI pipeline with 20+ modular Python scripts, improving diagnostic processing accuracy by 10%.",
-      "Co-authored C++ firmware and debugged hardware integration, deploying a $10 diagnostic microscope on Raspberry Pi.",
+      "Co-authored C++ firmware and debugged hardware integration, integrating a Raspberry Pi diagnostic microscope with component costs below $200.",
     ],
     impact: [
       { value: "20+", label: "pipeline scripts" },
       { value: "10%", label: "better diagnostic accuracy" },
-      { value: "$10", label: "microscope unit cost" },
+      { value: "<$200", label: "microscope component cost" },
     ],
   },
 ];
@@ -547,7 +544,7 @@ export const navLinks = [
   { label: "Experience", href: "#experience" },
   { label: "Skills", href: "#skills" },
   { label: "Education", href: "#education" },
-  { label: "Publication", href: "#publication" },
+  { label: "Publication", href: "/publication", isRoute: true },
   { label: "Projects", href: "/projects", isRoute: true },
   { label: "Hobbies", href: "/hobbies", isRoute: true },
 ];

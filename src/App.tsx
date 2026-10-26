@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound";
 
 /* Hobbies and Projects pull in specialized interactive engines — keep them code-split */
 const Hobbies = lazy(() => import("./pages/Hobbies"));
+const Publication = lazy(() => import("./pages/Publication"));
 const Projects = lazy(() => import("./pages/Projects"));
 const FormFixerProject = lazy(() => import("./pages/FormFixerProject"));
 const SpotifyProject = lazy(() => import("./pages/SpotifyProject"));
@@ -36,6 +37,8 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/hobbies" element={<Hobbies />} />
+            <Route path="/publication" element={<Publication />} />
+            <Route path="/publications" element={<Publication />} />
             <Route path="/projects" element={<Projects />} />
             <Route path="/projects/form-fixer" element={<FormFixerProject />} />
             <Route path="/projects/spotify-playlist-generator" element={<SpotifyProject />} />
