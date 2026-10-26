@@ -130,9 +130,11 @@ const SpotifyWidget = () => {
 /* 3. Sorting Hub Interactive Visualizer (Faithful JavaFX & FXML Reproduction) */
 /* ------------------------------------------------------------------------- */
 const SortingHubWidget = () => {
-  const navigate = useNavigate();
   const [arraySize, setArraySize] = useState<number>(64);
   const [algorithm, setAlgorithm] = useState<"Merge Sort" | "Selection Sort">("Merge Sort");
+  const [speed, setSpeed] = useState<number>(35);
+  const speedRef = useRef<number>(35);
+  speedRef.current = speed;
   
   const createUnsortedArray = (n: number) => {
     const arr = Array.from({ length: n }, (_, i) => i + 1);
@@ -171,12 +173,19 @@ const SortingHubWidget = () => {
     setComparingIdx([]);
   };
 
+  const handleSpeedChange = (newSpeed: number) => {
+    setSpeed(newSpeed);
+    speedRef.current = newSpeed;
+  };
+
   const handleReset = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     runIdRef.current++;
     setIsSorting(false);
     setArraySize(64);
     setAlgorithm("Merge Sort");
+    setSpeed(35);
+    speedRef.current = 35;
     setArray(createUnsortedArray(64));
     setActiveIdx([]);
     setComparingIdx([]);
@@ -186,7 +195,8 @@ const SortingHubWidget = () => {
 
   const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  const runSort = async () => {
+  const runSort = async (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     if (isSorting) return;
     const currentRunId = ++runIdRef.current;
     setIsSorting(true);
@@ -198,7 +208,6 @@ const SortingHubWidget = () => {
     const working = [...array];
     let cmp = 0;
     let wr = 0;
-    const stepDelay = arraySize > 64 ? 20 : 40;
 
     if (algorithm === "Selection Sort") {
       // Faithful to SelectionSort.java
@@ -210,7 +219,7 @@ const SortingHubWidget = () => {
           cmp++;
           setComparisons(cmp);
           setComparingIdx([minIdx, j]);
-          await delay(stepDelay);
+          await delay(speedRef.current);
           if (runIdRef.current !== currentRunId) return;
           if (working[j] < working[minIdx]) {
             minIdx = j;
@@ -225,7 +234,7 @@ const SortingHubWidget = () => {
           setWrites(wr);
           setArray([...working]);
           setActiveIdx([i, minIdx]);
-          await delay(stepDelay);
+          await delay(speedRef.current);
           if (runIdRef.current !== currentRunId) return;
         }
       }
@@ -257,7 +266,7 @@ const SortingHubWidget = () => {
             setWrites(wr);
             setArray([...working]);
             setActiveIdx([l, left2]);
-            await delay(stepDelay);
+            await delay(speedRef.current);
             if (runIdRef.current !== currentRunId) return;
             l++;
             m++;
@@ -287,9 +296,9 @@ const SortingHubWidget = () => {
   };
 
   return (
-    <div className="flex flex-col h-[480px] sm:h-[520px] md:h-[560px] bg-neutral-950 p-4 sm:p-5 justify-between relative group/widget font-mono select-none">
-      {/* Top JavaFX Stage Bar */}
-      <div className="flex items-center justify-between pb-3 border-b border-white/10 gap-2">
+    <div className="flex flex-col h-[520px] sm:h-[540px] md:h-[560px] bg-neutral-950 p-4 sm:p-5 justify-between relative group/widget font-mono select-none">
+      {/* Top JavaFX Stage Bar (Case Study button removed as requested) */}
+      <div className="flex items-center justify-between pb-3 border-b border-white/10 gap-2 shrink-0">
         <div className="flex items-center gap-2.5">
           <img
             src="/images/projects/sorting/western_logo.png"
@@ -312,122 +321,160 @@ const SortingHubWidget = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate("/projects/sorting-hub");
-            }}
-            className="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 text-neutral-200 text-[11px] font-mono flex items-center gap-1.5 transition-colors"
-          >
-            <span>Case Study</span>
-            <ArrowRight size={12} />
-          </button>
-        </div>
-      </div>
-
-      {/* Sorting Canvas: 768x329 Proportional Red Bars */}
-      <div className="flex-1 my-3 bg-[#0d0d0d] rounded-xl border border-white/10 relative flex items-end justify-between gap-[1px] p-2 overflow-hidden shadow-inner">
-        <div
-          className="absolute inset-0 opacity-[0.03] pointer-events-none"
-          style={{
-            backgroundImage:
-              "linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)",
-            backgroundSize: "20px 20px",
-          }}
-        />
-
-        {array.map((val, idx) => {
-          const isComparing = comparingIdx.includes(idx);
-          const isSwapping = activeIdx.includes(idx);
-          const heightPercent = (val / arraySize) * 100;
-
-          let barBg = "bg-[#ef4444]";
-          let shadow = "";
-
-          if (isSwapping) {
-            barBg = "bg-amber-300";
-            shadow = "0 0 10px rgba(252, 211, 77, 0.9)";
-          } else if (isComparing) {
-            barBg = "bg-white";
-            shadow = "0 0 10px rgba(255, 255, 255, 0.95)";
-          }
-
-          return (
-            <div
-              key={idx}
-              style={{
-                height: `${heightPercent}%`,
-                boxShadow: shadow,
-              }}
-              className={`flex-1 rounded-t-[1px] transition-all duration-75 ${barBg}`}
-              title={`Index: ${idx} | Value: ${val}`}
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] text-neutral-400">
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                isSorting ? "bg-emerald-400 animate-pulse" : "bg-neutral-500"
+              }`}
             />
-          );
-        })}
-      </div>
-
-      {/* Telemetry Bar */}
-      <div className="flex items-center justify-between text-[11px] font-mono text-neutral-400 py-1 border-b border-white/5">
-        <div className="flex items-center gap-3">
-          <span>
-            Cmp: <strong className="text-white font-mono">{comparisons}</strong>
-          </span>
-          <span>
-            Writes: <strong className="text-white font-mono">{writes}</strong>
-          </span>
-        </div>
-        <div className="text-[10px] text-neutral-400">
-          {algorithm === "Merge Sort" ? "O(N log N) · O(1) Space" : "O(N²) · O(1) Space"}
+            <span className="font-mono">
+              {isSorting ? "Thread: RUNNING" : "Thread: IDLE"}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Control Panel Matching SortingHub-view.fxml */}
-      <div className="pt-2.5 flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
-        {/* ComboBox */}
-        <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-          <select
-            value={algorithm}
-            onChange={(e) => handleAlgorithmChange(e.target.value as "Merge Sort" | "Selection Sort")}
-            className="bg-black border border-white/20 rounded px-2 py-1 text-white text-[11px] font-mono focus:outline-none"
-          >
-            <option value="Merge Sort">Merge Sort</option>
-            <option value="Selection Sort">Selection Sort</option>
-          </select>
-        </div>
-
-        {/* Slider Scale (32 to 128) */}
-        <div
-          className="flex items-center gap-2 flex-1 max-w-[190px]"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <span className="text-[10px] text-neutral-400">Size:</span>
-          <input
-            type="range"
-            min="32"
-            max="128"
-            step="1"
-            value={arraySize}
-            onChange={(e) => handleSizeChange(Number(e.target.value))}
-            className="w-full accent-white h-1 bg-white/20 rounded cursor-pointer"
+      {/* Main Expanded Layout: Canvas on Left/Center, Dedicated Controls Sidebar on Right */}
+      <div className="flex-1 min-h-0 pt-3 flex flex-col md:flex-row gap-3 overflow-hidden">
+        {/* Main Visualization Area: Expanded Full-Height Sorting Bars Canvas */}
+        <div className="flex-1 min-h-[190px] md:min-h-0 bg-[#0d0d0d] rounded-xl border border-white/10 relative flex items-end justify-between gap-[1px] p-2 sm:p-3 overflow-hidden shadow-inner">
+          <div
+            className="absolute inset-0 opacity-[0.03] pointer-events-none"
+            style={{
+              backgroundImage:
+                "linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)",
+              backgroundSize: "20px 20px",
+            }}
           />
-          <span className="text-white text-[11px] font-bold w-6 text-right">{arraySize}</span>
+
+          {array.map((val, idx) => {
+            const isComparing = comparingIdx.includes(idx);
+            const isSwapping = activeIdx.includes(idx);
+            const heightPercent = (val / arraySize) * 100;
+
+            let barBg = "bg-[#ef4444]";
+            let shadow = "";
+
+            if (isSwapping) {
+              barBg = "bg-amber-300";
+              shadow = "0 0 10px rgba(252, 211, 77, 0.9)";
+            } else if (isComparing) {
+              barBg = "bg-white";
+              shadow = "0 0 10px rgba(255, 255, 255, 0.95)";
+            }
+
+            return (
+              <div
+                key={idx}
+                style={{
+                  height: `${heightPercent}%`,
+                  boxShadow: shadow,
+                }}
+                className={`flex-1 rounded-t-[1px] transition-all duration-75 ${barBg}`}
+                title={`Index: ${idx} | Value: ${val}`}
+              />
+            );
+          })}
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-          <button
-            onClick={runSort}
-            disabled={isSorting}
-            className="px-3 py-1 rounded bg-white text-black font-bold text-[11px] hover:bg-neutral-200 transition-colors disabled:opacity-40"
-          >
-            {isSorting ? "Sorting..." : "Sort"}
-          </button>
-          <button
-            onClick={handleReset}
-            className="px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 border border-white/20 text-neutral-200 text-[11px] font-bold transition-colors active:scale-95 shadow-[0_0_10px_rgba(255,255,255,0.05)]"
-          >
-            Reset
-          </button>
+        {/* Dedicated Control Sidebar */}
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="w-full md:w-56 sm:w-52 p-3 bg-neutral-900/70 border border-white/10 rounded-xl flex flex-col justify-between gap-2.5 text-xs font-mono shrink-0"
+        >
+          {/* Controls Group */}
+          <div className="space-y-2.5">
+            {/* Algorithm Dropdown */}
+            <div>
+              <label className="text-[10px] uppercase tracking-wider text-neutral-400 block mb-1">
+                Algorithm
+              </label>
+              <select
+                value={algorithm}
+                onChange={(e) =>
+                  handleAlgorithmChange(e.target.value as "Merge Sort" | "Selection Sort")
+                }
+                className="w-full bg-black border border-white/20 rounded-lg px-2.5 py-1.5 text-white text-[11px] font-mono focus:outline-none focus:border-white/50 cursor-pointer"
+              >
+                <option value="Merge Sort">Merge Sort</option>
+                <option value="Selection Sort">Selection Sort</option>
+              </select>
+            </div>
+
+            {/* Array Size Slider (32 to 128) */}
+            <div>
+              <div className="flex items-center justify-between text-[10px] text-neutral-400 mb-1">
+                <span className="uppercase tracking-wider">Array Size</span>
+                <span className="text-white font-bold">{arraySize}</span>
+              </div>
+              <input
+                type="range"
+                min="32"
+                max="128"
+                step="1"
+                value={arraySize}
+                onChange={(e) => handleSizeChange(Number(e.target.value))}
+                className="w-full accent-white h-1.5 bg-white/20 rounded cursor-pointer"
+              />
+            </div>
+
+            {/* Speed / Delay Slider (5ms to 100ms) */}
+            <div>
+              <div className="flex items-center justify-between text-[10px] text-neutral-400 mb-1">
+                <span className="uppercase tracking-wider">Step Delay</span>
+                <span className="text-white font-bold">{speed}ms</span>
+              </div>
+              <input
+                type="range"
+                min="5"
+                max="100"
+                step="5"
+                value={speed}
+                onChange={(e) => handleSpeedChange(Number(e.target.value))}
+                className="w-full accent-white h-1.5 bg-white/20 rounded cursor-pointer"
+              />
+            </div>
+          </div>
+
+          {/* Telemetry Badges */}
+          <div className="space-y-1.5 pt-1.5 border-t border-white/10">
+            <div className="grid grid-cols-2 gap-1.5">
+              <div className="p-2 rounded-lg bg-black/60 border border-white/5">
+                <div className="text-[9px] uppercase tracking-wider text-neutral-400">Comparisons</div>
+                <div className="text-sm font-bold text-white mt-0.5">{comparisons}</div>
+              </div>
+              <div className="p-2 rounded-lg bg-black/60 border border-white/5">
+                <div className="text-[9px] uppercase tracking-wider text-neutral-400">Writes</div>
+                <div className="text-sm font-bold text-white mt-0.5">{writes}</div>
+              </div>
+            </div>
+
+            <div className="px-2.5 py-1.5 rounded-lg bg-black/60 border border-white/5 flex items-center justify-between text-[10px]">
+              <span className="text-neutral-400">Complexity</span>
+              <span className="text-amber-300 font-bold">
+                {algorithm === "Merge Sort" ? "O(N log N)" : "O(N²)"}
+              </span>
+            </div>
+          </div>
+
+          {/* Action Buttons: Sort (Primary) & Reset */}
+          <div className="flex items-center gap-2 pt-1.5 border-t border-white/10">
+            <button
+              onClick={runSort}
+              disabled={isSorting}
+              className="flex-1 py-1.5 px-3 rounded-lg bg-white text-black font-bold text-[11px] hover:bg-neutral-200 transition-colors disabled:opacity-40 flex items-center justify-center gap-1.5 shadow-md active:scale-95"
+            >
+              <Play size={11} className="fill-black" />
+              <span>{isSorting ? "Sorting..." : "Sort"}</span>
+            </button>
+            <button
+              onClick={handleReset}
+              className="py-1.5 px-3 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 text-neutral-200 text-[11px] font-bold transition-colors active:scale-95 flex items-center justify-center gap-1"
+            >
+              <RotateCcw size={11} />
+              <span>Reset</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
