@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, lazy, Suspense } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,15 +22,13 @@ import {
   X,
   Cpu,
   Music2,
-  Box,
 } from "lucide-react";
 import CursorGlow from "@/components/CursorGlow";
 import { projects, profile, type Project } from "@/data/profile";
 import ResumeModal from "@/components/ResumeModal";
 import { TiltCard } from "@/components/animated";
 
-/* Lazy-load the 3D WebGL Polyhedron scene so Three.js loads asynchronously */
-const ProjectsPolyhedron = lazy(() => import("@/components/animated/ProjectsPolyhedron"));
+import ScrollWireframe from "@/components/animated/ScrollWireframe";
 
 /* ------------------------------------------------------------------------- */
 /* 1. FormFixer AI Preview Widget (Enlarged Full-Bleed Phone Preview)        */
@@ -91,9 +89,9 @@ const SpotifyWidget = () => {
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/60 pointer-events-none" />
 
       {/* Authentic Frosted Glass Capsule (Matching home.js) */}
-      <div className="relative z-10 w-full max-w-sm sm:max-w-md p-6 sm:p-8 rounded-3xl bg-neutral-900/60 border border-white/20 backdrop-blur-xl text-center shadow-[0_0_50px_rgba(0,0,0,0.8)] transition-all duration-300 group-hover/spotify:border-emerald-500/50 group-hover/spotify:shadow-[0_0_40px_rgba(16,185,129,0.15)]">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-mono text-emerald-400 uppercase tracking-widest mb-4">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+      <div className="relative z-10 w-full max-w-sm sm:max-w-md p-6 sm:p-8 rounded-3xl bg-neutral-900/60 border border-white/20 backdrop-blur-xl text-center shadow-[0_0_50px_rgba(0,0,0,0.8)] transition-all duration-300 group-hover/spotify:border-neutral-500/50 group-hover/spotify:shadow-[0_0_40px_rgba(100,100,100,0.15)]">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-500/10 border border-neutral-500/30 text-[10px] font-mono text-neutral-400 uppercase tracking-widest mb-4">
+          <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 animate-pulse" />
           FastAPI · OpenAI GPT-4 · Spotify Web API
         </div>
 
@@ -105,7 +103,7 @@ const SpotifyWidget = () => {
           Use the power of AI to create personalized playlists with your own preferences
         </p>
 
-        <div className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-white text-black font-bold text-xs tracking-wider transition-all duration-300 group-hover/spotify:bg-emerald-400 group-hover/spotify:shadow-[0_0_20px_rgba(16,185,129,0.4)]">
+        <div className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-white text-black font-bold text-xs tracking-wider transition-all duration-300 group-hover/spotify:bg-neutral-400 group-hover/spotify:shadow-[0_0_20px_rgba(100,100,100,0.4)]">
           <Music2 size={14} />
           <span>LOGIN WITH SPOTIFY</span>
         </div>
@@ -182,7 +180,7 @@ const SortingHubWidget = () => {
             alt="Sorting Hub Logo"
             className="w-5 h-5 rounded object-contain bg-white/10 p-0.5"
           />
-          <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+          <div className="w-2.5 h-2.5 rounded-full bg-neutral-400 animate-pulse" />
           <span className="text-xs text-white font-semibold uppercase tracking-wider">
             Selection Sort Visualizer
           </span>
@@ -196,9 +194,9 @@ const SortingHubWidget = () => {
           const isComparing = comparingIdx.includes(idx);
           const isSwapping = activeIdx.includes(idx);
           const bg = isSwapping
-            ? "bg-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.8)]"
+            ? "bg-neutral-200 shadow-[0_0_12px_rgba(200,200,200,0.8)]"
             : isComparing
-            ? "bg-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.8)]"
+            ? "bg-neutral-500 shadow-[0_0_12px_rgba(128,128,128,0.8)]"
             : "bg-white/40 hover:bg-white/60";
 
           return (
@@ -217,7 +215,7 @@ const SortingHubWidget = () => {
       {/* Actions and Stats */}
       <div className="flex items-center justify-between text-xs font-mono text-neutral-300">
         <div>
-          Comparisons: <span className="text-emerald-400 font-bold">{comparisons}</span>
+          Comparisons: <span className="text-neutral-400 font-bold">{comparisons}</span>
         </div>
         <div className="flex gap-2">
           <button
@@ -257,9 +255,9 @@ const EnginereaWidget = () => {
           <img
             src="/images/projects/enginerea/bobby.png"
             alt="Bobby the Builder"
-            className="w-5 h-5 rounded-full object-contain bg-amber-500/20"
+            className="w-5 h-5 rounded-full object-contain bg-neutral-500/20"
           />
-          <div className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
+          <div className="w-2.5 h-2.5 rounded-full bg-neutral-400 animate-pulse" />
           <span className="text-xs font-mono text-white font-semibold uppercase tracking-wider">
             Enginerea Story & Physics
           </span>
@@ -289,7 +287,7 @@ const EnginereaWidget = () => {
             className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent flex items-end p-3">
-            <span className="text-[11px] font-mono text-amber-300">
+            <span className="text-[11px] font-mono text-neutral-300">
               Level 1 Gameplay: Bobby solving 2D equilibrium problems
             </span>
           </div>
@@ -299,11 +297,11 @@ const EnginereaWidget = () => {
           {/* Truss SVG Simulation */}
           <svg viewBox="0 0 400 180" className="w-full h-full max-h-[220px]">
             {/* Ground Supports */}
-            <polygon points="40,160 30,175 50,175" fill="#71717a" />
-            <polygon points="360,160 350,175 370,175" fill="#71717a" />
+            <polygon points="40,160 30,175 50,175" fill="#767676" />
+            <polygon points="360,160 350,175 370,175" fill="#767676" />
 
             {/* Bottom Chord */}
-            <line x1="40" y1="160" x2="360" y2="160" stroke="#a1a1aa" strokeWidth="4" />
+            <line x1="40" y1="160" x2="360" y2="160" stroke="#a6a6a6" strokeWidth="4" />
 
             {/* Dynamic Struts */}
             {Array.from({ length: trussCount }).map((_, i) => {
@@ -312,9 +310,9 @@ const EnginereaWidget = () => {
               const xMid = (xStart + xEnd) / 2;
               return (
                 <g key={i}>
-                  <line x1={xStart} y1="160" x2={xMid} y2="50" stroke={passed ? "#10b981" : "#f43f5e"} strokeWidth="3" />
-                  <line x1={xMid} y1="50" x2={xEnd} y2="160" stroke={passed ? "#10b981" : "#f43f5e"} strokeWidth="3" />
-                  <line x1={xStart} y1="50" x2={xEnd} y2="50" stroke="#e4e4e7" strokeWidth="3" />
+                  <line x1={xStart} y1="160" x2={xMid} y2="50" stroke={passed ? "#646464" : "#9a9a9a"} strokeWidth="3" />
+                  <line x1={xMid} y1="50" x2={xEnd} y2="160" stroke={passed ? "#646464" : "#9a9a9a"} strokeWidth="3" />
+                  <line x1={xStart} y1="50" x2={xEnd} y2="50" stroke="#e6e6e6" strokeWidth="3" />
                 </g>
               );
             })}
@@ -324,12 +322,12 @@ const EnginereaWidget = () => {
               animate={{ y: [0, 4, 0] }}
               transition={{ repeat: Infinity, duration: 1.2 }}
             >
-              <line x1="200" y1="15" x2="200" y2="48" stroke="#f59e0b" strokeWidth="3" />
-              <polygon points="196,44 204,44 200,52" fill="#f59e0b" />
+              <line x1="200" y1="15" x2="200" y2="48" stroke="#808080" strokeWidth="3" />
+              <polygon points="196,44 204,44 200,52" fill="#808080" />
             </motion.g>
           </svg>
 
-          <div className="absolute top-2 right-2 text-[10px] font-mono bg-black/60 px-2 py-1 rounded border border-white/10 text-amber-300">
+          <div className="absolute top-2 right-2 text-[10px] font-mono bg-black/60 px-2 py-1 rounded border border-white/10 text-neutral-300">
             Load: {loadApplied} kN
           </div>
         </div>
@@ -338,7 +336,7 @@ const EnginereaWidget = () => {
       <div className="space-y-2 text-xs font-mono">
         <div className="flex justify-between text-neutral-300">
           <span>Structural Members: {trussCount}</span>
-          <span className={passed ? "text-emerald-400 font-bold" : "text-rose-400 font-bold"}>
+          <span className={passed ? "text-neutral-400 font-bold" : "text-neutral-400 font-bold"}>
             Safety Factor: {safetyFactor}x ({passed ? "PASSED" : "COLLAPSE"})
           </span>
         </div>
@@ -357,7 +355,7 @@ const EnginereaWidget = () => {
           </button>
           <button
             onClick={() => setLoadApplied((l) => (l > 300 ? 80 : l + 60))}
-            className="flex-1 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40"
+            className="flex-1 py-1 rounded bg-neutral-500/20 hover:bg-neutral-500/30 text-neutral-300 border border-neutral-500/40"
           >
             Apply Load
           </button>
@@ -401,12 +399,12 @@ const ChatroomWidget = () => {
             alt="C++ Logo"
             className="w-5 h-5 rounded object-contain bg-white/10 p-0.5"
           />
-          <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+          <div className="w-2.5 h-2.5 rounded-full bg-neutral-400 animate-pulse" />
           <span className="text-xs text-neutral-200 font-semibold uppercase tracking-wider">
             C++ POSIX Sockets Terminal
           </span>
         </div>
-        <div className="text-[10px] text-emerald-400">Ping: 1.4ms | FD: 5</div>
+        <div className="text-[10px] text-neutral-400">Ping: 1.4ms | FD: 5</div>
       </div>
 
       {/* Terminal Output */}
@@ -418,13 +416,13 @@ const ChatroomWidget = () => {
                 m.type === "sys"
                   ? "text-neutral-400 font-bold"
                   : m.type === "whisper"
-                  ? "text-purple-400 font-bold"
-                  : "text-emerald-400 font-bold"
+                  ? "text-neutral-400 font-bold"
+                  : "text-neutral-400 font-bold"
               }
             >
               [{m.sender}]:
             </span>{" "}
-            <span className={m.type === "whisper" ? "text-purple-300 italic" : "text-neutral-300"}>
+            <span className={m.type === "whisper" ? "text-neutral-300 italic" : "text-neutral-300"}>
               {m.text}
             </span>
           </div>
@@ -434,7 +432,7 @@ const ChatroomWidget = () => {
       {/* Terminal Input */}
       <div className="flex gap-2">
         <div className="flex-1 flex items-center bg-black/60 rounded-xl border border-white/10 px-3">
-          <span className="text-emerald-400 text-xs mr-1.5">$</span>
+          <span className="text-neutral-400 text-xs mr-1.5">$</span>
           <input
             type="text"
             value={inputVal}
@@ -465,7 +463,6 @@ const Projects = () => {
   const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [copiedClone, setCopiedClone] = useState(false);
-  const [show3DMatrix, setShow3DMatrix] = useState(true);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -481,7 +478,7 @@ const Projects = () => {
       const matchesSearch =
         p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.tech.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.summary.toLowerCase().includes(searchQuery.toLowerCase());
+        p.overview.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     });
   }, [selectedCategory, searchQuery]);
@@ -553,35 +550,7 @@ const Projects = () => {
             </p>
           </div>
 
-          {/* Interactive 3D WebGL Matrix Showcase */}
-          <div className="mb-12">
-            <div className="flex items-center justify-between mb-3 px-2">
-              <div className="flex items-center gap-2">
-                <Box size={14} className="text-emerald-400" />
-                <span className="text-xs font-mono uppercase tracking-wider text-neutral-300 font-bold">
-                  3D Glassmorphism System Core
-                </span>
-              </div>
-              <button
-                onClick={() => setShow3DMatrix(!show3DMatrix)}
-                className="text-[11px] font-mono text-neutral-400 hover:text-white transition-colors"
-              >
-                {show3DMatrix ? "Minimize 3D Matrix" : "Expand 3D Matrix"}
-              </button>
-            </div>
-
-            {show3DMatrix && (
-              <Suspense
-                fallback={
-                  <div className="w-full h-[320px] rounded-3xl bg-neutral-950/40 border border-white/10 flex items-center justify-center font-mono text-xs text-neutral-500">
-                    Loading 3D WebGL Matrix...
-                  </div>
-                }
-              >
-                <ProjectsPolyhedron />
-              </Suspense>
-            )}
-          </div>
+          <ScrollWireframe />
 
           {/* Filter & Search Bar */}
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-10 pb-6 border-b border-white/10">
@@ -700,7 +669,7 @@ const Projects = () => {
                 {/* Modal Header */}
                 <div className="p-6 border-b border-white/10 flex items-start justify-between bg-neutral-900/60">
                   <div>
-                    <span className="text-[10px] font-mono uppercase tracking-widest text-emerald-400">
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-400">
                       {selectedProject.category}
                     </span>
                     <h3 className="text-2xl font-bold text-white mt-1">
@@ -725,7 +694,7 @@ const Projects = () => {
                       Overview
                     </h4>
                     <p className="text-sm text-neutral-300 leading-relaxed">
-                      {selectedProject.summary}
+                      {selectedProject.overview}
                     </p>
                   </div>
 
@@ -758,7 +727,7 @@ const Projects = () => {
                         </div>
                         {selectedProject.architecture.flow.map((step, idx) => (
                           <div key={idx} className="text-xs font-mono text-neutral-300 flex items-start gap-2">
-                            <span className="text-emerald-400 font-bold">→</span>
+                            <span className="text-neutral-400 font-bold">→</span>
                             <span>{step}</span>
                           </div>
                         ))}
@@ -774,7 +743,7 @@ const Projects = () => {
                     <ul className="space-y-2.5">
                       {selectedProject.bullets.map((b, i) => (
                         <li key={i} className="flex items-start gap-3 text-sm text-neutral-300">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 shrink-0" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 mt-2 shrink-0" />
                           <span>{b}</span>
                         </li>
                       ))}
@@ -790,7 +759,7 @@ const Projects = () => {
                       onClick={() => copyCloneCmd(selectedProject.githubUrl)}
                       className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-mono text-white flex items-center gap-1.5"
                     >
-                      {copiedClone ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                      {copiedClone ? <Check size={14} className="text-neutral-400" /> : <Copy size={14} />}
                       <span>{copiedClone ? "Copied" : "Copy Clone"}</span>
                     </button>
                   </div>

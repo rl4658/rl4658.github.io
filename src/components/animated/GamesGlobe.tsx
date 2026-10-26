@@ -11,9 +11,9 @@ const GAMES = [
 ];
 
 /* Pink ↔ purple gradient across the sphere. Position-based so it's stable per word. */
-const PINK = new THREE.Color("#ec4899");
-const PURPLE = new THREE.Color("#8b5cf6");
-const HOVER = new THREE.Color("#fbcfe8");
+const PLATINUM = new THREE.Color("#9a9a9a");
+const SILVER = new THREE.Color("#a9a9a9");
+const HOVER = new THREE.Color("#e5e5e5");
 
 const Word = ({
   position,
@@ -28,7 +28,7 @@ const Word = ({
   /* Mix pink→purple based on Y so the cloud has a subtle vertical gradient. */
   const baseColor = useMemo(() => {
     const t = (position.y / 6 + 1) / 2; // 0..1
-    return new THREE.Color().lerpColors(PURPLE, PINK, t);
+    return new THREE.Color().lerpColors(SILVER, PLATINUM, t);
   }, [position]);
 
   useFrame(() => {
@@ -47,7 +47,7 @@ const Word = ({
         anchorY="middle"
         color={baseColor}
         outlineWidth={0.012}
-        outlineColor="#020617"
+        outlineColor="#050505"
         outlineOpacity={0.85}
         material-toneMapped={false}
         onPointerOver={(e) => {
@@ -117,8 +117,8 @@ const GamesGlobe = () => {
         gl={{ antialias: false, alpha: true }}
       >
         <ambientLight intensity={0.6} />
-        <pointLight position={[10, 10, 10]} intensity={0.8} color="#ec4899" />
-        <pointLight position={[-10, -10, -10]} intensity={0.4} color="#8b5cf6" />
+        <pointLight position={[10, 10, 10]} intensity={0.8} color="#9a9a9a" />
+        <pointLight position={[-10, -10, -10]} intensity={0.4} color="#a9a9a9" />
 
         <Cloud radius={6} games={GAMES} />
 

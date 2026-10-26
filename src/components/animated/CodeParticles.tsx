@@ -72,7 +72,7 @@ const CodeParticles = ({
     if (colorScheme === "primary") return "text-primary";
     if (colorScheme === "accent") return "text-accent";
     // Mixed - alternate between primary, accent, and a pink hue
-    const colors = ["text-primary", "text-accent", "text-pink-400"];
+    const colors = ["text-primary", "text-accent", "text-neutral-400"];
     return colors[index % colors.length];
   };
 

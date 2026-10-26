@@ -165,12 +165,12 @@ const IndexInner = () => {
                 {activeExperience && (
                   <ExperienceDetail
                     key={activeExperience.slug}
-                    exp={activeExperience}
+                    experience={activeExperience}
                     onClose={closeExperience}
                     onPrev={prevExperience}
                     onNext={nextExperience}
-                    currentIndex={activeIndex}
-                    totalCount={experiences.length}
+                    index={activeIndex}
+                    total={experiences.length}
                   />
                 )}
               </AnimatePresence>

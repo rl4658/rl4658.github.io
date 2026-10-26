@@ -76,15 +76,15 @@ const ChapterStrip = () => {
               </span>
             </motion.div>
 
-            {/* Notch — short cyan bar that grows + glows when active. */}
+            {/* Notch — short platinum bar that grows + glows when active. */}
             <motion.span
               initial={false}
               animate={{
                 width: isActive ? 24 : 12,
                 opacity: isActive ? 1 : 0.45,
                 boxShadow: isActive
-                  ? "0 0 14px rgba(255, 255, 255, 0.8)"
-                  : "0 0 0px rgba(255, 255, 255, 0)",
+                  ? "0 0 14px rgba(255,255,255, 0.8)"
+                  : "0 0 0px rgba(255,255,255, 0)",
               }}
               transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
               className="h-[2px] rounded-full bg-primary group-hover:opacity-100"

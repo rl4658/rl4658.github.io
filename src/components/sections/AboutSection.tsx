@@ -49,7 +49,7 @@ const AboutSection = () => {
                   initial={{ opacity: 0, scale: 0.8 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true, margin: "-50px" }}
-                  whileHover={{ scale: 1.1, backgroundColor: "rgba(11, 165, 236, 0.2)" }}
+                  whileHover={{ scale: 1.1, backgroundColor: "rgba(124,124,124, 0.2)" }}
                   transition={{ duration: 0.4, delay: 0.1 * index }}
                   className="pill bg-primary/10 text-primary border-primary/20 cursor-default"
                 >

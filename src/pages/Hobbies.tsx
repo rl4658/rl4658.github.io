@@ -284,7 +284,7 @@ const Hobbies = () => {
         }
       `}</style>
 
-      <div className="relative min-h-screen bg-[#020617] text-foreground overflow-x-hidden">
+      <div className="relative min-h-screen bg-[#050505] text-foreground overflow-x-hidden">
         <CursorGlow />
         <FallingStars />
 
@@ -297,7 +297,7 @@ const Hobbies = () => {
             backgroundPosition: "center 40%",
             backgroundRepeat: "no-repeat",
             opacity: 0.22,
-            filter: "saturate(1.35) contrast(1.05)",
+            filter: "grayscale(1) contrast(1.05)",
           }}
           aria-hidden="true"
         />
@@ -307,13 +307,13 @@ const Hobbies = () => {
           className="fixed inset-0 z-[1] pointer-events-none"
           style={{
             background:
-              "radial-gradient(circle at center, rgba(2,6,23,0.72) 0%, rgba(2,6,23,0.88) 65%, rgba(2,6,23,0.98) 100%)",
+              "radial-gradient(circle at center, rgba(5,5,5,0.72) 0%, rgba(5,5,5,0.88) 65%, rgba(5,5,5,0.98) 100%)",
           }}
           aria-hidden="true"
         />
 
         {/* Top Floating Controls */}
-        <header className="sticky top-0 z-50 backdrop-blur-xl bg-slate-950/70 border-b border-white/5 px-6 md:px-12 py-4 flex items-center justify-between">
+        <header className="sticky top-0 z-50 backdrop-blur-xl bg-neutral-950/80 border-b border-white/5 px-6 md:px-12 py-4 flex items-center justify-between">
           <button
             onClick={() => navigate("/")}
             className="flex items-center gap-2 text-foreground/60 hover:text-white font-mono text-xs uppercase tracking-widest transition-colors p-2 rounded-xl hover:bg-white/5"
@@ -459,10 +459,10 @@ const Hobbies = () => {
           </div>
 
           {/* INTERACTIVE MODULE 2: Culinary Arts & Pasta Kitchen Lab */}
-          <div className="w-full max-w-3xl mb-14 glass-strong rounded-3xl p-6 md:p-8 border border-orange-500/20 shadow-2xl relative overflow-hidden">
+          <div className="w-full max-w-3xl mb-14 glass-strong rounded-3xl p-6 md:p-8 border border-neutral-500/20 shadow-2xl relative overflow-hidden">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10 mb-6">
               <div className="flex items-center gap-3">
-                <div className="p-3 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400">
+                <div className="p-3 rounded-2xl bg-neutral-500/10 border border-neutral-500/20 text-neutral-400">
                   <UtensilsCrossed size={24} />
                 </div>
                 <div>
@@ -470,7 +470,7 @@ const Hobbies = () => {
                   <p className="text-xs font-mono text-foreground/60">Emulsification Algorithms • Heat Control • Traditional Recipes</p>
                 </div>
               </div>
-              <span className="text-xs font-mono px-3 py-1 rounded-full bg-orange-500/10 text-orange-300 border border-orange-500/20">
+              <span className="text-xs font-mono px-3 py-1 rounded-full bg-neutral-500/10 text-neutral-300 border border-neutral-500/20">
                 Carbonara Authenticity: {pastaIngredients.length >= 4 ? "100% Roman" : "In Progress"}
               </span>
             </div>
@@ -498,14 +498,14 @@ const Hobbies = () => {
                       onClick={() => toggleIngredient(item)}
                       className={`px-3.5 py-2 rounded-xl text-xs font-mono transition-all flex items-center gap-2 border ${
                         isForbidden
-                          ? "bg-rose-500/10 border-rose-500/30 text-rose-300 hover:bg-rose-500/20"
+                          ? "bg-neutral-500/10 border-neutral-500/30 text-neutral-300 hover:bg-neutral-500/20"
                           : isSelected
-                          ? "bg-orange-500/20 border-orange-400/50 text-orange-200 shadow-[0_0_12px_rgba(249,115,22,0.2)]"
+                          ? "bg-neutral-500/20 border-neutral-400/50 text-neutral-200 shadow-[0_0_12px_rgba(136,136,136,0.2)]"
                           : "bg-white/5 border-white/10 text-foreground/70 hover:border-white/20"
                       }`}
                     >
-                      {isSelected ? <CheckCircle2 size={13} className="text-orange-400" /> : null}
-                      {isForbidden ? <AlertCircle size={13} className="text-rose-400" /> : null}
+                      {isSelected ? <CheckCircle2 size={13} className="text-neutral-400" /> : null}
+                      {isForbidden ? <AlertCircle size={13} className="text-neutral-400" /> : null}
                       <span>{item}</span>
                     </button>
                   );
@@ -516,7 +516,7 @@ const Hobbies = () => {
                 <motion.div
                   initial={{ opacity: 0, y: -6 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mt-3 p-3 rounded-xl bg-rose-500/20 border border-rose-500/40 text-xs font-mono text-rose-300 flex items-center gap-2"
+                  className="mt-3 p-3 rounded-xl bg-neutral-500/20 border border-neutral-500/40 text-xs font-mono text-neutral-300 flex items-center gap-2"
                 >
                   <AlertCircle size={15} />
                   <span>WARNING: Heavy cream is strictly forbidden in authentic Roman Carbonara! Traditional emulsion relies solely on pasta starch and egg yolk fat.</span>
@@ -530,10 +530,10 @@ const Hobbies = () => {
           </div>
 
           {/* INTERACTIVE MODULE 3: Hollow Knight Bench & Charms */}
-          <div className="w-full max-w-3xl mb-14 glass-strong rounded-3xl p-6 md:p-8 border border-emerald-500/20 shadow-2xl relative overflow-hidden">
+          <div className="w-full max-w-3xl mb-14 glass-strong rounded-3xl p-6 md:p-8 border border-neutral-500/20 shadow-2xl relative overflow-hidden">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10 mb-6">
               <div className="flex items-center gap-3">
-                <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                <div className="p-3 rounded-2xl bg-neutral-500/10 border border-neutral-500/20 text-neutral-400">
                   <Shield size={24} />
                 </div>
                 <div>
@@ -568,16 +568,16 @@ const Hobbies = () => {
                     onClick={() => toggleCharm(charm.id, charm.quote)}
                     className={`p-3.5 rounded-2xl border text-left transition-all ${
                       isEquipped
-                        ? "bg-emerald-500/15 border-emerald-400/50 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+                        ? "bg-neutral-500/15 border-neutral-400/50 shadow-[0_0_15px_rgba(100,100,100,0.2)]"
                         : "bg-white/[0.02] border-white/5 hover:border-white/15"
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
                       <span className="font-bold text-sm text-foreground">{charm.name}</span>
-                      <span className="text-[10px] font-mono text-emerald-400">{charm.cost}</span>
+                      <span className="text-[10px] font-mono text-neutral-400">{charm.cost}</span>
                     </div>
                     <p className="text-xs text-foreground/60 font-light">{charm.quote}</p>
-                    <div className="mt-2 text-[10px] font-mono text-emerald-400/80">
+                    <div className="mt-2 text-[10px] font-mono text-neutral-400/80">
                       {isEquipped ? "● EQUIPPED AT BENCH" : "○ CLICK TO EQUIP"}
                     </div>
                   </button>
@@ -586,7 +586,7 @@ const Hobbies = () => {
             </div>
 
             <div className="p-3.5 rounded-xl bg-black/50 border border-white/5 flex items-center gap-2 text-xs font-mono text-foreground/70">
-              <Sparkles size={14} className="text-emerald-400" />
+              <Sparkles size={14} className="text-neutral-400" />
               <span>Status: {lastLoreQuote}</span>
             </div>
           </div>
@@ -622,7 +622,7 @@ const Hobbies = () => {
                   max="100"
                   value={tiltLevel}
                   onChange={(e) => setTiltLevel(Number(e.target.value))}
-                  className="w-full accent-white h-1.5 bg-slate-800 rounded cursor-pointer"
+                  className="w-full accent-white h-1.5 bg-neutral-800 rounded cursor-pointer"
                 />
               </div>
 
@@ -645,16 +645,16 @@ const Hobbies = () => {
                 {reactionTestState === "waiting" && (
                   <button
                     onClick={handleReactionClick}
-                    className="px-6 py-2.5 rounded-xl bg-rose-500/30 text-rose-300 border border-rose-500/50 font-mono text-xs animate-pulse"
+                    className="px-6 py-2.5 rounded-xl bg-neutral-500/30 text-neutral-300 border border-neutral-500/50 font-mono text-xs animate-pulse"
                   >
-                    Wait for Green... (Do not click yet)
+                    Wait for the signal... (Do not click yet)
                   </button>
                 )}
 
                 {reactionTestState === "ready" && (
                   <button
                     onClick={handleReactionClick}
-                    className="px-8 py-3 rounded-xl bg-emerald-400 text-slate-950 font-mono font-bold text-sm shadow-[0_0_20px_#10b981] animate-bounce"
+                    className="px-8 py-3 rounded-xl bg-neutral-400 text-neutral-950 font-mono font-bold text-sm shadow-[0_0_20px_#646464] animate-bounce"
                   >
                     CLICK NOW!
                   </button>
@@ -662,7 +662,7 @@ const Hobbies = () => {
 
                 {reactionTestState === "result" && (
                   <div className="flex items-center gap-3">
-                    <span className="text-sm font-mono text-emerald-400 font-bold">
+                    <span className="text-sm font-mono text-neutral-400 font-bold">
                       {reactionScore} ms (Diamond Reflexes!)
                     </span>
                     <button
@@ -699,7 +699,7 @@ const Hobbies = () => {
 
             {/* COMPLETELY BORDERLESS 3D GLOBE WRAPPER (No border as requested) */}
             <div className="w-full aspect-square md:aspect-[16/10] max-w-3xl relative overflow-hidden bg-transparent">
-              <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_30%,rgba(2,6,23,0.85)_100%)] z-10" />
+              <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_30%,rgba(5,5,5,0.85)_100%)] z-10" />
               <Suspense
                 fallback={
                   <div className="w-full h-full flex items-center justify-center text-foreground/40 font-mono text-xs">

@@ -10,9 +10,9 @@ const SKILLS = [
   "Linux", "Kubernetes", "PyTorch", "Oracle Fusion",
 ];
 
-/* Vibrant cyan to purple gradient across the 3D sphere */
-const CYAN = new THREE.Color("#38bdf8");
-const PURPLE = new THREE.Color("#c084fc");
+/* Graphite to silver gradient across the 3D sphere */
+const GRAPHITE = new THREE.Color("#989898");
+const SILVER = new THREE.Color("#c0c0c0");
 const HOVER = new THREE.Color("#ffffff");
 
 const Word = ({
@@ -27,7 +27,7 @@ const Word = ({
 
   const baseColor = useMemo(() => {
     const t = (position.y / 6 + 1) / 2;
-    return new THREE.Color().lerpColors(PURPLE, CYAN, t);
+    return new THREE.Color().lerpColors(SILVER, GRAPHITE, t);
   }, [position]);
 
   useFrame(() => {
@@ -46,7 +46,7 @@ const Word = ({
         anchorY="middle"
         color={baseColor}
         outlineWidth={0.012}
-        outlineColor="#020617"
+        outlineColor="#050505"
         outlineOpacity={0.85}
         material-toneMapped={false}
         onPointerOver={(e) => {
@@ -115,7 +115,7 @@ const SkillsGlobe = ({ active = true }: SkillsGlobeProps) => {
       >
         <ambientLight intensity={0.7} />
         <pointLight position={[10, 10, 10]} intensity={0.8} color="#ffffff" />
-        <pointLight position={[-10, -10, -10]} intensity={0.4} color="#94a3b8" />
+        <pointLight position={[-10, -10, -10]} intensity={0.4} color="#a6a6a6" />
 
         <Cloud radius={6} skills={SKILLS} />
 

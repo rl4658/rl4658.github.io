@@ -7,7 +7,7 @@ import { useScene } from "@/contexts/SceneContext";
 
 const cardHover = {
   y: -8,
-  boxShadow: "0 20px 60px rgba(6, 182, 212, 0.18)",
+  boxShadow: "0 20px 60px rgba(109,109,109, 0.18)",
 };
 
 const EducationSection = () => {
@@ -95,7 +95,7 @@ const EducationSection = () => {
           <ScrollReveal from="up" intensity={1}>
             <TiltCard>
               <motion.div
-                whileHover={{ y: -8, boxShadow: "0 20px 60px rgba(16, 185, 129, 0.18)" }}
+                whileHover={{ y: -8, boxShadow: "0 20px 60px rgba(100,100,100, 0.18)" }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 className="glass-strong rounded-3xl p-6 md:p-8"
               >

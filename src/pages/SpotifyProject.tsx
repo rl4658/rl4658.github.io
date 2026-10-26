@@ -165,7 +165,7 @@ const SpotifyProject = () => {
         />
       </Helmet>
 
-      <div className="min-h-screen bg-[#050505] text-[#f5f5f5] selection:bg-emerald-500/20 selection:text-emerald-300 pb-32">
+      <div className="min-h-screen bg-[#050505] text-[#f5f5f5] selection:bg-neutral-500/20 selection:text-neutral-300 pb-32">
         <NavBar onResumeClick={() => setIsResumeOpen(true)} />
 
         <main className="w-full max-w-[1680px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 pt-24 md:pt-32">
@@ -200,8 +200,8 @@ const SpotifyProject = () => {
             transition={{ duration: 0.5 }}
             className="mb-12"
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-[11px] font-mono text-emerald-400 uppercase tracking-widest mb-4">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-500/10 border border-neutral-500/30 text-[11px] font-mono text-neutral-400 uppercase tracking-widest mb-4">
+              <span className="w-2 h-2 rounded-full bg-neutral-400 animate-pulse" />
               Full-Stack Music AI · NLP & Acoustic Vectors
             </div>
 
@@ -235,18 +235,18 @@ const SpotifyProject = () => {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-2xl font-bold text-white flex items-center gap-2.5">
-                  <Sliders className="text-emerald-400" size={24} />
+                  <Sliders className="text-neutral-400" size={24} />
                   <span>Interactive AI Synthesis Studio</span>
                 </h2>
                 <p className="text-xs font-mono text-neutral-400 mt-1">
-                  Live emulation of the React frontend + FastAPI recommendation algorithm from <code className="text-emerald-400">app.py</code>
+                  Live emulation of the React frontend + FastAPI recommendation algorithm from <code className="text-neutral-400">app.py</code>
                 </p>
               </div>
 
               <button
                 onClick={handleSynthesize}
                 disabled={isGenerating}
-                className="px-4 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/40 text-xs font-mono font-bold flex items-center gap-2 transition-all shadow-[0_0_20px_rgba(16,185,129,0.2)] disabled:opacity-50"
+                className="px-4 py-2 rounded-xl bg-neutral-500/20 hover:bg-neutral-500/30 text-neutral-400 border border-neutral-500/40 text-xs font-mono font-bold flex items-center gap-2 transition-all shadow-[0_0_20px_rgba(100,100,100,0.2)] disabled:opacity-50"
               >
                 <Sparkles size={14} className={isGenerating ? "animate-spin" : ""} />
                 <span>{isGenerating ? "Synthesizing Vectors..." : "Synthesize AI Mix"}</span>
@@ -255,7 +255,7 @@ const SpotifyProject = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               {/* Left Column: Prompt & 6 Sliders */}
-              <div className="lg:col-span-7 bg-zinc-950/80 border border-white/10 rounded-3xl p-6 sm:p-8 backdrop-blur-xl flex flex-col justify-between">
+              <div className="lg:col-span-7 bg-neutral-950/80 border border-white/10 rounded-3xl p-6 sm:p-8 backdrop-blur-xl flex flex-col justify-between">
                 <div>
                   {/* Prompt Bar with GPT Logo */}
                   <div className="mb-6">
@@ -268,9 +268,9 @@ const SpotifyProject = () => {
                         value={prompt}
                         onChange={(e) => setPrompt(e.target.value)}
                         placeholder="I'm going to the gym soon, give me a workout playlist..."
-                        className="w-full px-5 py-3.5 pr-14 rounded-2xl bg-white/[0.04] border border-white/20 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:border-emerald-400 font-sans transition-all"
+                        className="w-full px-5 py-3.5 pr-14 rounded-2xl bg-white/[0.04] border border-white/20 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:border-neutral-400 font-sans transition-all"
                       />
-                      <div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-mono text-emerald-400">
+                      <div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-2 py-1 rounded-lg bg-neutral-500/10 border border-neutral-500/30 text-[10px] font-mono text-neutral-400">
                         <Sparkles size={12} />
                         <span>GPT-4</span>
                       </div>
@@ -284,7 +284,7 @@ const SpotifyProject = () => {
                           onClick={() => setPrompt(p)}
                           className={`text-[11px] font-mono px-3 py-1 rounded-lg border transition-all text-left ${
                             prompt === p
-                              ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                              ? "bg-neutral-500/20 text-neutral-300 border-neutral-500/40"
                               : "bg-white/[0.02] text-neutral-400 border-white/10 hover:border-white/30 hover:text-white"
                           }`}
                         >
@@ -323,7 +323,7 @@ const SpotifyProject = () => {
                       <span className="text-xs font-mono uppercase tracking-wider text-neutral-300 font-bold">
                         (Optional) 6-Axis Audio Feature Sliders
                       </span>
-                      <span className="text-[10px] font-mono text-emerald-400">Values blended at 50% with GPT-4 targets</span>
+                      <span className="text-[10px] font-mono text-neutral-400">Values blended at 50% with GPT-4 targets</span>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -331,7 +331,7 @@ const SpotifyProject = () => {
                       <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/10">
                         <div className="flex justify-between text-xs font-mono mb-2">
                           <span className="text-neutral-300">Energy (Intensity)</span>
-                          <span className="text-emerald-400 font-bold">{(energy * 100).toFixed(0)}%</span>
+                          <span className="text-neutral-400 font-bold">{(energy * 100).toFixed(0)}%</span>
                         </div>
                         <input
                           type="range"
@@ -340,7 +340,7 @@ const SpotifyProject = () => {
                           step="0.05"
                           value={energy}
                           onChange={(e) => setEnergy(parseFloat(e.target.value))}
-                          className="w-full accent-emerald-400 h-1 bg-white/10 rounded cursor-pointer"
+                          className="w-full accent-neutral-400 h-1 bg-white/10 rounded cursor-pointer"
                         />
                       </div>
 
@@ -348,7 +348,7 @@ const SpotifyProject = () => {
                       <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/10">
                         <div className="flex justify-between text-xs font-mono mb-2">
                           <span className="text-neutral-300">Danceability</span>
-                          <span className="text-emerald-400 font-bold">{(danceability * 100).toFixed(0)}%</span>
+                          <span className="text-neutral-400 font-bold">{(danceability * 100).toFixed(0)}%</span>
                         </div>
                         <input
                           type="range"
@@ -357,7 +357,7 @@ const SpotifyProject = () => {
                           step="0.05"
                           value={danceability}
                           onChange={(e) => setDanceability(parseFloat(e.target.value))}
-                          className="w-full accent-emerald-400 h-1 bg-white/10 rounded cursor-pointer"
+                          className="w-full accent-neutral-400 h-1 bg-white/10 rounded cursor-pointer"
                         />
                       </div>
 
@@ -365,7 +365,7 @@ const SpotifyProject = () => {
                       <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/10">
                         <div className="flex justify-between text-xs font-mono mb-2">
                           <span className="text-neutral-300">Tempo (Speed)</span>
-                          <span className="text-emerald-400 font-bold">{tempo} BPM</span>
+                          <span className="text-neutral-400 font-bold">{tempo} BPM</span>
                         </div>
                         <input
                           type="range"
@@ -374,7 +374,7 @@ const SpotifyProject = () => {
                           step="1"
                           value={tempo}
                           onChange={(e) => setTempo(parseInt(e.target.value))}
-                          className="w-full accent-emerald-400 h-1 bg-white/10 rounded cursor-pointer"
+                          className="w-full accent-neutral-400 h-1 bg-white/10 rounded cursor-pointer"
                         />
                       </div>
 
@@ -382,7 +382,7 @@ const SpotifyProject = () => {
                       <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/10">
                         <div className="flex justify-between text-xs font-mono mb-2">
                           <span className="text-neutral-300">Mood / Valence</span>
-                          <span className="text-emerald-400 font-bold">{(valence * 100).toFixed(0)}%</span>
+                          <span className="text-neutral-400 font-bold">{(valence * 100).toFixed(0)}%</span>
                         </div>
                         <input
                           type="range"
@@ -391,7 +391,7 @@ const SpotifyProject = () => {
                           step="0.05"
                           value={valence}
                           onChange={(e) => setValence(parseFloat(e.target.value))}
-                          className="w-full accent-emerald-400 h-1 bg-white/10 rounded cursor-pointer"
+                          className="w-full accent-neutral-400 h-1 bg-white/10 rounded cursor-pointer"
                         />
                       </div>
 
@@ -399,7 +399,7 @@ const SpotifyProject = () => {
                       <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/10">
                         <div className="flex justify-between text-xs font-mono mb-2">
                           <span className="text-neutral-300">Acousticness</span>
-                          <span className="text-emerald-400 font-bold">{(acousticness * 100).toFixed(0)}%</span>
+                          <span className="text-neutral-400 font-bold">{(acousticness * 100).toFixed(0)}%</span>
                         </div>
                         <input
                           type="range"
@@ -408,7 +408,7 @@ const SpotifyProject = () => {
                           step="0.05"
                           value={acousticness}
                           onChange={(e) => setAcousticness(parseFloat(e.target.value))}
-                          className="w-full accent-emerald-400 h-1 bg-white/10 rounded cursor-pointer"
+                          className="w-full accent-neutral-400 h-1 bg-white/10 rounded cursor-pointer"
                         />
                       </div>
 
@@ -416,7 +416,7 @@ const SpotifyProject = () => {
                       <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/10">
                         <div className="flex justify-between text-xs font-mono mb-2">
                           <span className="text-neutral-300">Instrumentalness</span>
-                          <span className="text-emerald-400 font-bold">{(instrumentalness * 100).toFixed(0)}%</span>
+                          <span className="text-neutral-400 font-bold">{(instrumentalness * 100).toFixed(0)}%</span>
                         </div>
                         <input
                           type="range"
@@ -425,7 +425,7 @@ const SpotifyProject = () => {
                           step="0.05"
                           value={instrumentalness}
                           onChange={(e) => setInstrumentalness(parseFloat(e.target.value))}
-                          className="w-full accent-emerald-400 h-1 bg-white/10 rounded cursor-pointer"
+                          className="w-full accent-neutral-400 h-1 bg-white/10 rounded cursor-pointer"
                         />
                       </div>
                     </div>
@@ -434,11 +434,11 @@ const SpotifyProject = () => {
               </div>
 
               {/* Right Column: Dynamic Generated Playlist */}
-              <div className="lg:col-span-5 bg-zinc-950/80 border border-white/10 rounded-3xl p-6 backdrop-blur-xl flex flex-col justify-between">
+              <div className="lg:col-span-5 bg-neutral-950/80 border border-white/10 rounded-3xl p-6 backdrop-blur-xl flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
                     <div className="flex items-center gap-2">
-                      <Disc3 className="text-emerald-400 animate-spin" size={18} />
+                      <Disc3 className="text-neutral-400 animate-spin" size={18} />
                       <span className="text-xs font-mono text-white font-bold uppercase tracking-wider">
                         Synthesized Playlist Output
                       </span>
@@ -458,7 +458,7 @@ const SpotifyProject = () => {
                           onClick={() => setPlayingTrackId(isPlaying ? null : t.id)}
                           className={`flex items-center justify-between p-2.5 rounded-2xl border transition-all cursor-pointer ${
                             isPlaying
-                              ? "bg-emerald-500/10 border-emerald-500/40"
+                              ? "bg-neutral-500/10 border-neutral-500/40"
                               : "bg-white/[0.02] border-white/5 hover:border-white/20 hover:bg-white/[0.05]"
                           }`}
                         >
@@ -473,7 +473,7 @@ const SpotifyProject = () => {
                               </div>
                             </div>
                             <div>
-                              <div className={`text-xs font-bold leading-snug ${isPlaying ? "text-emerald-400" : "text-white"}`}>
+                              <div className={`text-xs font-bold leading-snug ${isPlaying ? "text-neutral-400" : "text-white"}`}>
                                 {t.name}
                               </div>
                               <div className="text-[11px] text-neutral-400 font-mono leading-none mt-0.5">
@@ -497,10 +497,10 @@ const SpotifyProject = () => {
                 {/* Player Status Bar */}
                 <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono text-neutral-400">
                   <div className="flex items-center gap-2">
-                    <Radio size={14} className="text-emerald-400 animate-pulse" />
+                    <Radio size={14} className="text-neutral-400 animate-pulse" />
                     <span>Spotify Web API Mock Ready</span>
                   </div>
-                  <span className="text-emerald-400">OAuth Handshake OK</span>
+                  <span className="text-neutral-400">OAuth Handshake OK</span>
                 </div>
               </div>
             </div>
@@ -509,7 +509,7 @@ const SpotifyProject = () => {
           {/* System Architecture & Flowchart */}
           <section className="mb-20">
             <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-2.5">
-              <Layers className="text-emerald-400" size={24} />
+              <Layers className="text-neutral-400" size={24} />
               <span>Full-Stack Pipeline Architecture</span>
             </h2>
             <p className="text-xs font-mono text-neutral-400 mb-6">
@@ -545,10 +545,10 @@ const SpotifyProject = () => {
               ].map((s) => (
                 <div
                   key={s.step}
-                  className="p-6 rounded-3xl bg-zinc-950/80 border border-white/10 backdrop-blur-xl flex flex-col justify-between group hover:border-emerald-500/40 transition-all"
+                  className="p-6 rounded-3xl bg-neutral-950/80 border border-white/10 backdrop-blur-xl flex flex-col justify-between group hover:border-neutral-500/40 transition-all"
                 >
                   <div>
-                    <span className="text-xs font-mono text-emerald-400 font-bold">{s.step}</span>
+                    <span className="text-xs font-mono text-neutral-400 font-bold">{s.step}</span>
                     <h3 className="text-base font-bold text-white mt-1 mb-2">{s.title}</h3>
                     <p className="text-xs text-neutral-400 leading-relaxed">{s.desc}</p>
                   </div>
@@ -562,15 +562,15 @@ const SpotifyProject = () => {
             </div>
 
             {/* Formula Card */}
-            <div className="mt-6 p-6 rounded-3xl bg-zinc-950/80 border border-white/10 backdrop-blur-xl">
+            <div className="mt-6 p-6 rounded-3xl bg-neutral-950/80 border border-white/10 backdrop-blur-xl">
               <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
-                <Code2 className="text-emerald-400" size={16} />
+                <Code2 className="text-neutral-400" size={16} />
                 <span>Feature Vector Fusion Formula</span>
               </h3>
               <p className="text-xs text-neutral-400 font-mono leading-relaxed mb-3">
                 When both a conversational prompt and a seed track ID are provided, the backend computes the harmonious geometric mean:
               </p>
-              <div className="bg-black/60 p-4 rounded-xl border border-white/10 font-mono text-xs text-emerald-300 overflow-x-auto">
+              <div className="bg-black/60 p-4 rounded-xl border border-white/10 font-mono text-xs text-neutral-300 overflow-x-auto">
                 <code>
                   final_tempo = (input_tempo + gpt_dict["Tempo"]) / 2<br />
                   final_energy = (input_energy + gpt_dict["Energy"]) / 2<br />
@@ -584,21 +584,21 @@ const SpotifyProject = () => {
           {/* Codebase Deep Dive */}
           <section className="mb-20">
             <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-2.5">
-              <Terminal className="text-emerald-400" size={24} />
+              <Terminal className="text-neutral-400" size={24} />
               <span>Implementation Walkthrough</span>
             </h2>
             <p className="text-xs font-mono text-neutral-400 mb-6">
               Authentic source code extracts from the repository
             </p>
 
-            <div className="rounded-3xl border border-white/10 bg-zinc-950/90 overflow-hidden backdrop-blur-xl">
+            <div className="rounded-3xl border border-white/10 bg-neutral-950/90 overflow-hidden backdrop-blur-xl">
               {/* Tab Header */}
               <div className="flex border-b border-white/10 bg-white/[0.02] p-2 gap-2 text-xs font-mono">
                 <button
                   onClick={() => setActiveCodeTab("fastapi")}
                   className={`px-4 py-2 rounded-xl transition-all ${
                     activeCodeTab === "fastapi"
-                      ? "bg-white/10 text-emerald-400 font-bold border border-white/10"
+                      ? "bg-white/10 text-neutral-400 font-bold border border-white/10"
                       : "text-neutral-400 hover:text-white"
                   }`}
                 >
@@ -608,7 +608,7 @@ const SpotifyProject = () => {
                   onClick={() => setActiveCodeTab("react_main")}
                   className={`px-4 py-2 rounded-xl transition-all ${
                     activeCodeTab === "react_main"
-                      ? "bg-white/10 text-emerald-400 font-bold border border-white/10"
+                      ? "bg-white/10 text-neutral-400 font-bold border border-white/10"
                       : "text-neutral-400 hover:text-white"
                   }`}
                 >
@@ -618,7 +618,7 @@ const SpotifyProject = () => {
                   onClick={() => setActiveCodeTab("search_engine")}
                   className={`px-4 py-2 rounded-xl transition-all ${
                     activeCodeTab === "search_engine"
-                      ? "bg-white/10 text-emerald-400 font-bold border border-white/10"
+                      ? "bg-white/10 text-neutral-400 font-bold border border-white/10"
                       : "text-neutral-400 hover:text-white"
                   }`}
                 >
@@ -735,7 +735,7 @@ async function search() {
           {/* Authentic Screenshots Gallery */}
           <section className="mb-20">
             <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-2.5">
-              <Disc3 className="text-emerald-400" size={24} />
+              <Disc3 className="text-neutral-400" size={24} />
               <span>Project Visual Assets & Screens</span>
             </h2>
             <p className="text-xs font-mono text-neutral-400 mb-6">
@@ -749,7 +749,7 @@ async function search() {
                   alt="Spotify Playlist Generator UI"
                   className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="p-4 bg-zinc-950/90 border-t border-white/10">
+                <div className="p-4 bg-neutral-950/90 border-t border-white/10">
                   <div className="text-xs font-bold text-white">Full Application Interface</div>
                   <div className="text-[11px] font-mono text-neutral-400 mt-0.5">
                     Interactive Prompt Bar, 6 Vertical Audio Sliders, and Seed Track Search
@@ -763,7 +763,7 @@ async function search() {
                   alt="Spotify Landing Page Backdrop"
                   className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="p-4 bg-zinc-950/90 border-t border-white/10">
+                <div className="p-4 bg-neutral-950/90 border-t border-white/10">
                   <div className="text-xs font-bold text-white">Rooftop DJ Skyline Backdrop</div>
                   <div className="text-[11px] font-mono text-neutral-400 mt-0.5">
                     Original atmospheric hero backdrop used on the landing page

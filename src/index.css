@@ -3,10 +3,10 @@
 @tailwind utilities;
 
 /*
- * Modern Software Engineer theme — deep slate base, cyan/emerald accents, glass.
+ * Modern Software Engineer theme — obsidian base, graphite surfaces, platinum accents.
  *
  * Performance rules baked into this file (see docs/superpowers/specs/2026-09-08-*):
- *  - No `filter:` on large or animated elements. Blur is done by the GPU shader
+ *  - No animated filter effects. Blur is done by the GPU shader
  *    backdrop (Index) or by pre-softened radial gradients (Hobbies).
  *  - No `mix-blend-mode` on full-screen layers.
  *  - No `background-attachment: fixed` — the dot grid is a fixed pseudo-element,
@@ -16,58 +16,58 @@
 
 @layer base {
   :root {
-    --background: 224 71% 3%;
-    --foreground: 210 40% 98%;
+    --background: 0 0% 2%;
+    --foreground: 0 0% 98%;
 
-    --card: 224 71% 5%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 224 71% 4%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 98%;
 
-    /* Primary: vibrant cyan-blue */
-    --primary: 192 95% 50%;
-    --primary-foreground: 224 71% 3%;
+    /* Primary: platinum */
+    --primary: 0 0% 95%;
+    --primary-foreground: 0 0% 2%;
 
-    --secondary: 220 35% 12%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 0 0% 11%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 220 30% 10%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 0 0% 7%;
+    --muted-foreground: 0 0% 65%;
 
-    /* Accent: cosmic violet */
-    --accent: 263 70% 62%;
-    --accent-foreground: 210 40% 98%;
+    /* Accent: silver */
+    --accent: 0 0% 75%;
+    --accent-foreground: 0 0% 2%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 0% 70%;
+    --destructive-foreground: 0 0% 2%;
 
-    --border: 220 30% 18%;
-    --input: 220 30% 14%;
-    --ring: 192 95% 50%;
+    --border: 0 0% 16%;
+    --input: 0 0% 12%;
+    --ring: 0 0% 85%;
 
     --radius: 1.25rem;
 
     /* Glass tokens — sophisticated deep glass with subtle illumination */
-    --glass-bg: 224 71% 5% / 0.78;
-    --glass-bg-strong: 224 71% 3% / 0.90;
-    --glass-border: 210 40% 98% / 0.12;
-    --glass-highlight: 192 95% 50% / 0.10;
+    --glass-bg: 0 0% 4% / 0.78;
+    --glass-bg-strong: 0 0% 2% / 0.90;
+    --glass-border: 0 0% 98% / 0.12;
+    --glass-highlight: 0 0% 95% / 0.10;
     --glass-shadow: 0 0% 0% / 0.80;
     --glass-blur: 16px;
 
-    --gradient-aurora-1: 192 95% 50%;   /* electric cyan */
-    --gradient-aurora-2: 263 70% 62%;   /* cosmic violet */
-    --gradient-aurora-3: 217 91% 60%;   /* deep blue */
-    --gradient-text: linear-gradient(135deg, #ffffff 0%, #38bdf8 50%, #c084fc 100%);
+    --gradient-aurora-1: 0 0% 12%;   /* graphite */
+    --gradient-aurora-2: 0 0% 28%;   /* smoke */
+    --gradient-aurora-3: 0 0% 65%;   /* platinum */
+    --gradient-text: linear-gradient(135deg, #ffffff 0%, #cccccc 50%, #888888 100%);
 
     --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     --transition-spring: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   .dark {
-    --background: 224 71% 3%;
-    --foreground: 210 40% 98%;
+    --background: 0 0% 2%;
+    --foreground: 0 0% 98%;
   }
 }
 
@@ -89,6 +89,12 @@
     overflow-x: clip;
   }
 
+  /* Keep portfolio imagery in the same monochrome art direction. Original
+     assets retain their color for direct viewing and project source links. */
+  img, video, iframe {
+    filter: grayscale(1);
+  }
+
   /* IDE-style dot grid on its own fixed, composited layer (replaces background-attachment: fixed). */
   body::before {
     content: '';
@@ -96,7 +102,7 @@
     inset: 0;
     z-index: -2;
     pointer-events: none;
-    background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+    background-image: radial-gradient(rgba(255,255,255, 0.08) 1px, transparent 1px);
     background-size: 28px 28px;
   }
 
@@ -109,8 +115,8 @@
   }
 
   ::selection {
-    background: rgba(255, 255, 255, 0.25);
-    color: hsl(210 40% 98%);
+    background: rgba(255,255,255, 0.25);
+    color: hsl(0 0% 98%);
   }
 }
 
@@ -153,15 +159,15 @@
 
   .pill {
     @apply inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium;
-    background: hsla(217 33% 14% / 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: hsl(210 40% 92%);
+    background: hsla(0 0% 14% / 0.7);
+    border: 1px solid rgba(255,255,255, 0.15);
+    color: hsl(0 0% 92%);
     transition: var(--transition-smooth);
   }
 
   .pill:hover {
-    border-color: rgba(255, 255, 255, 0.45);
-    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255,255,255, 0.45);
+    background: rgba(255,255,255, 0.1);
   }
 
   .hover-lift {
@@ -172,7 +178,7 @@
     transform: translateY(-4px);
     box-shadow:
       0 20px 40px hsla(var(--glass-shadow)),
-      0 0 0 1px rgba(255, 255, 255, 0.25),
+      0 0 0 1px rgba(255,255,255, 0.25),
       inset 0 1px 0 hsla(var(--glass-highlight));
   }
 
@@ -249,12 +255,12 @@
   ::-webkit-scrollbar { width: 10px; }
   ::-webkit-scrollbar-track { background: hsl(var(--background)); }
   ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.15));
+    background: linear-gradient(180deg, rgba(255,255,255, 0.4), rgba(255,255,255, 0.15));
     border-radius: 6px;
     border: 2px solid hsl(var(--background));
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.3));
+    background: linear-gradient(180deg, rgba(255,255,255, 0.7), rgba(255,255,255, 0.3));
   }
 
   .hide-mobile {
@@ -302,7 +308,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255, 0.25), transparent);
     animation: shimmer 3s infinite;
     animation-delay: 2s;
   }
@@ -353,15 +359,15 @@
   .glitch-wrap[data-glitching="true"]::before {
     opacity: 0.7;
     color: #ffffff;
-    -webkit-text-fill-color: rgba(255, 255, 255, 0.7);
+    -webkit-text-fill-color: rgba(255,255,255, 0.7);
     animation: glitch-r 0.2s steps(2) 1;
     clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
   }
 
   .glitch-wrap[data-glitching="true"]::after {
     opacity: 0.7;
-    color: #a1a1aa;
-    -webkit-text-fill-color: rgba(161, 161, 170, 0.7);
+    color: #a6a6a6;
+    -webkit-text-fill-color: rgba(166,166,166, 0.7);
     animation: glitch-g 0.2s steps(2) 1;
     clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
   }
@@ -372,8 +378,8 @@
     left: 0;
     right: 0;
     height: 2px;
-    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.8) 20%, #ffffff 50%, rgba(255, 255, 255, 0.8) 80%, transparent 100%);
-    box-shadow: 0 0 18px rgba(255, 255, 255, 0.8), 0 0 48px rgba(255, 255, 255, 0.4);
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255, 0.8) 20%, #ffffff 50%, rgba(255,255,255, 0.8) 80%, transparent 100%);
+    box-shadow: 0 0 18px rgba(255,255,255, 0.8), 0 0 48px rgba(255,255,255, 0.4);
     will-change: transform, opacity;
   }
 
@@ -382,7 +388,7 @@
     left: 0;
     right: 0;
     height: 28vh;
-    background: linear-gradient(to top, rgba(255, 255, 255, 0.15), transparent);
+    background: linear-gradient(to top, rgba(255,255,255, 0.15), transparent);
     will-change: transform, opacity;
   }
 

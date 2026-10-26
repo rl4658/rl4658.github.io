@@ -97,7 +97,7 @@ const CodeRainBurst = () => {
             ? "text-primary"
             : colorIdx === 1
               ? "text-accent"
-              : "text-pink-400";
+              : "text-neutral-400";
         return {
           id: i,
           glyph: CODE_GLYPHS[Math.floor(Math.random() * CODE_GLYPHS.length)],

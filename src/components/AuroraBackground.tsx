@@ -16,7 +16,7 @@ const AuroraBackground = () => {
         className="fixed inset-0 pointer-events-none"
         style={{
           zIndex: 1,
-          background: "radial-gradient(ellipse at center, transparent 45%, hsl(222 47% 3% / 0.55) 100%)",
+          background: "radial-gradient(ellipse at center, transparent 45%, rgba(5,5,5, 0.85) 100%)",
         }}
         aria-hidden
       />

@@ -9,14 +9,14 @@ import { skillCategories } from "@/data/profile";
 import { useScene } from "@/contexts/SceneContext";
 
 const techIcons = [
-  { name: "React", icon: SiReact, color: "#61DAFB" },
-  { name: "Python", icon: SiPython, color: "#3776AB" },
-  { name: "TypeScript", icon: SiTypescript, color: "#3178C6" },
-  { name: "AWS", icon: SiAmazon, color: "#FF9900" },
-  { name: "Docker", icon: SiDocker, color: "#2496ED" },
-  { name: "PostgreSQL", icon: SiPostgresql, color: "#4169E1" },
-  { name: "Node.js", icon: SiNodedotjs, color: "#339933" },
-  { name: "FastAPI", icon: SiFastapi, color: "#009688" },
+  { name: "React", icon: SiReact, color: "#aeaeae" },
+  { name: "Python", icon: SiPython, color: "#717171" },
+  { name: "TypeScript", icon: SiTypescript, color: "#7c7c7c" },
+  { name: "AWS", icon: SiAmazon, color: "#808080" },
+  { name: "Docker", icon: SiDocker, color: "#888888" },
+  { name: "PostgreSQL", icon: SiPostgresql, color: "#919191" },
+  { name: "Node.js", icon: SiNodedotjs, color: "#666666" },
+  { name: "FastAPI", icon: SiFastapi, color: "#4b4b4b" },
 ];
 
 const SkillsSection = () => {
@@ -85,7 +85,7 @@ const SkillsSection = () => {
             <Suspense fallback={null}>
               {hasBeenNear && <SkillsGlobe active={inView} />}
             </Suspense>
-            {/* Soft cyan/emerald glow underneath the canvas */}
+            {/* Soft platinum glow underneath the canvas */}
             <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08),transparent_60%)]" />
           </motion.div>
 
@@ -100,7 +100,7 @@ const SkillsSection = () => {
               <motion.div
                 whileHover={{
                   y: -8,
-                  boxShadow: "0 20px 60px rgba(255, 255, 255, 0.12)",
+                  boxShadow: "0 20px 60px rgba(255,255,255, 0.12)",
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 className="glass-strong rounded-2xl p-5 md:p-6 h-full"
@@ -118,7 +118,7 @@ const SkillsSection = () => {
                       animate={isVisible ? { opacity: 1, scale: 1 } : {}}
                       whileHover={{
                         scale: 1.05,
-                        boxShadow: "0 0 18px rgba(6, 182, 212, 0.45)",
+                        boxShadow: "0 0 18px rgba(109,109,109, 0.45)",
                       }}
                       whileTap={{ scale: 0.95 }}
                       transition={{

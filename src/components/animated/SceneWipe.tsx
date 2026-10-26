@@ -8,7 +8,7 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 /*                                                                             */
 /* Replaces the old expanding ring ("ripple"). A 2px cyan→emerald beam with a  */
 /* soft trailing gradient travels top→bottom in ~550ms, followed one frame     */
-/* later by a fainter emerald echo (a cheap chromatic offset). The chapter      */
+/* later by a fainter silver echo. The chapter      */
 /* label rides beside the beam in mono type. Everything animates transform and */
 /* opacity only, so the compositor handles it without repainting the page.     */
 /* -------------------------------------------------------------------------- */
@@ -22,6 +22,7 @@ const LABELS: Record<Scene, string> = {
   experience: "experience",
   skills: "skills",
   education: "education",
+  publication: "publication",
   projects: "projects",
 };
 
@@ -82,14 +83,14 @@ const SceneWipe = () => {
               style={{
                 top: 7,
                 opacity: 0.35,
-                background: "linear-gradient(90deg, transparent 0%, hsl(160 84% 55%) 30%, hsl(160 84% 55%) 70%, transparent 100%)",
-                boxShadow: "0 0 12px hsl(160 84% 55% / 0.7)",
+                background: "linear-gradient(90deg, transparent 0%, hsl(0 0% 55%) 30%, hsl(0 0% 55%) 70%, transparent 100%)",
+                boxShadow: "0 0 12px hsl(0 0% 55% / 0.7)",
               }}
             />
             {/* Chapter label riding the beam */}
             <div
               className="absolute right-8 md:right-24 -top-6 font-mono text-[10px] md:text-xs tracking-[0.35em] uppercase text-primary"
-              style={{ textShadow: "0 0 12px hsl(189 94% 55% / 0.8)" }}
+              style={{ textShadow: "0 0 12px hsl(0 0% 55% / 0.8)" }}
             >
               {`// ${chapter} ${LABELS[sweep.scene]}`}
             </div>

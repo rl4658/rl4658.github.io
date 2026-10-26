@@ -7,7 +7,7 @@ import { useScene } from "@/contexts/SceneContext";
 
 const cardHover = {
   y: -6,
-  boxShadow: "0 20px 60px rgba(6, 182, 212, 0.2)",
+  boxShadow: "0 20px 60px rgba(109,109,109, 0.2)",
 };
 
 const PublicationSection = () => {
@@ -163,7 +163,7 @@ const PublicationSection = () => {
                     <span className="text-[11px] font-mono text-foreground/50 uppercase tracking-widest mb-3">
                       Addressable LED Illumination Matrix (5x5)
                     </span>
-                    <div className="grid grid-cols-5 gap-2.5 p-4 bg-slate-950/80 rounded-2xl border border-white/10 shadow-inner">
+                    <div className="grid grid-cols-5 gap-2.5 p-4 bg-neutral-950/80 rounded-2xl border border-white/10 shadow-inner">
                       {ledMatrix.map((idx) => {
                         const row = Math.floor(idx / 5) - 2;
                         const col = (idx % 5) - 2;
@@ -178,7 +178,7 @@ const PublicationSection = () => {
                               isSelected
                                 ? "bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.6)] scale-110 font-bold"
                                 : isCenter
-                                ? "bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/40"
+                                ? "bg-neutral-500/20 border border-neutral-500/40 text-neutral-400 hover:bg-neutral-500/40"
                                 : "bg-white/5 border border-white/10 hover:border-white/40 hover:bg-white/10"
                             }`}
                             title={`LED (${col}, ${row})`}
@@ -200,14 +200,14 @@ const PublicationSection = () => {
                     <span className="text-[11px] font-mono text-foreground/50 uppercase tracking-widest mb-3">
                       Fourier Domain Synthetic Aperture Passband
                     </span>
-                    <div className="w-full max-w-[280px] aspect-square rounded-2xl bg-slate-950 border border-white/10 relative flex items-center justify-center overflow-hidden shadow-2xl">
+                    <div className="w-full max-w-[280px] aspect-square rounded-2xl bg-neutral-950 border border-white/10 relative flex items-center justify-center overflow-hidden shadow-2xl">
                       {/* Grid crosshairs */}
                       <div className="absolute inset-x-0 top-1/2 h-px bg-white/10" />
                       <div className="absolute inset-y-0 left-1/2 w-px bg-white/10" />
 
                       {/* Synthetic Aperture Boundary (Outer limit) */}
-                      <div className="w-56 h-56 rounded-full border border-dashed border-emerald-400/30 flex items-center justify-center relative">
-                        <span className="absolute top-2 text-[9px] font-mono text-emerald-400/60 tracking-wider">
+                      <div className="w-56 h-56 rounded-full border border-dashed border-neutral-400/30 flex items-center justify-center relative">
+                        <span className="absolute top-2 text-[9px] font-mono text-neutral-400/60 tracking-wider">
                           Synthetic NA Limit (3.2x)
                         </span>
                       </div>

@@ -74,7 +74,7 @@ const DiveBackdrop = ({ diving }: { diving: boolean }) => (
     className="absolute inset-0 pointer-events-none"
     style={{
       background:
-        "radial-gradient(ellipse at center, rgba(2,6,23,0.35) 0%, rgba(2,6,23,0.85) 55%, rgba(2,6,23,0.98) 100%)",
+        "radial-gradient(ellipse at center, rgba(5,5,5,0.35) 0%, rgba(5,5,5,0.85) 55%, rgba(5,5,5,0.98) 100%)",
     }}
   />
 );

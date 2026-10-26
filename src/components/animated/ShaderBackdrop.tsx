@@ -68,14 +68,15 @@ const FRAGMENT = /* glsl */ `
     float n1 = fbm(p * 1.5 + flow + vec2(t, -t * 0.7));
     float n2 = fbm(p * 2.1 - flow.yx * 0.6 + vec2(-t * 0.55, t * 0.9));
 
-    vec3 deepNavy      = vec3(0.04, 0.07, 0.16);
-    vec3 electricCyan  = vec3(0.0, 0.88, 0.95);
-    vec3 cosmicPurple  = vec3(0.48, 0.22, 0.92);
-    vec3 silverWhite   = vec3(0.92, 0.96, 1.0);
+    // Equal RGB channels keep the smoke and specular highlights achromatic.
+    vec3 obsidian    = vec3(0.01);
+    vec3 charcoal    = vec3(0.05);
+    vec3 graphite    = vec3(0.12);
+    vec3 silverWhite = vec3(0.90);
 
-    /* Dynamic chromatic blend responding to scroll and noise */
-    vec3 col = mix(deepNavy, electricCyan, smoothstep(0.25, 0.75, n1));
-    col = mix(col, cosmicPurple, smoothstep(0.40, 0.85, n2) * (0.35 + 0.65 * uScroll));
+    /* Liquid smoke blend responding to scroll and noise */
+    vec3 col = mix(obsidian, charcoal, smoothstep(0.25, 0.75, n1));
+    col = mix(col, graphite, smoothstep(0.40, 0.85, n2) * (0.35 + 0.65 * uScroll));
     col = mix(col, silverWhite, smoothstep(0.65, 0.95, n1 * n2) * 0.45);
 
     float glow = smoothstep(0.32, 0.90, n1 * 0.6 + n2 * 0.5);

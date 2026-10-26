@@ -73,7 +73,7 @@ const ProjectsSection = () => {
                   }}
                   className="px-6 py-3.5 rounded-2xl bg-white text-black font-bold text-sm tracking-wide flex items-center gap-2 hover:shadow-[0_0_25px_rgba(255,255,255,0.5)] hover:bg-neutral-200 transition-all shrink-0 group-hover:translate-x-1"
                 >
-                  <Play size={16} className="fill-slate-950" />
+                  <Play size={16} className="fill-neutral-950" />
                   <span>Launch Projects Page</span>
                   <ArrowRight size={16} />
                 </button>
@@ -94,7 +94,7 @@ const ProjectsSection = () => {
                 <motion.div
                   whileHover={{
                     y: -6,
-                    boxShadow: "0 20px 60px rgba(6, 182, 212, 0.2)",
+                    boxShadow: "0 20px 60px rgba(109,109,109, 0.2)",
                   }}
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
                   className="glass-strong rounded-3xl p-6 md:p-8 h-full flex flex-col justify-between border border-white/5"
@@ -158,7 +158,7 @@ const ProjectsSection = () => {
               <motion.div
                 whileHover={{
                   y: -6,
-                  boxShadow: "0 20px 60px rgba(16, 185, 129, 0.2)",
+                  boxShadow: "0 20px 60px rgba(100,100,100, 0.2)",
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 className="glass-strong rounded-3xl p-6 md:p-8 h-full border border-white/5"
