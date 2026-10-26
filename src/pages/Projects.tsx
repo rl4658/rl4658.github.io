@@ -121,116 +121,295 @@ const SpotifyWidget = () => {
 };
 
 /* ------------------------------------------------------------------------- */
-/* 3. Sorting Hub Interactive Visualizer                                     */
+/* 3. Sorting Hub Interactive Visualizer (Faithful JavaFX & FXML Reproduction) */
 /* ------------------------------------------------------------------------- */
 const SortingHubWidget = () => {
-  const [array, setArray] = useState<number[]>([45, 12, 85, 32, 89, 21, 64, 53, 98, 15, 72, 38, 59, 27]);
+  const navigate = useNavigate();
+  const [arraySize, setArraySize] = useState<number>(64);
+  const [algorithm, setAlgorithm] = useState<"Merge Sort" | "Selection Sort">("Merge Sort");
+  const [array, setArray] = useState<number[]>(() => {
+    const set = new Set<number>();
+    while (set.size < 64) {
+      set.add(Math.floor(Math.random() * 64) + 1);
+    }
+    return Array.from(set);
+  });
   const [activeIdx, setActiveIdx] = useState<number[]>([]);
   const [comparingIdx, setComparingIdx] = useState<number[]>([]);
-  const [isSorting, setIsSorting] = useState(false);
-  const [comparisons, setComparisons] = useState(0);
+  const [isSorting, setIsSorting] = useState<boolean>(false);
+  const [comparisons, setComparisons] = useState<number>(0);
+  const [writes, setWrites] = useState<number>(0);
 
-  const shuffleArray = () => {
-    if (isSorting) return;
-    const shuffled = [...array].sort(() => Math.random() - 0.5);
-    setArray(shuffled);
+  const abortRef = useRef<boolean>(false);
+
+  const generateUnsorted = (n: number) => {
+    const set = new Set<number>();
+    while (set.size < n) {
+      set.add(Math.floor(Math.random() * n) + 1);
+    }
+    return Array.from(set);
+  };
+
+  const handleSizeChange = (newSize: number) => {
+    if (isSorting) {
+      abortRef.current = true;
+      setIsSorting(false);
+    }
+    setArraySize(newSize);
+    setArray(generateUnsorted(newSize));
     setActiveIdx([]);
     setComparingIdx([]);
     setComparisons(0);
+    setWrites(0);
   };
+
+  const handleReset = () => {
+    abortRef.current = true;
+    setIsSorting(false);
+    setArraySize(64);
+    setAlgorithm("Merge Sort");
+    setArray(generateUnsorted(64));
+    setActiveIdx([]);
+    setComparingIdx([]);
+    setComparisons(0);
+    setWrites(0);
+  };
+
+  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const runSort = async () => {
     if (isSorting) return;
+    abortRef.current = false;
     setIsSorting(true);
-    const arr = [...array];
-    let cmp = 0;
+    setComparisons(0);
+    setWrites(0);
 
-    for (let i = 0; i < arr.length; i++) {
-      let minIdx = i;
-      for (let j = i + 1; j < arr.length; j++) {
-        cmp++;
-        setComparisons(cmp);
-        setComparingIdx([minIdx, j]);
-        await new Promise((r) => setTimeout(r, 60));
-        if (arr[j] < arr[minIdx]) {
-          minIdx = j;
+    const working = [...array];
+    let cmp = 0;
+    let wr = 0;
+    const stepDelay = arraySize > 64 ? 20 : 40;
+
+    if (algorithm === "Selection Sort") {
+      // Faithful to SelectionSort.java
+      for (let i = 0; i < working.length - 1; i++) {
+        if (abortRef.current) break;
+        let minIdx = i;
+        for (let j = i + 1; j < working.length; j++) {
+          if (abortRef.current) break;
+          cmp++;
+          setComparisons(cmp);
+          setComparingIdx([minIdx, j]);
+          await delay(stepDelay);
+          if (working[j] < working[minIdx]) {
+            minIdx = j;
+          }
+        }
+        if (minIdx !== i) {
+          const temp = working[i];
+          working[i] = working[minIdx];
+          working[minIdx] = temp;
+          wr += 2;
+          setWrites(wr);
+          setArray([...working]);
+          setActiveIdx([i, minIdx]);
+          await delay(stepDelay);
         }
       }
-      if (minIdx !== i) {
-        const tmp = arr[i];
-        arr[i] = arr[minIdx];
-        arr[minIdx] = tmp;
-        setArray([...arr]);
-        setActiveIdx([i, minIdx]);
-        await new Promise((r) => setTimeout(r, 90));
+    } else {
+      // Faithful to MergeSort.java (In-Place Merge)
+      async function mergeInPlace(l: number, m: number, r: number) {
+        if (abortRef.current) return;
+        let left2 = m + 1;
+        cmp++;
+        setComparisons(cmp);
+        if (working[m] <= working[left2]) return;
+
+        while (l <= m && left2 <= r) {
+          if (abortRef.current) break;
+          cmp++;
+          setComparisons(cmp);
+          setComparingIdx([l, left2]);
+          if (working[l] <= working[left2]) {
+            l++;
+          } else {
+            const value = working[left2];
+            let index = left2;
+            while (index !== l) {
+              working[index] = working[index - 1];
+              index--;
+            }
+            working[l] = value;
+            wr++;
+            setWrites(wr);
+            setArray([...working]);
+            setActiveIdx([l, left2]);
+            await delay(stepDelay);
+            l++;
+            m++;
+            left2++;
+          }
+        }
       }
+
+      async function mergeSort(l: number, r: number) {
+        if (abortRef.current || l >= r) return;
+        const m = l + Math.floor((r - l) / 2);
+        await mergeSort(l, m);
+        await mergeSort(m + 1, r);
+        await mergeInPlace(l, m, r);
+      }
+
+      await mergeSort(0, working.length - 1);
     }
+
     setActiveIdx([]);
     setComparingIdx([]);
     setIsSorting(false);
   };
 
   return (
-    <div className="flex flex-col h-[480px] sm:h-[520px] md:h-[560px] bg-neutral-950/90 p-5 justify-between relative group/widget font-mono">
-      {/* Visualizer Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
-        <div className="flex items-center gap-2">
+    <div className="flex flex-col h-[480px] sm:h-[520px] md:h-[560px] bg-neutral-950 p-4 sm:p-5 justify-between relative group/widget font-mono select-none">
+      {/* Top JavaFX Stage Bar */}
+      <div className="flex items-center justify-between pb-3 border-b border-white/10 gap-2">
+        <div className="flex items-center gap-2.5">
           <img
             src="/images/projects/sorting/western_logo.png"
-            alt="Sorting Hub Logo"
+            alt="Western University Logo"
             className="w-5 h-5 rounded object-contain bg-white/10 p-0.5"
           />
-          <div className="w-2.5 h-2.5 rounded-full bg-neutral-400 animate-pulse" />
-          <span className="text-xs text-white font-semibold uppercase tracking-wider">
-            Selection Sort Visualizer
-          </span>
+          <div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-semibold text-white tracking-wide">
+                Sorting Hub
+              </span>
+              <span className="text-[9px] px-1.5 py-0.2 rounded bg-white/10 text-neutral-300 font-mono">
+                JavaFX 17
+              </span>
+            </div>
+            <p className="text-[10px] text-neutral-500 font-mono">
+              se2203.assignment1 · Strategy Pattern
+            </p>
+          </div>
         </div>
-        <div className="text-[10px] text-neutral-400">Time: O(N²) | Space: O(1)</div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate("/projects/sorting-hub");
+            }}
+            className="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 text-neutral-200 text-[11px] font-mono flex items-center gap-1.5 transition-colors"
+          >
+            <span>Case Study</span>
+            <ArrowRight size={12} />
+          </button>
+        </div>
       </div>
 
-      {/* Sorting Bars Container */}
-      <div className="flex-1 flex items-end justify-center gap-1.5 px-2 py-4 bg-black/60 rounded-xl border border-white/10 mb-4 overflow-hidden">
+      {/* Sorting Canvas: 768x329 Proportional Red Bars */}
+      <div className="flex-1 my-3 bg-[#0d0d0d] rounded-xl border border-white/10 relative flex items-end justify-between gap-[1px] p-2 overflow-hidden shadow-inner">
+        <div
+          className="absolute inset-0 opacity-[0.03] pointer-events-none"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)",
+            backgroundSize: "20px 20px",
+          }}
+        />
+
         {array.map((val, idx) => {
           const isComparing = comparingIdx.includes(idx);
           const isSwapping = activeIdx.includes(idx);
-          const bg = isSwapping
-            ? "bg-neutral-200 shadow-[0_0_12px_rgba(200,200,200,0.8)]"
-            : isComparing
-            ? "bg-neutral-500 shadow-[0_0_12px_rgba(128,128,128,0.8)]"
-            : "bg-white/40 hover:bg-white/60";
+          const heightPercent = (val / arraySize) * 100;
+
+          let barBg = "bg-[#ef4444]";
+          let shadow = "";
+
+          if (isSwapping) {
+            barBg = "bg-amber-300";
+            shadow = "0 0 10px rgba(252, 211, 77, 0.9)";
+          } else if (isComparing) {
+            barBg = "bg-white";
+            shadow = "0 0 10px rgba(255, 255, 255, 0.95)";
+          }
 
           return (
-            <motion.div
+            <div
               key={idx}
-              layout
-              transition={{ type: "spring", stiffness: 350, damping: 25 }}
-              style={{ height: `${val}%` }}
-              className={`w-full max-w-[20px] rounded-t-sm transition-colors ${bg}`}
-              title={`Value: ${val}`}
+              style={{
+                height: `${heightPercent}%`,
+                boxShadow: shadow,
+              }}
+              className={`flex-1 rounded-t-[1px] transition-all duration-75 ${barBg}`}
+              title={`Index: ${idx} | Value: ${val}`}
             />
           );
         })}
       </div>
 
-      {/* Actions and Stats */}
-      <div className="flex items-center justify-between text-xs font-mono text-neutral-300">
-        <div>
-          Comparisons: <span className="text-neutral-400 font-bold">{comparisons}</span>
+      {/* Telemetry Bar */}
+      <div className="flex items-center justify-between text-[11px] font-mono text-neutral-400 py-1 border-b border-white/5">
+        <div className="flex items-center gap-3">
+          <span>
+            Cmp: <strong className="text-white font-mono">{comparisons}</strong>
+          </span>
+          <span>
+            Writes: <strong className="text-white font-mono">{writes}</strong>
+          </span>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={(e) => { e.stopPropagation(); shuffleArray(); }}
+        <div className="text-[10px] text-neutral-400">
+          {algorithm === "Merge Sort" ? "O(N log N) · O(1) Space" : "O(N²) · O(1) Space"}
+        </div>
+      </div>
+
+      {/* Control Panel Matching SortingHub-view.fxml */}
+      <div className="pt-2.5 flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
+        {/* ComboBox */}
+        <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+          <select
+            value={algorithm}
             disabled={isSorting}
-            className="px-2.5 py-1 rounded bg-white/5 hover:bg-white/10 border border-white/10 transition-colors disabled:opacity-40 text-neutral-300 hover:text-white"
+            onChange={(e) => setAlgorithm(e.target.value as "Merge Sort" | "Selection Sort")}
+            className="bg-black border border-white/20 rounded px-2 py-1 text-white text-[11px] font-mono focus:outline-none disabled:opacity-40"
           >
-            Shuffle
+            <option value="Merge Sort">Merge Sort</option>
+            <option value="Selection Sort">Selection Sort</option>
+          </select>
+        </div>
+
+        {/* Slider Scale (32 to 128) */}
+        <div
+          className="flex items-center gap-2 flex-1 max-w-[190px]"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <span className="text-[10px] text-neutral-400">Size:</span>
+          <input
+            type="range"
+            min="32"
+            max="128"
+            step="1"
+            value={arraySize}
+            disabled={isSorting}
+            onChange={(e) => handleSizeChange(Number(e.target.value))}
+            className="w-full accent-white h-1 bg-white/20 rounded cursor-pointer disabled:opacity-40"
+          />
+          <span className="text-white text-[11px] font-bold w-6 text-right">{arraySize}</span>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+          <button
+            onClick={runSort}
+            disabled={isSorting}
+            className="px-3 py-1 rounded bg-white text-black font-bold text-[11px] hover:bg-neutral-200 transition-colors disabled:opacity-40"
+          >
+            {isSorting ? "Sorting..." : "Sort"}
           </button>
           <button
-            onClick={(e) => { e.stopPropagation(); runSort(); }}
-            disabled={isSorting}
-            className="px-3 py-1 rounded bg-white/10 hover:bg-white/20 text-white border border-white/20 transition-colors font-bold disabled:opacity-40 shadow-[0_0_12px_rgba(255,255,255,0.1)]"
+            onClick={handleReset}
+            className="px-2.5 py-1 rounded bg-white/5 border border-white/10 hover:bg-white/15 text-neutral-300 text-[11px] transition-colors"
           >
-            {isSorting ? "Sorting..." : "Start Sort"}
+            Reset
           </button>
         </div>
       </div>
@@ -598,6 +777,8 @@ const Projects = () => {
                       navigate("/projects/form-fixer");
                     } else if (project.id === "spotify-playlist-generator") {
                       navigate("/projects/spotify-playlist-generator");
+                    } else if (project.id === "sorting-hub") {
+                      navigate("/projects/sorting-hub");
                     } else {
                       setSelectedProject(project);
                     }
