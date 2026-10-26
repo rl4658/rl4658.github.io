@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Helmet } from "react-helmet";
 import { Link } from "react-router-dom";
 import { ArrowLeft, ArrowUpRight, Copy, Check } from "lucide-react";
@@ -12,8 +12,31 @@ const hardware = [
   ["Imaging", "Raspberry Pi V2 NOIR camera", "1.12 μm pixels, 3.0 mm lens, 2.6× magnification."],
   ["Structure", "3D-printed PLA body", "Modeled in OpenSCAD and fabricated on a consumer Dremel 3045 printer."],
 ];
-function Figure({ file, alt, caption }: { file: string; alt: string; caption: string }) {
-  return <figure className="research-figure"><img src={`/images/publication/${file}`} alt={alt} loading="lazy" className="w-full h-auto max-h-[560px] object-contain p-4" /><figcaption className="research-caption">{caption}</figcaption></figure>;
+function Figure({ file, alt, caption, isCad }: { file: string; alt: string; caption: string; isCad?: boolean }) {
+  return (
+    <figure className="research-figure group">
+      <div className={`flex-1 flex items-center justify-center p-4 sm:p-6 min-h-[260px] ${isCad ? "bg-gradient-to-b from-white/[0.04] to-transparent" : "bg-black/40"}`}>
+        {isCad ? (
+          <img
+            src={`/images/publication/${file}`}
+            alt={alt}
+            loading="lazy"
+            className="w-full h-auto max-h-[360px] object-contain drop-shadow-[0_12px_30px_rgba(0,0,0,0.6)] transition-transform duration-300 group-hover:scale-[1.02]"
+          />
+        ) : (
+          <div className="w-full max-w-4xl bg-white p-2.5 sm:p-4 rounded-xl shadow-md border border-neutral-200">
+            <img
+              src={`/images/publication/${file}`}
+              alt={alt}
+              loading="lazy"
+              className="w-full h-auto max-h-[440px] object-contain rounded-lg"
+            />
+          </div>
+        )}
+      </div>
+      <figcaption className="research-caption">{caption}</figcaption>
+    </figure>
+  );
 }
 export default function Publication() {
   const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
@@ -48,10 +71,10 @@ export default function Publication() {
       <section id="hardware" className="research-section">
         <p className="editorial-eyebrow mb-4">02 / From CAD to the bench</p><h2 className="research-heading">A small instrument, built in layers.</h2>
         <div className="research-prose max-w-3xl mb-8"><p>The printed structure holds the optical path together. The stage supports the specimen; the mount holder and camera mount locate the imaging assembly, while spacers set the separation between components. These parts make the design reproducible with consumer fabrication tools.</p></div>
-        <div className="grid md:grid-cols-3 gap-5">
-          <Figure file="microscope_cad_view_2.png" alt="Isometric CAD view of the printed microscope structure" caption="Isometric view — stage and supporting printed structure." />
-          <Figure file="microscope_cad_view_3.png" alt="Rear CAD view of the microscope mount holder and camera assembly" caption="Rear view — mount holder and camera mount alignment." />
-          <Figure file="microscope_cad_view_4.png" alt="Side CAD view showing the microscope structure and spacing" caption="Side view — component spacing and stacked assembly." />
+        <div className="grid md:grid-cols-3 gap-6">
+          <Figure isCad file="microscope_cad_view_2.png" alt="Isometric CAD view of the printed microscope structure" caption="Isometric view — stage and supporting printed structure." />
+          <Figure isCad file="microscope_cad_view_3.png" alt="Rear CAD view of the microscope mount holder and camera assembly" caption="Rear view — mount holder and camera mount alignment." />
+          <Figure isCad file="microscope_cad_view_4.png" alt="Side CAD view showing the microscope structure and spacing" caption="Side view — component spacing and stacked assembly." />
         </div>
         <h3 className="mt-10 mb-5 text-xl font-light">Bill of materials & hardware breakdown</h3>
         <div className="overflow-x-auto editorial-card"><table className="w-full min-w-[580px] text-sm text-left"><caption className="sr-only">Core components of the microscope; total component cost below $200 USD.</caption><thead className="border-b border-white/10 text-neutral-300"><tr><th className="p-5">Subsystem</th><th className="p-5">Component</th><th className="p-5">Details</th></tr></thead><tbody>{hardware.map(([role, name, detail]) => <tr key={role} className="border-b border-white/5"><th className="p-5 font-normal text-neutral-500">{role}</th><td className="p-5 text-neutral-200">{name}</td><td className="p-5 text-neutral-400 leading-6">{detail}</td></tr>)}</tbody></table></div>
