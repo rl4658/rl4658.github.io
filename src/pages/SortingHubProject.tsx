@@ -799,7 +799,7 @@ export default function SortingHubProject() {
             <Sliders className="text-neutral-400 mb-3" size={20} />
             <h4 className="text-sm font-semibold text-white">In-Place Merging</h4>
             <p className="text-xs text-neutral-400 mt-1 leading-5">
-              Achieving $O(1)$ auxiliary space in Merge Sort through pointer array shifts.
+              Achieving O(1) auxiliary space in Merge Sort through pointer array shifts.
             </p>
           </div>
         </div>
@@ -928,13 +928,13 @@ Thread.sleep(60); // ✅ ONLY WORKER PAUSES!`}</code>
             <h4 className="text-lg font-light text-white mb-2">1. Selection Sort</h4>
             <p className="editorial-eyebrow text-amber-400 mb-4">O(N²) Quadratic Complexity · O(1) Memory</p>
             <p className="text-sm text-neutral-300 leading-6">
-              Selection sort scans the unsorted subarray from index $i$ to $N-1$ to locate the absolute minimum
-              element, then performs a single swap with index $i$.
+              Selection sort scans the unsorted subarray from index i to N - 1 to locate the absolute minimum
+              element, then performs a single swap with index i.
             </p>
             <ul className="mt-4 space-y-2 text-xs text-neutral-400 font-mono">
-              <li>• Total Comparisons: $N(N - 1) / 2$</li>
-              <li>• Total Swaps: At most $N - 1$</li>
-              <li>• Best/Worst Time: Always $O(N²)$</li>
+              <li>• Total Comparisons: N(N - 1) / 2</li>
+              <li>• Total Swaps: At most N - 1</li>
+              <li>• Best/Worst Time: Always O(N²)</li>
               <li>• Step Throttle: 60ms delay per swap</li>
             </ul>
           </div>
@@ -943,13 +943,13 @@ Thread.sleep(60); // ✅ ONLY WORKER PAUSES!`}</code>
             <h4 className="text-lg font-light text-white mb-2">2. In-Place Merge Sort</h4>
             <p className="editorial-eyebrow text-emerald-400 mb-4">O(N log N) Divide &amp; Conquer · O(1) Aux Memory</p>
             <p className="text-sm text-neutral-300 leading-6">
-              Standard merge sort allocates an auxiliary array of size $N$. This implementation uses an{" "}
+              Standard merge sort allocates an auxiliary array of size N. This implementation uses an{" "}
               <strong>in-place merging technique</strong> with element shifts, eliminating extra memory allocations entirely.
             </p>
             <ul className="mt-4 space-y-2 text-xs text-neutral-400 font-mono">
-              <li>• Divide Phase: Recursively bisects at midpoint $m$</li>
+              <li>• Divide Phase: Recursively bisects at midpoint m</li>
               <li>• In-Place Merge: Shifts elements right by 1 to insert</li>
-              <li>• Auxiliary Space: $O(1)$ strictly in-place</li>
+              <li>• Auxiliary Space: O(1) strictly in-place</li>
               <li>• Step Throttle: 50ms delay per shift</li>
             </ul>
           </div>
@@ -1007,7 +1007,9 @@ Thread.sleep(60); // ✅ ONLY WORKER PAUSES!`}</code>
             href={repo}
             label="View complete repository on GitHub"
             meta="rl4658/sorting-hub · JavaFX 17 · Scene Builder · Maven"
-          />
+          >
+            View complete repository on GitHub (rl4658/sorting-hub · JavaFX 17 · Maven)
+          </SourceLink>
         </div>
       </ArticleSection>
 
@@ -1062,7 +1064,7 @@ Thread.sleep(60); // ✅ ONLY WORKER PAUSES!`}</code>
             <li className="flex items-start gap-2">
               <span className="text-emerald-400 mt-1">•</span>
               <span>
-                <strong>Space-Time Trade-offs:</strong> In-place Merge Sort eliminates auxiliary memory allocations ($O(1)$ space), but incurs shifting overhead ($O(N)$ operations during element insertions).
+                <strong>Space-Time Trade-offs:</strong> In-place Merge Sort eliminates auxiliary memory allocations (O(1) space), but incurs shifting overhead (O(N) operations during element insertions).
               </span>
             </li>
             <li className="flex items-start gap-2">

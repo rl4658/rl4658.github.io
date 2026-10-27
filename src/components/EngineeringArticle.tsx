@@ -116,10 +116,14 @@ export function ArticleSection({
 
 export function SourceLink({
   href,
+  label,
+  meta,
   children,
 }: {
   href: string;
-  children: ReactNode;
+  label?: string;
+  meta?: string;
+  children?: ReactNode;
 }) {
   return (
     <a
@@ -128,7 +132,16 @@ export function SourceLink({
       rel="noopener noreferrer"
       className="inline-flex items-center gap-2 text-sm text-neutral-200 underline underline-offset-4 hover:text-white"
     >
-      {children}
+      {children ? (
+        children
+      ) : (
+        <span>
+          {label}
+          {meta ? (
+            <span className="text-neutral-400 font-normal ml-1.5">({meta})</span>
+          ) : null}
+        </span>
+      )}
       <ArrowUpRight size={15} className="shrink-0" />
     </a>
   );

@@ -296,46 +296,9 @@ const SortingHubWidget = () => {
   };
 
   return (
-    <div className="flex flex-col h-[520px] sm:h-[540px] md:h-[560px] bg-neutral-950 p-4 sm:p-5 justify-between relative group/widget font-mono select-none">
-      {/* Top JavaFX Stage Bar (Case Study button removed as requested) */}
-      <div className="flex items-center justify-between pb-3 border-b border-white/10 gap-2 shrink-0">
-        <div className="flex items-center gap-2.5">
-          <img
-            src="/images/projects/sorting/western_logo.png"
-            alt="Western University Logo"
-            className="w-5 h-5 rounded object-contain bg-white/10 p-0.5"
-          />
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-semibold text-white tracking-wide">
-                Sorting Hub
-              </span>
-              <span className="text-[9px] px-1.5 py-0.2 rounded bg-white/10 text-neutral-300 font-mono">
-                JavaFX 17
-              </span>
-            </div>
-            <p className="text-[10px] text-neutral-500 font-mono">
-              se2203.assignment1 · Strategy Pattern
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] text-neutral-400">
-            <span
-              className={`w-1.5 h-1.5 rounded-full ${
-                isSorting ? "bg-emerald-400 animate-pulse" : "bg-neutral-500"
-              }`}
-            />
-            <span className="font-mono">
-              {isSorting ? "Thread: RUNNING" : "Thread: IDLE"}
-            </span>
-          </div>
-        </div>
-      </div>
-
+    <div className="flex flex-col h-[520px] sm:h-[540px] md:h-[560px] bg-neutral-950 p-4 sm:p-5 relative group/widget font-mono select-none">
       {/* Main Expanded Layout: Canvas on Left/Center, Dedicated Controls Sidebar on Right */}
-      <div className="flex-1 min-h-0 pt-3 flex flex-col md:flex-row gap-3 overflow-hidden">
+      <div className="flex-1 min-h-0 h-full flex flex-col md:flex-row gap-3 overflow-hidden">
         {/* Main Visualization Area: Expanded Full-Height Sorting Bars Canvas */}
         <div className="flex-1 min-h-[190px] md:min-h-0 bg-[#0d0d0d] rounded-xl border border-white/10 relative flex items-end justify-between gap-[1px] p-2 sm:p-3 overflow-hidden shadow-inner">
           <div
