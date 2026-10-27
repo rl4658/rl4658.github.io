@@ -16,6 +16,7 @@ const FormFixerProject = lazy(() => import("./pages/FormFixerProject"));
 const SpotifyProject = lazy(() => import("./pages/SpotifyProject"));
 const SortingHubProject = lazy(() => import("./pages/SortingHubProject"));
 const EnginereaProject = lazy(() => import("./pages/EnginereaProject"));
+const ChatroomProject = lazy(() => import("./pages/ChatroomProject"));
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,8 @@ const App = () => (
             <Route path="/projects/sorting" element={<SortingHubProject />} />
             <Route path="/projects/enginerea" element={<EnginereaProject />} />
             <Route path="/projects/bobby-enginerea" element={<EnginereaProject />} />
+            <Route path="/projects/chatroom-whisperers" element={<ChatroomProject />} />
+            <Route path="/projects/chatroom" element={<ChatroomProject />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
