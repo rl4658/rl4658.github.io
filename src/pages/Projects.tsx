@@ -652,6 +652,160 @@ const WaterShaderWidget = () => {
   );
 };
 
+/* ------------------------------------------------------------------------- */
+/* 7. Cryptographic Misuse Detector Preview Widget (Phosphor CRT Terminal)   */
+/* ------------------------------------------------------------------------- */
+const CryptoScannerWidget = () => {
+  const navigate = useNavigate();
+
+  return (
+    <div
+      onClick={() => navigate("/projects/crypto-misuse-detector")}
+      className="relative h-[480px] sm:h-[520px] md:h-[560px] w-full bg-neutral-950 flex items-center justify-center p-4 sm:p-6 md:p-8 overflow-hidden group/cryptoscan cursor-pointer"
+      title="Click to Explore Cryptographic Misuse Detector"
+    >
+      {/* Ambient Phosphor Gradient Glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.12),transparent_70%)] pointer-events-none" />
+
+      {/* Center: Framed Preview of CryptoScan Terminal Interface — NO CAPTIONS / NO HUD BARS! */}
+      <div className="relative z-10 w-full max-w-3xl aspect-[16/9] sm:aspect-[16/9] md:h-[400px] rounded-2xl overflow-hidden border-2 border-emerald-500/30 shadow-[0_0_50px_rgba(0,0,0,0.9),0_0_25px_rgba(16,185,129,0.15)] bg-[#030a06] transition-all duration-300 group-hover/cryptoscan:scale-[1.02] group-hover/cryptoscan:border-emerald-400/60 group-hover/cryptoscan:shadow-[0_0_60px_rgba(16,185,129,0.25)] flex flex-col justify-between p-3.5 sm:p-5 select-none font-mono">
+        {/* Terminal Header Bar */}
+        <div className="flex items-center justify-between border-b border-emerald-500/20 pb-2.5 sm:pb-3 shrink-0">
+          <div className="flex items-center gap-2">
+            <div className="flex gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
+              <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
+            </div>
+            <div className="ml-2 flex items-center gap-1.5 text-[10px] sm:text-xs text-emerald-400 font-bold tracking-wider">
+              <Radio size={12} className="animate-pulse text-emerald-400" />
+              <span>cryptoscan://dual-engine-sentinel</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded bg-emerald-950/80 border border-emerald-500/30 text-[9px] sm:text-[10px] text-emerald-300">
+              SSE: ACTIVE
+            </span>
+            <span className="hidden sm:inline text-[9px] text-neutral-500">
+              Gemini 2.5 Flash + Semgrep
+            </span>
+          </div>
+        </div>
+
+        {/* Terminal Target & Mode Bar */}
+        <div className="bg-black/60 rounded-lg p-2 sm:p-2.5 border border-emerald-500/15 flex items-center justify-between text-[9px] sm:text-[11px] shrink-0 my-1.5 sm:my-2">
+          <div className="flex items-center gap-2 truncate">
+            <span className="text-emerald-400 font-bold shrink-0">TARGET:</span>
+            <span className="text-neutral-300 truncate">payment-service.git (Python · Java · Go)</span>
+          </div>
+          <span className="text-cyan-400 font-bold shrink-0 text-[8px] sm:text-[10px]">
+            MODE: DUAL (AST + LLM)
+          </span>
+        </div>
+
+        {/* Split Findings Stream in Emerald Green / Cyan Phosphor Styling */}
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 flex-1 min-h-0 overflow-hidden">
+          {/* Left Column: Semgrep AST */}
+          <div className="bg-black/40 rounded-lg p-2 sm:p-3 border border-cyan-500/20 flex flex-col justify-between overflow-hidden">
+            <div className="flex items-center justify-between pb-1 sm:pb-1.5 border-b border-cyan-500/15">
+              <span className="text-[9px] sm:text-[11px] font-bold text-cyan-300 flex items-center gap-1">
+                <Code size={11} className="text-cyan-400" />
+                <span>SEMGREP AST</span>
+              </span>
+              <span className="text-[8px] sm:text-[9px] text-cyan-400/80">3 MATCHES</span>
+            </div>
+            <div className="space-y-1 sm:space-y-1.5 text-[8px] sm:text-[10px] text-neutral-300 my-auto">
+              <div className="flex items-center gap-1.5">
+                <span className="px-1 py-0.2 rounded bg-red-500/20 text-red-400 font-bold text-[7px] sm:text-[8px]">
+                  CRIT
+                </span>
+                <span className="text-cyan-200 truncate">CWE-321 hardcoded_key</span>
+                <span className="text-neutral-500 ml-auto">L:7</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="px-1 py-0.2 rounded bg-amber-500/20 text-amber-400 font-bold text-[7px] sm:text-[8px]">
+                  HIGH
+                </span>
+                <span className="text-cyan-200 truncate">CWE-327 ecb_mode</span>
+                <span className="text-neutral-500 ml-auto">L:11</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="px-1 py-0.2 rounded bg-amber-500/20 text-amber-400 font-bold text-[7px] sm:text-[8px]">
+                  HIGH
+                </span>
+                <span className="text-cyan-200 truncate">CWE-327 weak_algorithm</span>
+                <span className="text-neutral-500 ml-auto">L:17</span>
+              </div>
+            </div>
+            <div className="text-[7px] sm:text-[9px] text-cyan-400/60 pt-1 border-t border-cyan-500/10 truncate">
+              AST pattern matching · 120ms execution
+            </div>
+          </div>
+
+          {/* Right Column: Gemini 2.5 Flash */}
+          <div className="bg-black/40 rounded-lg p-2 sm:p-3 border border-emerald-500/20 flex flex-col justify-between overflow-hidden">
+            <div className="flex items-center justify-between pb-1 sm:pb-1.5 border-b border-emerald-500/15">
+              <span className="text-[9px] sm:text-[11px] font-bold text-emerald-300 flex items-center gap-1">
+                <Sparkles size={11} className="text-emerald-400" />
+                <span>GEMINI 2.5 FLASH</span>
+              </span>
+              <span className="text-[8px] sm:text-[9px] text-emerald-400/80">3 VERIFIED</span>
+            </div>
+            <div className="space-y-1 sm:space-y-1.5 text-[8px] sm:text-[10px] text-neutral-300 my-auto">
+              <div className="flex items-center gap-1.5">
+                <span className="px-1 py-0.2 rounded bg-red-500/20 text-red-400 font-bold text-[7px] sm:text-[8px]">
+                  CRIT
+                </span>
+                <span className="text-emerald-200 truncate">128-bit key in literal byte</span>
+                <span className="text-neutral-500 ml-auto">L:7</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="px-1 py-0.2 rounded bg-amber-500/20 text-amber-400 font-bold text-[7px] sm:text-[8px]">
+                  HIGH
+                </span>
+                <span className="text-emerald-200 truncate">AES-ECB mode leaks entropy</span>
+                <span className="text-neutral-500 ml-auto">L:11</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="px-1 py-0.2 rounded bg-amber-500/20 text-amber-400 font-bold text-[7px] sm:text-[8px]">
+                  HIGH
+                </span>
+                <span className="text-emerald-200 truncate">MD5 collision vulnerability</span>
+                <span className="text-neutral-500 ml-auto">L:17</span>
+              </div>
+            </div>
+            <div className="text-[7px] sm:text-[9px] text-emerald-400/60 pt-1 border-t border-emerald-500/10 truncate">
+              Semantic 150-line window chunking
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Metrics Consensus Strip */}
+        <div className="bg-black/80 rounded-lg p-2 border border-emerald-500/20 flex items-center justify-between text-[8px] sm:text-[10px] text-neutral-400 shrink-0 mt-1.5 sm:mt-2">
+          <div className="flex items-center gap-2 sm:gap-4 truncate">
+            <span className="text-emerald-300 font-bold">100% CONSENSUS</span>
+            <span className="hidden sm:inline text-neutral-600">|</span>
+            <span className="text-neutral-300">F1: 0.96</span>
+            <span className="hidden sm:inline text-neutral-600">|</span>
+            <span className="text-neutral-300">Precision: 1.0</span>
+            <span className="hidden sm:inline text-neutral-600">|</span>
+            <span className="text-neutral-300">Tolerance: ±5 lines</span>
+          </div>
+          <span className="text-emerald-400 font-bold shrink-0">ALL TESTS PASSED</span>
+        </div>
+      </div>
+
+      {/* Hover Action Overlay */}
+      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/cryptoscan:opacity-100 transition-opacity flex items-center justify-center pointer-events-none backdrop-blur-[2px] z-20">
+        <div className="px-5 py-2.5 rounded-full bg-white text-black font-bold text-xs font-mono shadow-2xl flex items-center gap-2 transform translate-y-2 group-hover/cryptoscan:translate-y-0 transition-transform">
+          <span>Explore Project</span>
+          <ArrowRight size={14} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 /* ========================================================================= */
 /* MAIN PROJECTS PAGE COMPONENT                                              */
 /* ========================================================================= */
@@ -793,7 +947,9 @@ const Projects = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: idx * 0.1 }}
                   onClick={() => {
-                    if (project.id === "form-fixer") {
+                    if (project.id === "crypto-misuse-detector" || project.id === "crypto-scanner") {
+                      navigate("/projects/crypto-misuse-detector");
+                    } else if (project.id === "form-fixer") {
                       navigate("/projects/form-fixer");
                     } else if (project.id === "spotify-playlist-generator") {
                       navigate("/projects/spotify-playlist-generator");
@@ -844,6 +1000,7 @@ const Projects = () => {
 
                     {/* LIVE WORKING INTERACTIVE PREVIEW WIDGET */}
                     <div className="border-b border-white/10 min-h-[220px]">
+                      {project.id === "crypto-misuse-detector" && <CryptoScannerWidget />}
                       {project.id === "form-fixer" && <FormFixerWidget project={project} />}
                       {project.id === "spotify-playlist-generator" && <SpotifyWidget />}
                       {project.id === "sorting-hub" && <SortingHubWidget />}

@@ -67,6 +67,7 @@ export interface Project {
     | "Game Engine & Systems"
     | "Systems & Algorithms"
     | "Computer Graphics & Shaders"
+    | "Security & AI Systems"
     | string;
   tagline: string;
   githubUrl: string;
@@ -357,6 +358,51 @@ export const certifications: Certification[] = [
 ];
 
 export const projects: Project[] = [
+  {
+    id: "crypto-misuse-detector",
+    name: "Cryptographic Misuse Detector",
+    tech: "Python, Google Gemini API, Semgrep, FastAPI, SSE, AST Analysis",
+    stack: [
+      "Python 3.10+",
+      "Google Gemini 2.0/2.5 Flash (google-genai)",
+      "Semgrep (AST Engine)",
+      "FastAPI & Uvicorn",
+      "Server-Sent Events (SSE)",
+      "GitPython",
+      "Rich Terminal UI",
+      "PyCryptodome",
+      "Pytest",
+    ],
+    category: "Security & AI Systems",
+    tagline: "Dual-engine static analysis platform combining Gemini LLM and Semgrep rules to detect cryptographic implementation flaws across Python, Java, and Go",
+    githubUrl: "https://github.com/rl4658/cryptographic-misuse-detector",
+    overview:
+      "Cryptographic Misuse Detector (CryptoScan) is a dual-engine security static analysis platform that pairs rule-based AST pattern matching (Semgrep) with large language model semantic reasoning (Google Gemini 2.0/2.5 Flash via google-genai) to detect OWASP Top 10 A02:2021 cryptographic flaws across Python, Java, and Go codebases. Engineered with a multi-language rule pipeline, chunked LLM static analysis with temperature=0 deterministic reasoning and strict JSON schema generation, a ground-truth benchmark comparator computing Precision, Recall, and F1 (±5 line tolerance), and an asynchronous FastAPI backend streaming real-time pipeline events via Server-Sent Events (SSE) to a retro cyberpunk CRT terminal interface.",
+    bullets: [
+      "Constructed dual-engine parallel static analysis pipeline combining deterministic AST pattern matching (Semgrep) with semantic LLM inference (Google Gemini Flash).",
+      "Authored custom multi-language YAML Semgrep rules detecting 6 OWASP/CWE cryptographic flaws (hardcoded keys CWE-321, ECB mode CWE-327, weak hash algorithms CWE-327, IV reuse CWE-329, insecure PRNG CWE-338, insufficient key length CWE-326) across Python, Java, and Go.",
+      "Engineered chunked semantic static analysis in Python using google-genai SDK with 150-line windowing, system instruction guardrails, temperature=0.0 determinism, and Pydantic structured JSON schemas.",
+      "Built comparative evaluation engine benchmarking Semgrep vs. LLM findings against curated ground-truth datasets, calculating True Positives, False Positives, False Negatives, Precision, Recall, and F1 score with ±5 line tolerance.",
+      "Architected asynchronous FastAPI backend utilizing Server-Sent Events (SSE) for real-time progress, finding emission, and agreement metric streaming paired with GitPython shallow repository sandboxing.",
+    ],
+    metrics: [
+      { label: "Vulnerability Types", value: "6 CWE Classes" },
+      { label: "Languages", value: "Python, Java, Go" },
+      { label: "Engine Arch", value: "Dual (Semgrep + LLM)" },
+      { label: "Streaming Protocol", value: "FastAPI SSE" },
+    ],
+    architecture: {
+      summary: "Target Git Repository / File -> Shallow Sandbox Clone -> Dual Engine Dispatch [Semgrep AST Rules || Gemini 2.5 Flash LLM 150-line Chunks] -> Finding Normalization -> Ground-Truth Comparator (±5 line tolerance) -> Rich CLI / FastAPI SSE Stream.",
+      flow: [
+        "1. Ingestion: Shallow clones repository via GitPython into an isolated tempdir sandbox with safe URL validation",
+        "2. AST Engine: Semgrep invokes language-specific YAML rule manifests (python_crypto.yaml, java_crypto.yaml, go_crypto.yaml)",
+        "3. Semantic LLM Engine: Divides source files into 150-line overlapping windows, invoking Gemini Flash with temperature=0.0 and Pydantic JSON schemas",
+        "4. Finding Normalization: Standardizes heterogeneous tool outputs into unified CryptoFinding models (rule_id, cwe, severity, line, code_snippet, fix)",
+        "5. Ground-Truth Comparator: Matches tool findings against ground_truth.json using ±5 line matching window, calculating TP, FP, FN, Precision, Recall, and F1",
+        "6. Telemetry & Streaming: Dispatches live progress, finding payloads, and agreement metrics via Rich terminal tables or FastAPI Server-Sent Events (SSE)",
+      ],
+    },
+  },
   {
     id: "form-fixer",
     name: "FormFixer.AI",

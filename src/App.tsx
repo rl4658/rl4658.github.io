@@ -18,6 +18,7 @@ const SortingHubProject = lazy(() => import("./pages/SortingHubProject"));
 const EnginereaProject = lazy(() => import("./pages/EnginereaProject"));
 const ChatroomProject = lazy(() => import("./pages/ChatroomProject"));
 const WaterShaderProject = lazy(() => import("./pages/WaterShaderProject"));
+const CryptoScannerProject = lazy(() => import("./pages/CryptoScannerProject"));
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,8 @@ const App = () => (
             <Route path="/projects/chatroom" element={<ChatroomProject />} />
             <Route path="/projects/water-surface-simulation" element={<WaterShaderProject />} />
             <Route path="/projects/water-shader" element={<WaterShaderProject />} />
+            <Route path="/projects/crypto-misuse-detector" element={<CryptoScannerProject />} />
+            <Route path="/projects/crypto-scanner" element={<CryptoScannerProject />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
