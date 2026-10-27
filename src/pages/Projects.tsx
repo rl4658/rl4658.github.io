@@ -163,34 +163,14 @@ const SortingHubWidget = () => {
   return (
     <div
       onClick={() => navigate("/projects/sorting-hub")}
-      className="relative h-[480px] sm:h-[520px] md:h-[560px] w-full bg-neutral-950 flex flex-col justify-between p-4 sm:p-5 md:p-6 overflow-hidden group/sorting cursor-pointer"
+      className="relative h-[480px] sm:h-[520px] md:h-[560px] w-full bg-neutral-950 flex items-center justify-center p-4 sm:p-6 md:p-8 overflow-hidden group/sorting cursor-pointer"
       title="Click to Explore Sorting Hub"
     >
       {/* Ambient Gradient Glow */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.05),transparent_70%)] pointer-events-none" />
 
-      {/* Top JavaFX HUD Bar */}
-      <div className="relative z-10 flex items-center justify-between gap-2 text-xs font-mono">
-        <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-black/70 border border-white/15 backdrop-blur-md shadow-lg pointer-events-none shrink-0">
-          <div className="flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-[11px] text-neutral-200 whitespace-nowrap">
-            <span className="font-semibold text-white">JavaFX 17 / FXML</span>
-            <span className="text-white/40">·</span>
-            <span className="text-emerald-400 font-semibold flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Thread Decoupled
-            </span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-black/70 border border-white/15 backdrop-blur-md shadow-lg text-[9px] sm:text-[11px] text-neutral-300 pointer-events-none whitespace-nowrap shrink-0">
-          <span className="text-white font-semibold">Merge Sort</span>
-          <span className="text-white/40">·</span>
-          <span className="text-amber-300 font-mono">O(N log N)</span>
-        </div>
-      </div>
-
       {/* Center: Sorting Canvas Viewport */}
-      <div className="relative z-10 my-auto w-full max-w-3xl h-[280px] sm:h-[310px] rounded-2xl overflow-hidden border-2 border-white/20 shadow-[0_0_50px_rgba(0,0,0,0.9),0_0_25px_rgba(255,255,255,0.06)] bg-black/90 p-4 flex flex-col justify-between transition-all duration-300 group-hover/sorting:scale-[1.02] group-hover/sorting:border-white/50">
+      <div className="relative z-10 w-full max-w-3xl h-[360px] sm:h-[400px] md:h-[440px] rounded-2xl overflow-hidden border-2 border-white/20 shadow-[0_0_50px_rgba(0,0,0,0.9),0_0_25px_rgba(255,255,255,0.06)] bg-black/90 p-4 sm:p-5 flex flex-col justify-between transition-all duration-300 group-hover/sorting:scale-[1.02] group-hover/sorting:border-white/50">
         {/* Sub-header inside canvas */}
         <div className="flex items-center justify-between text-[10px] font-mono text-neutral-400 border-b border-white/10 pb-2">
           <span className="text-neutral-300 font-medium flex items-center gap-1.5">
@@ -201,7 +181,7 @@ const SortingHubWidget = () => {
         </div>
 
         {/* 64 Dynamic Bars */}
-        <div className="flex-1 flex items-end gap-[1.5px] sm:gap-[2.5px] pt-4 pb-1 px-1">
+        <div className="flex-1 flex items-end gap-[1.5px] sm:gap-[2.5px] pt-4 pb-2 px-1">
           {bars.map((height, idx) => {
             const isComparing = idx === activeStep || idx === (activeStep + 1) % 64;
             const isPartitionPivot = idx === (activeStep + 16) % 64;
@@ -242,19 +222,6 @@ const SortingHubWidget = () => {
         </div>
       </div>
 
-      {/* Bottom In-Game HUD Bar */}
-      <div className="relative z-10 flex items-center justify-between gap-2 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-black/70 border border-white/15 backdrop-blur-md text-[9px] sm:text-[11px] font-mono pointer-events-none whitespace-nowrap">
-        <div className="flex items-center gap-1.5 sm:gap-2 text-neutral-300">
-          <span className="text-white font-medium">Strategy Pattern</span>
-          <span className="hidden sm:inline text-white/30">·</span>
-          <span className="hidden sm:inline text-neutral-400">In-Place Insertion / Selection</span>
-        </div>
-        <div className="flex items-center gap-1.5 sm:gap-2 text-neutral-300">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
-          <span className="text-white font-medium">Zero UI Freezing</span>
-        </div>
-      </div>
-
       {/* Hover Action Overlay */}
       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/sorting:opacity-100 transition-opacity flex items-center justify-center pointer-events-none backdrop-blur-[2px] z-20">
         <div className="px-5 py-2.5 rounded-full bg-white text-black font-bold text-xs font-mono shadow-2xl flex items-center gap-2 transform translate-y-2 group-hover/sorting:translate-y-0 transition-transform">
@@ -275,7 +242,7 @@ const EnginereaWidget = () => {
   return (
     <div
       onClick={() => navigate("/projects/enginerea")}
-      className="relative h-[480px] sm:h-[520px] md:h-[560px] w-full bg-neutral-950 flex flex-col justify-between p-4 sm:p-5 md:p-6 overflow-hidden group/enginerea cursor-pointer"
+      className="relative h-[480px] sm:h-[520px] md:h-[560px] w-full bg-neutral-950 flex items-center justify-center p-4 sm:p-6 md:p-8 overflow-hidden group/enginerea cursor-pointer"
       title="Click to Explore Bobby: The Town of Enginerea"
     >
       {/* Ambient Cyber Glow & Blurred Backdrop */}
@@ -288,41 +255,8 @@ const EnginereaWidget = () => {
       />
       <div className="absolute inset-0 bg-black/55 pointer-events-none" />
 
-      {/* Top In-Game HUD Bar */}
-      <div className="relative z-10 flex items-center justify-between gap-2 text-xs font-mono">
-        {/* Top-Left Badge */}
-        <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-black/70 border border-white/15 backdrop-blur-md shadow-lg pointer-events-none shrink-0">
-          <img
-            src="/images/projects/enginerea/gameicon.png"
-            alt="Bobby Icon"
-            className="w-4 h-4 sm:w-5 sm:h-5 rounded object-contain shrink-0"
-          />
-          <div className="flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-[11px] text-neutral-200 whitespace-nowrap">
-            <span className="font-semibold text-white">
-              Pygame<span className="hidden sm:inline"> 2D</span> Engine
-            </span>
-            <span className="text-white/40">·</span>
-            <span className="text-emerald-400 font-semibold flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              150 FPS
-            </span>
-          </div>
-        </div>
-
-        {/* Top-Right Badge */}
-        <div className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-black/70 border border-white/15 backdrop-blur-md shadow-lg text-[9px] sm:text-[11px] text-neutral-300 pointer-events-none whitespace-nowrap shrink-0">
-          <span className="text-white font-semibold">
-            3 <span className="hidden sm:inline">Campaign </span>Stages
-          </span>
-          <span className="text-white/40">·</span>
-          <span className="text-neutral-400">
-            <span className="hidden sm:inline">AABB </span>Kinematics
-          </span>
-        </div>
-      </div>
-
       {/* Center: Immersive Framed 1200:575 Arcade Viewport */}
-      <div className="relative z-10 my-auto w-full max-w-3xl aspect-[1200/575] rounded-2xl overflow-hidden border-2 border-white/20 shadow-[0_0_50px_rgba(0,0,0,0.9),0_0_25px_rgba(6,182,212,0.15)] bg-black transition-all duration-300 group-hover/enginerea:scale-[1.02] group-hover/enginerea:border-white/50 group-hover/enginerea:shadow-[0_0_60px_rgba(6,182,212,0.25)]">
+      <div className="relative z-10 w-full max-w-3xl aspect-[1200/575] rounded-2xl overflow-hidden border-2 border-white/20 shadow-[0_0_50px_rgba(0,0,0,0.9),0_0_25px_rgba(6,182,212,0.15)] bg-black transition-all duration-300 group-hover/enginerea:scale-[1.02] group-hover/enginerea:border-white/50 group-hover/enginerea:shadow-[0_0_60px_rgba(6,182,212,0.25)]">
         <img
           src="/images/projects/enginerea/scene_start_menu.png"
           alt="Bobby: The Town of Enginerea Arcade Start Menu Viewport"
@@ -333,21 +267,6 @@ const EnginereaWidget = () => {
         {/* Subtle CRT Vignette & Screen Atmosphere */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-white/[0.04] pointer-events-none" />
         <div className="absolute inset-0 shadow-[inset_0_0_30px_rgba(0,0,0,0.6)] pointer-events-none" />
-      </div>
-
-      {/* Bottom In-Game HUD Bar */}
-      <div className="relative z-10 flex items-center justify-between gap-2 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-black/70 border border-white/15 backdrop-blur-md text-[9px] sm:text-[11px] font-mono pointer-events-none whitespace-nowrap">
-        <div className="flex items-center gap-1.5 sm:gap-2 text-neutral-300">
-          <span className="text-white font-medium">Modular Shop<span className="hidden sm:inline"> Loadouts</span></span>
-          <span className="hidden sm:inline text-white/30">·</span>
-          <span className="hidden sm:inline text-neutral-400">Axe Deflections</span>
-        </div>
-        <div className="flex items-center gap-1.5 sm:gap-2 text-neutral-300">
-          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
-          <span className="text-white font-medium">
-            <span className="hidden sm:inline">Spinning </span>Projectile Deflection<span className="hidden sm:inline"> AI</span>
-          </span>
-        </div>
       </div>
 
       {/* Hover Action Overlay */}
@@ -370,39 +289,14 @@ const ChatroomWidget = () => {
   return (
     <div
       onClick={() => navigate("/projects/chatroom-whisperers")}
-      className="relative min-h-[480px] h-[480px] sm:h-[520px] md:h-[560px] w-full bg-neutral-950 flex flex-col justify-between p-2.5 sm:p-5 md:p-6 overflow-hidden group/chatroom cursor-pointer select-none"
+      className="relative h-[480px] sm:h-[520px] md:h-[560px] w-full bg-neutral-950 flex items-center justify-center p-3 sm:p-6 md:p-8 overflow-hidden group/chatroom cursor-pointer select-none"
       title="Click to Explore Chatroom Whisperers"
     >
       {/* Ambient Gradient Glow */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(59,130,246,0.08),transparent_70%)] pointer-events-none" />
 
-      {/* Top HUD Bar */}
-      <div className="relative z-10 flex items-center justify-between gap-1.5 sm:gap-2 text-xs font-mono shrink-0">
-        <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-black/70 border border-white/15 backdrop-blur-md shadow-lg pointer-events-none shrink-0">
-          <img
-            src="/images/projects/chatroom/logo.png"
-            alt="Chatroom Logo"
-            className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded object-contain shrink-0"
-          />
-          <div className="flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-[11px] text-neutral-200 whitespace-nowrap">
-            <span className="font-semibold text-white">C++<span className="hidden sm:inline"> POSIX</span> Sockets</span>
-            <span className="text-white/40">·</span>
-            <span className="text-emerald-400 font-semibold flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              127.0.0.1:3000
-            </span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-black/70 border border-white/15 backdrop-blur-md shadow-lg text-[9px] sm:text-[11px] text-neutral-300 pointer-events-none whitespace-nowrap shrink-0">
-          <span className="text-white font-semibold">Worker<span className="hidden sm:inline"> Thread</span> Pool</span>
-          <span className="hidden sm:inline text-white/40">·</span>
-          <span className="hidden sm:inline text-neutral-400">std::mutex Locks</span>
-        </div>
-      </div>
-
       {/* Center: Authentic PyQt5 Desktop Window Frame (Centered & Dual-Column) */}
-      <div className="relative z-10 my-auto w-full max-w-xl sm:max-w-2xl mx-auto rounded-2xl overflow-hidden border-2 border-white/20 shadow-[0_0_50px_rgba(0,0,0,0.9),0_0_25px_rgba(59,130,246,0.12)] bg-[#121212] transition-all duration-300 group-hover/chatroom:scale-[1.02] group-hover/chatroom:border-white/50 transform-gpu shrink-0">
+      <div className="relative z-10 w-full max-w-xl sm:max-w-2xl mx-auto rounded-2xl overflow-hidden border-2 border-white/20 shadow-[0_0_50px_rgba(0,0,0,0.9),0_0_25px_rgba(59,130,246,0.12)] bg-[#121212] transition-all duration-300 group-hover/chatroom:scale-[1.02] group-hover/chatroom:border-white/50 transform-gpu shrink-0">
         {/* Title Bar */}
         <div className="flex items-center justify-between px-2.5 sm:px-3.5 py-1 sm:py-2 bg-[#181818] border-b border-white/10 shrink-0">
           <div className="flex items-center gap-1.5 sm:gap-2">
@@ -533,19 +427,6 @@ const ChatroomWidget = () => {
               </span>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Bottom HUD Bar */}
-      <div className="relative z-10 flex items-center justify-between gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1 sm:py-2 rounded-xl bg-black/70 border border-white/15 backdrop-blur-md text-[9px] sm:text-[11px] font-mono pointer-events-none whitespace-nowrap shrink-0">
-        <div className="flex items-center gap-1 sm:gap-2 text-neutral-300">
-          <span className="text-white font-medium">Semicolon<span className="hidden sm:inline"> Protocol</span></span>
-          <span className="hidden sm:inline text-white/30">·</span>
-          <span className="hidden sm:inline text-neutral-400">CREATE_ROOM / JOIN_ROOM</span>
-        </div>
-        <div className="flex items-center gap-1 sm:gap-2 text-neutral-300">
-          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
-          <span className="text-white font-medium">Thread-Safe<span className="hidden sm:inline"> Broadcast</span></span>
         </div>
       </div>
 
