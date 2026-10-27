@@ -59,7 +59,15 @@ export interface Project {
   name: string;
   tech: string;
   stack: string[];
-  category: "AI & Computer Vision" | "Full-Stack & APIs" | "Algorithms & Data" | "Systems & Networking";
+  category:
+    | "AI & Computer Vision"
+    | "Full-Stack & APIs"
+    | "Algorithms & Data"
+    | "Systems & Networking"
+    | "Game Engine & Systems"
+    | "Systems & Algorithms"
+    | "Computer Graphics & Shaders"
+    | string;
   tagline: string;
   githubUrl: string;
   demoUrl?: string;
@@ -544,6 +552,51 @@ export const projects: Project[] = [
         "2. Client Connection: PyQt5 client connects, triggering worker thread spawn with dedicated socket FD",
         "3. Semicolon Protocol Parsing: Worker processes CREATE_ROOM, JOIN_ROOM, MESSAGE_ROOM with lock_guard synchronization",
         "4. State Broadcast & Teardown: Broadcasts UPDATE_DATA to all connected peers; cleans up on DISCONNECT_ROOM or client exit",
+      ],
+    },
+  },
+  {
+    id: "water-surface-simulation",
+    name: "Water Surface Simulation",
+    tech: "C++11, OpenGL 4.0, GLSL, GLFW, GLEW, GLM",
+    stack: [
+      "C++11",
+      "OpenGL 4.0 Core",
+      "GLSL Shaders",
+      "Hardware Tessellation (TCS/TES)",
+      "Geometry Shaders",
+      "GLFW & GLEW",
+      "GLM Mathematics",
+      "Procedural Wave Physics",
+    ],
+    category: "Computer Graphics & Shaders",
+    tagline: "Real-time procedural ocean water simulation with hardware tessellation (TCS/TES), 4-wave Gerstner displacement, and heightmap blending",
+    githubUrl: "https://github.com/rl4658/water_shader",
+    overview:
+      "A real-time procedural ocean water rendering engine built in modern C++11, OpenGL 4.0 Core Profile, and GLSL. Implements a multi-stage programmable GPU graphics pipeline utilizing Quad-Patch Hardware Tessellation (Tessellation Control and Evaluation Shaders) for dynamic level-of-detail surface subdivision, Geometry Shader 4-wave Gerstner trochoidal displacement and dynamic normal generation via vector cross products, heightmap texture blending, and animated Phong specular illumination.",
+    bullets: [
+      "Constructed an OpenGL 4.0 5-stage programmable rendering pipeline spanning Vertex Shader, TCS, TES, Geometry Shader, and Fragment Shader with custom GLSL shaders.",
+      "Implemented Quad-Patch hardware tessellation (layout (vertices = 4) out) in TCS and bilinear coordinate interpolation in TES, dynamically subdividing low-resolution coarse base meshes.",
+      "Engineered multi-frequency Gerstner trochoidal wave physics in the Geometry Shader combining 4 wave harmonic vectors with steepness (Q factor) parameterization.",
+      "Blended procedural trochoidal mathematics with high-frequency heightmap texture displacement (displacement-map1.bmp) and temporal UV velocity offsets.",
+      "Calculated analytical dynamic surface normal vectors across displaced triangle primitives using cross(b - a, c - b), driving realistic Blinn-Phong specular ocean highlights.",
+      "Architected modular C++11 systems featuring PlaneMesh procedural quad grid generation, Camera spherical orbit controls, and GLFW event dispatching.",
+    ],
+    metrics: [
+      { label: "Shader Stages", value: "5 GLSL Stages" },
+      { label: "Tessellation", value: "64x Quad Patch" },
+      { label: "Gerstner Waves", value: "4 Harmonic Waves" },
+      { label: "Framerate", value: "60+ FPS" },
+    ],
+    architecture: {
+      summary: "PlaneMesh Quad Grid -> Vertex Transform -> TCS Quad Patch Tesselator -> TES Bilinear Interpolation -> Geometry Shader Gerstner & Heightmap Displacement -> Fragment Shader Phong Shading.",
+      flow: [
+        "1. PlaneMesh Base Geometry: C++ generates coarse 20x20 world space quad grid (GL_PATCHES with 4 control points per primitive)",
+        "2. Vertex Shader: Computes world space coordinates, light vector, eye vector, and animated scrolling UV coordinates (posXZ + texOffset + time * 0.08) / texScale",
+        "3. Tessellation Control Shader (TCS): Sets per-patch gl_TessLevelOuter and gl_TessLevelInner dynamically, delegating work to GPU hardware tessellator",
+        "4. Tessellation Evaluation Shader (TES): Bilinearly interpolates vertex position, light vector, eye vector, and UVs across (u, v) normalized patch coordinates",
+        "5. Geometry Shader: Evaluates 4-component Gerstner trochoidal equations + heightmap red channel sampling, displacing vertices and computing cross-product surface normals",
+        "6. Fragment Shader: Normalizes perturbed surface normals and evaluates Phong illumination (ambient, diffuse water texture, specular highlight with pow(cosAlpha, 8.0))",
       ],
     },
   },

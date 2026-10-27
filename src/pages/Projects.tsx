@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import * as THREE from "three";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { motion, AnimatePresence } from "framer-motion";
@@ -441,6 +442,216 @@ const ChatroomWidget = () => {
   );
 };
 
+/* ------------------------------------------------------------------------- */
+/* 6. Water Surface Simulation Preview Widget (Authentic 3D Ocean Preview)   */
+/* ------------------------------------------------------------------------- */
+const WaterShaderCanvas = () => {
+  const mountRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = mountRef.current;
+    if (!container) return;
+
+    let width = container.clientWidth || 640;
+    let height = container.clientHeight || 360;
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x070c14);
+
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+    camera.position.set(16, 12, 16);
+    camera.lookAt(0, -1, 0);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.innerHTML = "";
+    container.appendChild(renderer.domElement);
+
+    const textureLoader = new THREE.TextureLoader();
+    const waterTex = textureLoader.load("/images/projects/water_shader/water.png");
+    waterTex.wrapS = THREE.RepeatWrapping;
+    waterTex.wrapT = THREE.RepeatWrapping;
+
+    const dispTex = textureLoader.load("/images/projects/water_shader/displacement-map1.png");
+    dispTex.wrapS = THREE.RepeatWrapping;
+    dispTex.wrapT = THREE.RepeatWrapping;
+
+    const uniforms = {
+      time: { value: 0.0 },
+      heightMult: { value: 0.15 },
+      texScale: { value: 10.0 },
+      displacementTexture: { value: dispTex },
+      waterTexture: { value: waterTex },
+      lightPos: { value: new THREE.Vector3(5.0, 30.0, 5.0) },
+      eyePos: { value: camera.position },
+    };
+
+    const material = new THREE.ShaderMaterial({
+      vertexShader: `
+        uniform float time;
+        uniform float heightMult;
+        uniform float texScale;
+        uniform sampler2D displacementTexture;
+        uniform vec3 lightPos;
+        uniform vec3 eyePos;
+
+        varying vec3 vNormal;
+        varying vec3 vLightDir;
+        varying vec3 vEyeDir;
+        varying vec2 vUv;
+
+        vec3 Gerstner(vec3 worldpos, float w, float A, float phi, float Q, vec2 D, int N) {
+            float dotVal = dot(D, worldpos.xz);
+            float wavePhase = w * dotVal + phi * time;
+            float Qi = w * A * Q / float(N);
+            return vec3(Qi * D.x * cos(wavePhase), A * sin(wavePhase), Qi * D.y * cos(wavePhase));
+        }
+
+        vec3 computeDisplacement(vec3 p, vec2 uvCoord) {
+            vec3 disp = vec3(0.0);
+            disp += Gerstner(p, 4.0, 0.08, 1.1, 0.75, vec2(0.3, 0.6), 4);
+            disp += Gerstner(p, 2.0, 0.05, 1.1, 0.75, vec2(0.2, 0.866), 4);
+            disp += Gerstner(p, 0.6, 0.2, 0.4, 0.1, vec2(0.3, 0.7), 4);
+            disp += Gerstner(p, 0.9, 0.15, 0.4, 0.1, vec2(0.8, 0.1), 4);
+            float h = texture2D(displacementTexture, uvCoord).r;
+            disp.y += h * heightMult;
+            return disp;
+        }
+
+        void main() {
+            vec4 worldPos = modelMatrix * vec4(position, 1.0);
+            vec2 posXZ = worldPos.xz;
+            vec2 uvCoord = (posXZ + time * 0.08) / texScale;
+            vUv = uvCoord;
+
+            vec3 disp = computeDisplacement(worldPos.xyz, uvCoord);
+            vec3 displacedWorld = worldPos.xyz + disp;
+
+            float delta = 0.05;
+            vec2 uvX = (posXZ + vec2(delta, 0.0) + time * 0.08) / texScale;
+            vec2 uvZ = (posXZ + vec2(0.0, delta) + time * 0.08) / texScale;
+            vec3 pX = worldPos.xyz + vec3(delta, 0.0, 0.0) + computeDisplacement(worldPos.xyz + vec3(delta, 0.0, 0.0), uvX);
+            vec3 pZ = worldPos.xyz + vec3(0.0, 0.0, delta) + computeDisplacement(worldPos.xyz + vec3(0.0, 0.0, delta), uvZ);
+
+            vNormal = normalize(cross(pZ - displacedWorld, pX - displacedWorld));
+            vLightDir = lightPos - displacedWorld;
+            vEyeDir = eyePos - displacedWorld;
+
+            gl_Position = projectionMatrix * viewMatrix * vec4(displacedWorld, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform sampler2D waterTexture;
+        varying vec3 vNormal;
+        varying vec3 vLightDir;
+        varying vec3 vEyeDir;
+        varying vec2 vUv;
+
+        void main() {
+            vec3 N = normalize(vNormal);
+            vec3 L = normalize(vLightDir);
+            vec3 E = normalize(vEyeDir);
+            vec3 R = reflect(-L, N);
+
+            vec4 MaterialDiffuseColor = texture2D(waterTexture, vUv);
+            vec4 MaterialAmbientColor = vec4(0.2, 0.2, 0.2, 1.0) * MaterialDiffuseColor;
+            vec4 MaterialSpecularColor = vec4(0.7, 0.7, 0.7, 1.0);
+
+            float cosTheta = clamp(dot(N, L), 0.0, 1.0);
+            float cosAlpha = clamp(dot(E, R), 0.0, 1.0);
+
+            vec4 color = MaterialAmbientColor +
+                         MaterialDiffuseColor * cosTheta +
+                         MaterialSpecularColor * pow(cosAlpha, 8.0);
+
+            gl_FragColor = color;
+        }
+      `,
+      uniforms,
+      side: THREE.DoubleSide,
+    });
+
+    const planeGeo = new THREE.PlaneGeometry(22, 22, 48, 48);
+    planeGeo.rotateX(-Math.PI / 2);
+    const planeMesh = new THREE.Mesh(planeGeo, material);
+    scene.add(planeMesh);
+
+    const resizeObserver = new ResizeObserver(() => {
+      if (!container) return;
+      width = container.clientWidth;
+      height = container.clientHeight;
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height);
+    });
+    resizeObserver.observe(container);
+
+    let animationFrameId: number;
+    let clock = new THREE.Clock();
+
+    const animate = () => {
+      animationFrameId = requestAnimationFrame(animate);
+      const elapsed = clock.getElapsedTime();
+      uniforms.time.value = elapsed;
+
+      // Gentle autonomous camera pan
+      const angle = elapsed * 0.15 + 0.8;
+      camera.position.x = 22 * Math.cos(angle);
+      camera.position.z = 22 * Math.sin(angle);
+      camera.position.y = 11 + Math.sin(elapsed * 0.2) * 2;
+      camera.lookAt(0, -0.5, 0);
+      uniforms.eyePos.value.copy(camera.position);
+
+      renderer.render(scene, camera);
+    };
+    animate();
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      resizeObserver.disconnect();
+      planeGeo.dispose();
+      material.dispose();
+      waterTex.dispose();
+      dispTex.dispose();
+      renderer.dispose();
+      if (container.contains(renderer.domElement)) {
+        container.removeChild(renderer.domElement);
+      }
+    };
+  }, []);
+
+  return <div ref={mountRef} className="w-full h-full pointer-events-none select-none" />;
+};
+
+const WaterShaderWidget = () => {
+  const navigate = useNavigate();
+
+  return (
+    <div
+      onClick={() => navigate("/projects/water-surface-simulation")}
+      className="relative h-[480px] sm:h-[520px] md:h-[560px] w-full bg-neutral-950 flex items-center justify-center p-4 sm:p-6 md:p-8 overflow-hidden group/watershader cursor-pointer"
+      title="Click to Explore Water Surface Simulation"
+    >
+      {/* Ambient Gradient Glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(6,182,212,0.15),transparent_70%)] pointer-events-none" />
+
+      {/* Center: Framed 3D Water Simulation Viewport — NO CAPTIONS / NO HUD BARS! */}
+      <div className="relative z-10 w-full max-w-3xl aspect-[16/9] sm:aspect-[16/9] md:h-[400px] rounded-2xl overflow-hidden border-2 border-white/20 shadow-[0_0_50px_rgba(0,0,0,0.9),0_0_25px_rgba(6,182,212,0.15)] bg-black transition-all duration-300 group-hover/watershader:scale-[1.02] group-hover/watershader:border-white/50 group-hover/watershader:shadow-[0_0_60px_rgba(6,182,212,0.25)]">
+        <WaterShaderCanvas />
+      </div>
+
+      {/* Hover Action Overlay */}
+      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/watershader:opacity-100 transition-opacity flex items-center justify-center pointer-events-none backdrop-blur-[2px] z-20">
+        <div className="px-5 py-2.5 rounded-full bg-white text-black font-bold text-xs font-mono shadow-2xl flex items-center gap-2 transform translate-y-2 group-hover/watershader:translate-y-0 transition-transform">
+          <span>Explore Project</span>
+          <ArrowRight size={14} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 /* ========================================================================= */
 /* MAIN PROJECTS PAGE COMPONENT                                              */
 /* ========================================================================= */
@@ -592,6 +803,8 @@ const Projects = () => {
                       navigate("/projects/enginerea");
                     } else if (project.id === "chatroom-whisperers") {
                       navigate("/projects/chatroom-whisperers");
+                    } else if (project.id === "water-surface-simulation" || project.id === "water-shader") {
+                      navigate("/projects/water-surface-simulation");
                     } else {
                       setSelectedProject(project);
                     }
@@ -636,6 +849,9 @@ const Projects = () => {
                       {project.id === "sorting-hub" && <SortingHubWidget />}
                       {project.id === "enginerea" && <EnginereaWidget />}
                       {project.id === "chatroom-whisperers" && <ChatroomWidget />}
+                      {(project.id === "water-surface-simulation" || project.id === "water-shader") && (
+                        <WaterShaderWidget />
+                      )}
                     </div>
                   </div>
                 </motion.div>
