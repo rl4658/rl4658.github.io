@@ -64,6 +64,7 @@ interface RoomData {
   isLocked: boolean;
   currentUsers: number;
   maxUsers: number;
+  participants: string[];
   messages: ChatMessage[];
 }
 
@@ -80,12 +81,12 @@ const INITIAL_ROOMS: RoomData[] = [
     name: "cyber-den",
     password: "matrix",
     isLocked: true,
-    currentUsers: 2,
+    currentUsers: 1,
     maxUsers: 4,
+    participants: ["cypher"],
     messages: [
       { sender: "SYSTEM", text: "Room cyber-den created with password protection", time: "10:14:02", isSystem: true },
       { sender: "cypher", text: "POSIX worker thread pool spawned on FD 6.", time: "10:15:30" },
-      { sender: "trinity", text: "std::lock_guard on roomDataMutex active.", time: "10:16:11" },
     ],
   },
   {
@@ -94,6 +95,7 @@ const INITIAL_ROOMS: RoomData[] = [
     isLocked: false,
     currentUsers: 1,
     maxUsers: 5,
+    participants: ["linus"],
     messages: [
       { sender: "SYSTEM", text: "Public developer lounge online", time: "10:12:00", isSystem: true },
       { sender: "linus", text: "POSIX select vs epoll benchmarks looking clean on port 3000.", time: "10:18:22" },
@@ -103,8 +105,9 @@ const INITIAL_ROOMS: RoomData[] = [
     name: "general",
     password: null,
     isLocked: false,
-    currentUsers: 3,
+    currentUsers: 2,
     maxUsers: 5,
+    participants: ["dijkstra", "turing"],
     messages: [
       { sender: "SYSTEM", text: "General chatter room initialized", time: "10:00:00", isSystem: true },
       { sender: "dijkstra", text: "Mutual exclusion guarantees zero race conditions.", time: "10:20:05" },
@@ -117,6 +120,7 @@ const INITIAL_ROOMS: RoomData[] = [
     isLocked: true,
     currentUsers: 4,
     maxUsers: 4,
+    participants: ["knuth", "hopper", "lovelace", "neumann"],
     messages: [
       { sender: "SYSTEM", text: "Algorithm laboratory room initialized", time: "09:55:00", isSystem: true },
       { sender: "knuth", text: "Room capacity full test initialized [4/4].", time: "10:01:00" },
@@ -165,60 +169,674 @@ const INITIAL_LOGS: ServerLog[] = [
     timestamp: "10:14:02.114",
     thread: "ServerThread",
     type: "info",
-    text: "Spawned SocketThreadIndividually worker for client socket FD 4",
+    text: "Spawned SocketThread worker for client socket FD 4 (alex)",
   },
   {
     id: "l7",
-    timestamp: "10:14:02.204",
-    thread: "SocketThreadIndividually:FD 4",
+    timestamp: "10:14:05.312",
+    thread: "ServerThread",
+    type: "info",
+    text: "Accepted new client TCP socket (FD 5) from 127.0.0.1:54212",
+  },
+  {
+    id: "l8",
+    timestamp: "10:14:05.314",
+    thread: "MUTEX",
+    type: "mutex",
+    text: "std::lock_guard<std::mutex> lock(connectedClientsMutex)",
+  },
+  {
+    id: "l9",
+    timestamp: "10:14:05.316",
+    thread: "ServerThread",
+    type: "info",
+    text: "Spawned SocketThread worker for client socket FD 5 (maya)",
+  },
+  {
+    id: "l10",
+    timestamp: "10:14:05.402",
+    thread: "SocketThread:FD 4",
     type: "recv",
     text: ">> RECV: UPDATE_DATA_REQUEST;alex",
   },
   {
-    id: "l8",
-    timestamp: "10:14:02.206",
+    id: "l11",
+    timestamp: "10:14:05.404",
     thread: "MUTEX",
     type: "mutex",
     text: "std::lock_guard<std::mutex> lock(roomDataMutex)",
   },
   {
-    id: "l9",
-    timestamp: "10:14:02.208",
-    thread: "SocketThreadIndividually:FD 4",
+    id: "l12",
+    timestamp: "10:14:05.406",
+    thread: "SocketThread:FD 4",
     type: "send",
-    text: "<< SEND: UPDATE_DATA;cyber-den:2/4:Locked;dev-lounge:1/5:Unlocked;general:3/5:Unlocked;algo-lab:4/4:Locked",
+    text: "<< SEND: UPDATE_DATA;cyber-den:1/4:Locked;dev-lounge:1/5:Unlocked;general:2/5:Unlocked;algo-lab:4/4:Locked",
   },
 ];
 
 /* ------------------------------------------------------------------------- */
-/* Interactive PyQt5 Client & C++ Socket Server Bus Simulator                */
+/* Reusable PyQt5 Desktop Window Frame Component                             */
+/* ------------------------------------------------------------------------- */
+interface PyQt5ClientWindowProps {
+  clientId: "client1" | "client2";
+  clientLabel: string;
+  defaultUsername: string;
+  fd: number;
+  port: string;
+  accent: "cyan" | "purple";
+  state: "lobby" | "chat";
+  username: string;
+  setUsername: (name: string) => void;
+  activeRoom: RoomData | null;
+  rooms: RoomData[];
+  createName: string;
+  setCreateName: (name: string) => void;
+  createPassword: string;
+  setCreatePassword: (pwd: string) => void;
+  createMaxUsers: number;
+  setCreateMaxUsers: (num: number) => void;
+  selectedRoomName: string;
+  setSelectedRoomName: (name: string) => void;
+  joinPassword: string;
+  setJoinPassword: (pwd: string) => void;
+  chatInput: string;
+  setChatInput: (input: string) => void;
+  warningModal: { title: string; message: string } | null;
+  setWarningModal: (modal: { title: string; message: string } | null) => void;
+  chatContainerRef: React.RefObject<HTMLDivElement>;
+  onCreateRoom: () => void;
+  onJoinRoom: () => void;
+  onSendMessage: () => void;
+  onDisconnectRoom: () => void;
+  isServerRunning: boolean;
+}
+
+function PyQt5ClientWindow({
+  clientId,
+  clientLabel,
+  defaultUsername,
+  fd,
+  port,
+  accent,
+  state,
+  username,
+  setUsername,
+  activeRoom,
+  rooms,
+  createName,
+  setCreateName,
+  createPassword,
+  setCreatePassword,
+  createMaxUsers,
+  setCreateMaxUsers,
+  selectedRoomName,
+  setSelectedRoomName,
+  joinPassword,
+  setJoinPassword,
+  chatInput,
+  setChatInput,
+  warningModal,
+  setWarningModal,
+  chatContainerRef,
+  onCreateRoom,
+  onJoinRoom,
+  onSendMessage,
+  onDisconnectRoom,
+  isServerRunning,
+}: PyQt5ClientWindowProps) {
+  const selectedRoom = useMemo(() => {
+    return rooms.find((r) => r.name === selectedRoomName) || null;
+  }, [rooms, selectedRoomName]);
+
+  const isCyan = accent === "cyan";
+  const userTagColor = isCyan ? "text-cyan-400" : "text-purple-400";
+  const badgeBorderColor = isCyan ? "border-cyan-500/40" : "border-purple-500/40";
+  const badgeBgColor = isCyan ? "bg-cyan-950/40" : "bg-purple-950/40";
+
+  return (
+    <div className={`w-full rounded-2xl border-2 border-white/20 bg-[#121212] overflow-hidden shadow-2xl relative font-sans flex flex-col min-h-[560px]`}>
+      {/* Client Identity Header Badge */}
+      <div className={`flex items-center justify-between px-3.5 py-1.5 ${badgeBgColor} border-b ${badgeBorderColor} text-[11px] font-mono`}>
+        <div className="flex items-center gap-1.5 font-semibold">
+          <span className={`w-2 h-2 rounded-full ${isCyan ? "bg-cyan-400" : "bg-purple-400"}`} />
+          <span className={userTagColor}>{clientLabel}</span>
+          <span className="text-neutral-500">·</span>
+          <span className="text-neutral-300">User: <strong className="text-white">{username || defaultUsername}</strong></span>
+        </div>
+        <div className="flex items-center gap-2 text-neutral-400 text-[10px]">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span>127.0.0.1:{port}</span>
+          <span className="text-white/20">|</span>
+          <span className="text-neutral-400 font-bold">FD: {fd}</span>
+        </div>
+      </div>
+
+      {/* Desktop Window Title Bar */}
+      <div className="flex items-center justify-between px-4 py-2 bg-[#181818] border-b border-white/10 shrink-0 select-none">
+        <div className="flex items-center gap-2.5">
+          <img
+            src="/images/projects/chatroom/logo.png"
+            alt="Chatroom Whisperers"
+            className="w-4 h-4 rounded-sm object-contain bg-white/5 p-0.5"
+          />
+          <span className="text-xs font-semibold text-neutral-200 font-mono truncate max-w-[200px] sm:max-w-xs">
+            {state === "chat" && activeRoom
+              ? `${activeRoom.name} - Chatroom Whisperers [${username || defaultUsername}]`
+              : `Chatroom Whisperers - [${username || defaultUsername}]`}
+          </span>
+        </div>
+        <div className="flex items-center gap-2 text-neutral-400 text-xs font-mono">
+          <div className="w-5 h-5 rounded flex items-center justify-center hover:bg-white/10 transition-colors">
+            <Minus size={12} />
+          </div>
+          <div className="w-5 h-5 rounded flex items-center justify-center hover:bg-white/10 transition-colors">
+            <Square size={10} />
+          </div>
+          <button
+            type="button"
+            title="Close / Disconnect"
+            onClick={() => {
+              if (state === "chat") {
+                onDisconnectRoom();
+              } else {
+                setCreateName("");
+                setCreatePassword("");
+                setJoinPassword("");
+              }
+            }}
+            className="w-5 h-5 rounded flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors"
+          >
+            <X size={12} />
+          </button>
+        </div>
+      </div>
+
+      {/* Window Body: Either Lobby (State 1) or Active Room (State 2) */}
+      {state === "lobby" ? (
+        /* State 1: Lobby (ChatRoomGUI in client.py) - EXACT Single Vertical Stack! */
+        <div className="p-5 sm:p-6 space-y-3.5 text-xs select-none bg-[#121212] flex-1 flex flex-col justify-between">
+          <div className="space-y-3">
+            {/* 1. QLabel("Username:") + QLineEdit */}
+            <div>
+              <label className="text-xs font-semibold text-neutral-300 block mb-1 font-mono">
+                Username:
+              </label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter username"
+                className="w-full bg-black/60 border border-white/20 rounded-md px-3 py-1.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-white/50 font-mono shadow-inner"
+              />
+            </div>
+
+            {/* 2. QLabel("Create Chatroom") [Underlined Title] */}
+            <div className="pt-1">
+              <span className="text-sm font-bold text-white underline tracking-wide">
+                Create Chatroom
+              </span>
+            </div>
+
+            {/* 3. QLabel("Chatroom Name:") + QLineEdit */}
+            <div>
+              <label className="text-xs text-neutral-300 block mb-1">
+                Chatroom Name:
+              </label>
+              <input
+                type="text"
+                value={createName}
+                onChange={(e) => setCreateName(e.target.value)}
+                placeholder="e.g. distributed-systems"
+                className="w-full bg-black/60 border border-white/20 rounded-md px-3 py-1.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-white/50 font-mono shadow-inner"
+              />
+            </div>
+
+            {/* 4. QLabel("Chatroom Password (Optional):") + QLineEdit(Password) */}
+            <div>
+              <label className="text-xs text-neutral-300 block mb-1">
+                Chatroom Password (Optional):
+              </label>
+              <input
+                type="password"
+                value={createPassword}
+                onChange={(e) => setCreatePassword(e.target.value)}
+                placeholder="Leave blank for public room"
+                className="w-full bg-black/60 border border-white/20 rounded-md px-3 py-1.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-white/50 font-mono shadow-inner"
+              />
+            </div>
+
+            {/* 5. QLabel("Lobby Size (2-5):") + QSlider(min=2, max=5) */}
+            <div>
+              <div className="flex items-center justify-between text-xs text-neutral-300 mb-1">
+                <span>Lobby Size (2-5):</span>
+                <span className={`${userTagColor} font-mono font-bold`}>{createMaxUsers} Users</span>
+              </div>
+              <input
+                type="range"
+                min="2"
+                max="5"
+                step="1"
+                value={createMaxUsers}
+                onChange={(e) => setCreateMaxUsers(Number(e.target.value))}
+                className="w-full accent-white cursor-pointer h-2 bg-neutral-800 rounded-lg"
+              />
+              <div className="flex justify-between text-[10px] font-mono text-neutral-500 mt-0.5 px-1">
+                <span className={createMaxUsers === 2 ? "text-white font-bold" : ""}>2 min</span>
+                <span className={createMaxUsers === 3 ? "text-white font-bold" : ""}>3</span>
+                <span className={createMaxUsers === 4 ? "text-white font-bold" : ""}>4</span>
+                <span className={createMaxUsers === 5 ? "text-white font-bold" : ""}>5 max</span>
+              </div>
+            </div>
+
+            {/* 6. QPushButton("Create Chatroom") */}
+            <button
+              type="button"
+              onClick={onCreateRoom}
+              className="w-full py-2 rounded-md bg-white/10 hover:bg-white/20 active:bg-white/5 border border-white/20 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 shadow-sm"
+            >
+              <MessageSquare size={13} />
+              <span>Create Chatroom</span>
+            </button>
+
+            {/* 7. Spacing(20) & QLabel("Join Chat Room") [Underlined Title] */}
+            <div className="pt-3 border-t border-white/10">
+              <span className="text-sm font-bold text-white underline tracking-wide">
+                Join Chat Room
+              </span>
+            </div>
+
+            {/* 8. QLabel("Available Chatrooms:") + QComboBox */}
+            <div>
+              <label className="text-xs text-neutral-300 block mb-1">
+                Available Chatrooms:
+              </label>
+              <select
+                value={selectedRoomName}
+                onChange={(e) => setSelectedRoomName(e.target.value)}
+                className="w-full bg-black/60 border border-white/20 rounded-md px-3 py-1.5 text-xs text-white focus:outline-none focus:border-white/50 font-mono shadow-inner cursor-pointer"
+              >
+                {rooms.map((r) => (
+                  <option key={r.name} value={r.name} className="bg-neutral-900 text-white py-1">
+                    {r.name} - [{r.isLocked ? "Locked" : "Unlocked"}], {r.currentUsers}/{r.maxUsers} users
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 9. QLabel("Password:") & QLineEdit (Dynamically revealed when locked room selected) */}
+            {selectedRoom?.isLocked ? (
+              <div className="space-y-1 animate-in fade-in duration-200">
+                <div className="flex items-center justify-between text-xs font-mono text-neutral-300">
+                  <span className="flex items-center gap-1.5 text-amber-400 font-semibold">
+                    <Lock size={12} />
+                    <span>Password:</span>
+                  </span>
+                  <span className="text-[10px] text-neutral-500">
+                    Room is locked (Hint: &apos;{selectedRoom.password}&apos;)
+                  </span>
+                </div>
+                <input
+                  type="password"
+                  value={joinPassword}
+                  onChange={(e) => setJoinPassword(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && onJoinRoom()}
+                  placeholder="Enter room password to unlock..."
+                  className="w-full bg-black/60 border border-amber-500/40 rounded-md px-3 py-1.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none focus:border-amber-400 font-mono shadow-inner"
+                />
+              </div>
+            ) : (
+              <div className="p-2 rounded-md bg-white/5 border border-white/10 text-[11px] font-mono text-neutral-400 flex items-center gap-2">
+                <Unlock size={13} className="text-emerald-400 shrink-0" />
+                <span>This chatroom is public. No password required.</span>
+              </div>
+            )}
+          </div>
+
+          {/* 10. QPushButton("Connect") */}
+          <button
+            type="button"
+            onClick={onJoinRoom}
+            className="w-full py-2.5 rounded-md bg-white hover:bg-neutral-200 active:bg-neutral-300 text-black font-bold text-xs tracking-wider transition-colors flex items-center justify-center gap-2 shadow mt-2"
+          >
+            <Radio size={14} />
+            <span>Connect</span>
+          </button>
+        </div>
+      ) : (
+        /* State 2: Active Room (ChatWindow in client.py) */
+        <div className="p-4 sm:p-5 space-y-3 flex flex-col flex-1">
+          {/* Header Strip */}
+          <div className="flex items-center justify-between pb-3 border-b border-white/10 shrink-0">
+            <div className="flex items-center gap-2">
+              <span className="text-base font-bold text-white font-mono">{activeRoom?.name}</span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border border-white/15 bg-white/5 text-neutral-300">
+                {activeRoom?.isLocked ? "🔒 Locked" : "🔓 Public"}
+              </span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border border-white/15 bg-white/5 text-neutral-300 flex items-center gap-1">
+                <Users size={11} />
+                <span>{activeRoom?.currentUsers}/{activeRoom?.maxUsers} Users</span>
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={onDisconnectRoom}
+              className="px-3 py-1 rounded-md bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-500/30 text-xs font-medium transition-colors flex items-center gap-1.5"
+            >
+              <Power size={13} />
+              <span>Disconnect</span>
+            </button>
+          </div>
+
+          {/* QTextEdit(readOnly=True) - Messages Display */}
+          <div
+            ref={chatContainerRef}
+            className="flex-1 min-h-[300px] max-h-[360px] bg-black/75 rounded-lg border border-white/10 p-4 overflow-y-auto space-y-2.5 text-xs font-mono"
+          >
+            {activeRoom?.messages.map((m, i) => (
+              <div key={i} className="leading-relaxed">
+                {m.isSystem ? (
+                  <div className="text-neutral-500 italic text-[11px] py-0.5">
+                    *** {m.text} ({m.time}) ***
+                  </div>
+                ) : (
+                  <div className="flex items-start gap-2">
+                    <span className="text-neutral-500 text-[10px] shrink-0 mt-0.5">{m.time}</span>
+                    <span
+                      className={
+                        m.sender === username
+                          ? `${userTagColor} font-bold shrink-0`
+                          : "text-neutral-300 font-bold shrink-0"
+                      }
+                    >
+                      {m.sender}:
+                    </span>
+                    <span className={m.sender === username ? "text-white" : "text-neutral-200"}>
+                      {m.text}
+                    </span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* QLineEdit() + Send Button */}
+          <div className="flex items-center gap-2 pt-1 shrink-0">
+            <input
+              type="text"
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && onSendMessage()}
+              placeholder={`Type message as ${username || defaultUsername}...`}
+              className="flex-1 bg-black/70 border border-white/20 rounded-md px-3.5 py-2 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-white/50 font-mono"
+            />
+            <button
+              type="button"
+              onClick={onSendMessage}
+              className="px-5 py-2 rounded-md bg-white text-black font-bold text-xs hover:bg-neutral-200 transition-colors flex items-center gap-1.5 shrink-0 shadow font-mono"
+            >
+              <Send size={13} />
+              <span>Send</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Simulated QMessageBox Warning Modal */}
+      {warningModal && (
+        <div
+          onClick={() => setWarningModal(null)}
+          className="absolute inset-0 bg-black/80 backdrop-blur-sm z-30 flex items-center justify-center p-4 animate-in fade-in duration-150"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm bg-[#1e1e1e] border border-amber-500/40 rounded-xl shadow-2xl p-5 text-left space-y-4"
+          >
+            <div className="flex items-center justify-between border-b border-white/10 pb-2">
+              <div className="flex items-center gap-2 text-amber-400 text-xs font-semibold">
+                <AlertTriangle size={16} />
+                <span>{warningModal.title}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setWarningModal(null)}
+                className="text-neutral-400 hover:text-white"
+              >
+                <X size={14} />
+              </button>
+            </div>
+            <p className="text-xs text-neutral-200 leading-relaxed font-sans">
+              {warningModal.message}
+            </p>
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                onClick={() => setWarningModal(null)}
+                className="px-4 py-1.5 rounded-lg bg-white text-black text-xs font-bold hover:bg-neutral-200 transition-colors shadow"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------------- */
+/* Simulated C++ Socket Server Bus Terminal Component                        */
+/* ------------------------------------------------------------------------- */
+interface ServerBusTerminalProps {
+  serverLogs: ServerLog[];
+  logFilter: "all" | "packets" | "mutex" | "broadcast";
+  setLogFilter: (filter: "all" | "packets" | "mutex" | "broadcast") => void;
+  isServerRunning: boolean;
+  onShutdown: () => void;
+  onRestart: () => void;
+  customPacketInput: string;
+  setCustomPacketInput: (val: string) => void;
+  onDispatchPacket: () => void;
+  logsContainerRef: React.RefObject<HTMLDivElement>;
+  isDrawer?: boolean;
+}
+
+function ServerBusTerminal({
+  serverLogs,
+  logFilter,
+  setLogFilter,
+  isServerRunning,
+  onShutdown,
+  onRestart,
+  customPacketInput,
+  setCustomPacketInput,
+  onDispatchPacket,
+  logsContainerRef,
+  isDrawer = false,
+}: ServerBusTerminalProps) {
+  const filteredLogs = useMemo(() => {
+    if (logFilter === "all") return serverLogs;
+    if (logFilter === "packets") return serverLogs.filter((l) => l.type === "recv" || l.type === "send");
+    if (logFilter === "mutex") return serverLogs.filter((l) => l.type === "mutex");
+    if (logFilter === "broadcast") return serverLogs.filter((l) => l.type === "bcast" || l.type === "shutdown");
+    return serverLogs;
+  }, [serverLogs, logFilter]);
+
+  return (
+    <div
+      className={`w-full ${
+        isDrawer ? "max-w-6xl" : "max-w-4xl"
+      } mx-auto rounded-2xl border-2 border-white/20 bg-black/95 overflow-hidden shadow-2xl flex flex-col ${
+        isDrawer ? "h-[440px]" : "h-[560px]"
+      }`}
+    >
+      {/* Terminal Header */}
+      <div className="flex flex-wrap items-center justify-between px-4 py-2.5 bg-neutral-900 border-b border-white/10 gap-2 shrink-0">
+        <div className="flex items-center gap-2">
+          <Terminal size={14} className="text-cyan-400" />
+          <span className="text-xs font-bold text-neutral-200 font-mono">
+            POSIX TCP Server Bus · 127.0.0.1:3000
+          </span>
+          <span className="text-[10px] font-mono text-neutral-400 bg-white/5 px-2 py-0.5 rounded border border-white/10">
+            FD 4 (Alex) &amp; FD 5 (Maya)
+          </span>
+        </div>
+
+        {/* Log Filters */}
+        <div className="flex items-center gap-1.5 text-[11px] font-mono">
+          <button
+            type="button"
+            onClick={() => setLogFilter("all")}
+            className={`px-2 py-0.5 rounded transition-colors ${
+              logFilter === "all" ? "bg-white text-black font-bold" : "text-neutral-400 hover:text-white"
+            }`}
+          >
+            All ({serverLogs.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setLogFilter("packets")}
+            className={`px-2 py-0.5 rounded transition-colors ${
+              logFilter === "packets" ? "bg-white text-black font-bold" : "text-neutral-400 hover:text-white"
+            }`}
+          >
+            Packets
+          </button>
+          <button
+            type="button"
+            onClick={() => setLogFilter("mutex")}
+            className={`px-2 py-0.5 rounded transition-colors ${
+              logFilter === "mutex" ? "bg-white text-black font-bold" : "text-neutral-400 hover:text-white"
+            }`}
+          >
+            Mutex
+          </button>
+          <button
+            type="button"
+            onClick={() => setLogFilter("broadcast")}
+            className={`px-2 py-0.5 rounded transition-colors ${
+              logFilter === "broadcast" ? "bg-white text-black font-bold" : "text-neutral-400 hover:text-white"
+            }`}
+          >
+            Broadcasts
+          </button>
+        </div>
+
+        {/* Server Power Button */}
+        <div className="flex items-center gap-2">
+          {isServerRunning ? (
+            <button
+              type="button"
+              onClick={onShutdown}
+              className="px-2.5 py-1 rounded bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-500/30 text-[11px] font-mono font-medium transition-colors flex items-center gap-1.5"
+            >
+              <Power size={11} />
+              <span>SIGINT (Stop)</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onRestart}
+              className="px-2.5 py-1 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-[11px] font-mono font-bold transition-colors flex items-center gap-1.5 shadow"
+            >
+              <Play size={11} className="fill-emerald-300" />
+              <span>Reboot Server</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Terminal Output Stream */}
+      <div
+        ref={logsContainerRef}
+        className="flex-1 min-h-0 p-4 font-mono text-xs overflow-y-auto space-y-1.5 bg-black/90 select-text"
+      >
+        {filteredLogs.map((log) => {
+          let badgeColor = "bg-neutral-800 text-neutral-300";
+          if (log.type === "recv") badgeColor = "bg-cyan-950 text-cyan-300 border border-cyan-800/50";
+          if (log.type === "send") badgeColor = "bg-emerald-950 text-emerald-300 border border-emerald-800/50";
+          if (log.type === "mutex") badgeColor = "bg-amber-950 text-amber-300 border border-amber-800/50";
+          if (log.type === "bcast") badgeColor = "bg-purple-950 text-purple-300 border border-purple-800/50";
+          if (log.type === "err" || log.type === "shutdown") badgeColor = "bg-red-950 text-red-300 border border-red-800/50";
+
+          return (
+            <div key={log.id} className="flex items-start gap-2.5 leading-relaxed hover:bg-white/5 px-2 py-0.5 rounded transition-colors">
+              <span className="text-neutral-600 text-[10px] shrink-0 mt-0.5">{log.timestamp}</span>
+              <span className="text-neutral-400 font-semibold shrink-0 text-[11px]">[{log.thread}]</span>
+              <span className={`px-1.5 py-0.2 rounded text-[9px] uppercase font-bold shrink-0 ${badgeColor}`}>
+                {log.type}
+              </span>
+              <span className="text-neutral-200 break-all">{log.text}</span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Custom Semicolon Packet Injector */}
+      <div className="p-3 bg-neutral-900 border-t border-white/10 flex items-center gap-2 shrink-0">
+        <span className="text-xs font-mono text-neutral-400 whitespace-nowrap hidden sm:inline">
+          Packet Injector:
+        </span>
+        <input
+          type="text"
+          value={customPacketInput}
+          onChange={(e) => setCustomPacketInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && onDispatchPacket()}
+          placeholder="e.g. MESSAGE_ROOM;cyber-den;POSIX mutex stream verified;alex"
+          className="flex-1 bg-black/80 border border-white/20 rounded-md px-3 py-1.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-white/50 font-mono"
+        />
+        <button
+          type="button"
+          onClick={onDispatchPacket}
+          className="px-4 py-1.5 rounded-md bg-white text-black font-bold text-xs hover:bg-neutral-200 transition-colors shadow shrink-0 font-mono"
+        >
+          Dispatch
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------------- */
+/* Interactive PyQt5 Dual-Client & C++ Socket Server Bus Simulator           */
 /* ------------------------------------------------------------------------- */
 function InteractiveChatroomStudio() {
-  const [mode, setMode] = useState<"client" | "server">("client");
+  const [viewMode, setViewMode] = useState<"dual" | "client1" | "client2" | "server">("dual");
+  const [showServerDrawer, setShowServerDrawer] = useState<boolean>(false);
   const [rooms, setRooms] = useState<RoomData[]>(INITIAL_ROOMS);
-  const [username, setUsername] = useState<string>("alex");
-  const [clientState, setClientState] = useState<"lobby" | "chat">("lobby");
-  const [activeRoomName, setActiveRoomName] = useState<string | null>(null);
-
-  // Lobby Form
-  const [createName, setCreateName] = useState<string>("");
-  const [createPassword, setCreatePassword] = useState<string>("");
-  const [createMaxUsers, setCreateMaxUsers] = useState<number>(2);
-  const [selectedRoomName, setSelectedRoomName] = useState<string>("cyber-den");
-  const [joinPassword, setJoinPassword] = useState<string>("");
-  const [warningModal, setWarningModal] = useState<{ title: string; message: string } | null>(null);
-
-  // Chat Form
-  const [chatInput, setChatInput] = useState<string>("");
-
-  // Server & Bus State
   const [serverLogs, setServerLogs] = useState<ServerLog[]>(INITIAL_LOGS);
   const [logFilter, setLogFilter] = useState<"all" | "packets" | "mutex" | "broadcast">("all");
   const [isServerRunning, setIsServerRunning] = useState<boolean>(true);
   const [customPacketInput, setCustomPacketInput] = useState<string>("");
 
-  const logsEndRef = useRef<HTMLDivElement>(null);
-  const chatMessagesEndRef = useRef<HTMLDivElement>(null);
+  // Client 1 (Alex - FD 4) State
+  const [c1Username, setC1Username] = useState<string>("alex");
+  const [c1State, setC1State] = useState<"lobby" | "chat">("lobby");
+  const [c1ActiveRoomName, setC1ActiveRoomName] = useState<string | null>(null);
+  const [c1CreateName, setC1CreateName] = useState<string>("");
+  const [c1CreatePassword, setC1CreatePassword] = useState<string>("");
+  const [c1CreateMaxUsers, setC1CreateMaxUsers] = useState<number>(2);
+  const [c1SelectedRoomName, setC1SelectedRoomName] = useState<string>("cyber-den");
+  const [c1JoinPassword, setC1JoinPassword] = useState<string>("");
+  const [c1ChatInput, setC1ChatInput] = useState<string>("");
+  const [c1WarningModal, setC1WarningModal] = useState<{ title: string; message: string } | null>(null);
+
+  // Client 2 (Maya - FD 5) State
+  const [c2Username, setC2Username] = useState<string>("maya");
+  const [c2State, setC2State] = useState<"lobby" | "chat">("lobby");
+  const [c2ActiveRoomName, setC2ActiveRoomName] = useState<string | null>(null);
+  const [c2CreateName, setC2CreateName] = useState<string>("");
+  const [c2CreatePassword, setC2CreatePassword] = useState<string>("");
+  const [c2CreateMaxUsers, setC2CreateMaxUsers] = useState<number>(2);
+  const [c2SelectedRoomName, setC2SelectedRoomName] = useState<string>("cyber-den");
+  const [c2JoinPassword, setC2JoinPassword] = useState<string>("");
+  const [c2ChatInput, setC2ChatInput] = useState<string>("");
+  const [c2WarningModal, setC2WarningModal] = useState<{ title: string; message: string } | null>(null);
+
+  // Container References for Safe Scrolling
+  const logsContainerRef = useRef<HTMLDivElement>(null);
+  const c1ChatContainerRef = useRef<HTMLDivElement>(null);
+  const c2ChatContainerRef = useRef<HTMLDivElement>(null);
 
   const getTimestamp = () => {
     const d = new Date();
@@ -239,53 +857,58 @@ function InteractiveChatroomStudio() {
     ]);
   };
 
-  // Auto-scroll server logs
+  // Safe container-only scrolling for server logs (NEVER scrolls browser window)
   useEffect(() => {
-    if (mode === "server") {
-      logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (logsContainerRef.current) {
+      logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
     }
-  }, [serverLogs, mode]);
+  }, [serverLogs, viewMode, showServerDrawer]);
 
-  // Auto-scroll chat messages
+  // Safe container-only scrolling for Client 1 chat messages
   useEffect(() => {
-    if (clientState === "chat") {
-      chatMessagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (c1ChatContainerRef.current) {
+      c1ChatContainerRef.current.scrollTop = c1ChatContainerRef.current.scrollHeight;
     }
-  }, [rooms, clientState]);
+  }, [rooms, c1State]);
 
-  const activeRoom = useMemo(() => {
-    return rooms.find((r) => r.name === activeRoomName) || null;
-  }, [rooms, activeRoomName]);
+  // Safe container-only scrolling for Client 2 chat messages
+  useEffect(() => {
+    if (c2ChatContainerRef.current) {
+      c2ChatContainerRef.current.scrollTop = c2ChatContainerRef.current.scrollHeight;
+    }
+  }, [rooms, c2State]);
 
-  const selectedRoom = useMemo(() => {
-    return rooms.find((r) => r.name === selectedRoomName) || null;
-  }, [rooms, selectedRoomName]);
+  const c1ActiveRoom = useMemo(() => {
+    return rooms.find((r) => r.name === c1ActiveRoomName) || null;
+  }, [rooms, c1ActiveRoomName]);
 
-  const filteredLogs = useMemo(() => {
-    if (logFilter === "all") return serverLogs;
-    if (logFilter === "packets") return serverLogs.filter((l) => l.type === "recv" || l.type === "send");
-    if (logFilter === "mutex") return serverLogs.filter((l) => l.type === "mutex");
-    if (logFilter === "broadcast") return serverLogs.filter((l) => l.type === "bcast" || l.type === "shutdown");
-    return serverLogs;
-  }, [serverLogs, logFilter]);
+  const c2ActiveRoom = useMemo(() => {
+    return rooms.find((r) => r.name === c2ActiveRoomName) || null;
+  }, [rooms, c2ActiveRoomName]);
 
   /* ----------------------------------------------------------------------- */
   /* Client Actions                                                          */
   /* ----------------------------------------------------------------------- */
 
-  const handleCreateRoom = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
+  const handleCreateRoom = (clientId: "client1" | "client2") => {
+    const isC1 = clientId === "client1";
+    const user = (isC1 ? c1Username : c2Username).trim() || (isC1 ? "alex" : "maya");
+    const name = (isC1 ? c1CreateName : c2CreateName).trim();
+    const pwd = (isC1 ? c1CreatePassword : c2CreatePassword).trim();
+    const maxUsers = isC1 ? c1CreateMaxUsers : c2CreateMaxUsers;
+    const fd = isC1 ? 4 : 5;
+    const setWarning = isC1 ? setC1WarningModal : setC2WarningModal;
+
     if (!isServerRunning) {
-      setWarningModal({
+      setWarning({
         title: "QMessageBox - Server Offline",
         message: "Cannot connect: The C++ TCP server on port 3000 is stopped. Restart it in the Server Bus tab.",
       });
       return;
     }
 
-    const name = createName.trim();
     if (!name) {
-      setWarningModal({
+      setWarning({
         title: "QMessageBox - Warning",
         message: "Room Name Required: Please enter a valid name for the new chatroom.",
       });
@@ -293,23 +916,21 @@ function InteractiveChatroomStudio() {
     }
 
     if (rooms.some((r) => r.name.toLowerCase() === name.toLowerCase())) {
-      setWarningModal({
+      setWarning({
         title: "QMessageBox - Warning",
         message: `Existing Room: A chatroom named '${name}' already exists.`,
       });
       return;
     }
 
-    const pwd = createPassword.trim();
     const isLocked = pwd.length > 0;
-    const maxUsers = createMaxUsers;
-    const user = username.trim() || "alex";
+    const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
-    // 1. Semicolon ASCII packet to server
-    addLog("SocketThreadIndividually:FD 4", "recv", `>> RECV: CREATE_ROOM;${name};${pwd || "NO_PASSWORD"};1;${maxUsers};${user}`);
+    // Semicolon ASCII packet to server
+    addLog(`SocketThread:FD ${fd}`, "recv", `>> RECV: CREATE_ROOM;${name};${pwd || "NO_PASSWORD"};1;${maxUsers};${user}`);
     addLog("MUTEX", "mutex", "std::lock_guard<std::mutex> lock(roomsMutex)");
     addLog("MUTEX", "mutex", "std::lock_guard<std::mutex> lock(roomDataMutex)");
-    addLog("SocketThreadIndividually:FD 4", "send", "<< SEND: CREATE_SUCCESS");
+    addLog(`SocketThread:FD ${fd}`, "send", "<< SEND: CREATE_SUCCESS");
     addLog("Broadcast", "bcast", `<< BCAST: UPDATE_DATA;${name};1;${maxUsers};${isLocked ? "Locked" : "Unlocked"}`);
 
     const newRoom: RoomData = {
@@ -318,51 +939,66 @@ function InteractiveChatroomStudio() {
       isLocked,
       currentUsers: 1,
       maxUsers,
+      participants: [user],
       messages: [
         {
           sender: "SYSTEM",
           text: `Room '${name}' created by ${user} (Capacity: 1/${maxUsers})`,
-          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          time,
           isSystem: true,
         },
       ],
     };
 
     setRooms((prev) => [...prev, newRoom]);
-    setSelectedRoomName(name);
-    setActiveRoomName(name);
-    setClientState("chat");
-    setCreateName("");
-    setCreatePassword("");
-    setCreateMaxUsers(2);
+
+    if (isC1) {
+      setC1ActiveRoomName(name);
+      setC1State("chat");
+      setC1CreateName("");
+      setC1CreatePassword("");
+      setC1CreateMaxUsers(2);
+      setC2SelectedRoomName(name);
+    } else {
+      setC2ActiveRoomName(name);
+      setC2State("chat");
+      setC2CreateName("");
+      setC2CreatePassword("");
+      setC2CreateMaxUsers(2);
+      setC1SelectedRoomName(name);
+    }
   };
 
-  const handleJoinRoom = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
+  const handleJoinRoom = (clientId: "client1" | "client2") => {
+    const isC1 = clientId === "client1";
+    const user = (isC1 ? c1Username : c2Username).trim() || (isC1 ? "alex" : "maya");
+    const selectedName = isC1 ? c1SelectedRoomName : c2SelectedRoomName;
+    const pwd = (isC1 ? c1JoinPassword : c2JoinPassword).trim();
+    const fd = isC1 ? 4 : 5;
+    const setWarning = isC1 ? setC1WarningModal : setC2WarningModal;
+
     if (!isServerRunning) {
-      setWarningModal({
+      setWarning({
         title: "QMessageBox - Server Offline",
         message: "Cannot connect: The C++ TCP server on port 3000 is stopped. Restart it in the Server Bus tab.",
       });
       return;
     }
 
-    const target = rooms.find((r) => r.name === selectedRoomName);
+    const target = rooms.find((r) => r.name === selectedName);
     if (!target) {
-      setWarningModal({
+      setWarning({
         title: "QMessageBox - Warning",
         message: "No Room: Please select an existing chatroom from the list.",
       });
       return;
     }
 
-    const user = username.trim() || "alex";
-
     // Capacity check
     if (target.currentUsers >= target.maxUsers) {
-      addLog("SocketThreadIndividually:FD 4", "recv", `>> RECV: JOIN_ROOM;${target.name};${target.isLocked ? "***" : "NO_PASSWORD"};${user}`);
-      addLog("SocketThreadIndividually:FD 4", "err", "<< SEND: ROOM_FULL");
-      setWarningModal({
+      addLog(`SocketThread:FD ${fd}`, "recv", `>> RECV: JOIN_ROOM;${target.name};${target.isLocked ? "***" : "NO_PASSWORD"};${user}`);
+      addLog(`SocketThread:FD ${fd}`, "err", "<< SEND: ROOM_FULL");
+      setWarning({
         title: "QMessageBox - Warning",
         message: `Room Full: The chatroom '${target.name}' is currently at capacity (${target.maxUsers}/${target.maxUsers} users).`,
       });
@@ -370,10 +1006,10 @@ function InteractiveChatroomStudio() {
     }
 
     // Password check
-    if (target.isLocked && joinPassword.trim() !== target.password) {
-      addLog("SocketThreadIndividually:FD 4", "recv", `>> RECV: JOIN_ROOM;${target.name};***;${user}`);
-      addLog("SocketThreadIndividually:FD 4", "err", "<< SEND: INVALID_PASSWORD");
-      setWarningModal({
+    if (target.isLocked && pwd !== target.password) {
+      addLog(`SocketThread:FD ${fd}`, "recv", `>> RECV: JOIN_ROOM;${target.name};***;${user}`);
+      addLog(`SocketThread:FD ${fd}`, "err", "<< SEND: INVALID_PASSWORD");
+      setWarning({
         title: "QMessageBox - Warning",
         message: `Invalid Password: Password entered for '${target.name}' is incorrect.`,
       });
@@ -381,11 +1017,13 @@ function InteractiveChatroomStudio() {
     }
 
     // Join Success
-    addLog("SocketThreadIndividually:FD 4", "recv", `>> RECV: JOIN_ROOM;${target.name};${target.isLocked ? "***" : "NO_PASSWORD"};${user}`);
+    const newCount = target.currentUsers + 1;
+    addLog(`SocketThread:FD ${fd}`, "recv", `>> RECV: JOIN_ROOM;${target.name};${target.isLocked ? "***" : "NO_PASSWORD"};${user}`);
     addLog("MUTEX", "mutex", "std::lock_guard<std::mutex> lock(roomDataMutex)");
     addLog("MUTEX", "mutex", "std::lock_guard<std::mutex> lock(connectedClientsMutex)");
-    addLog("SocketThreadIndividually:FD 4", "send", "<< SEND: JOIN_SUCCESS");
-    addLog("Broadcast", "bcast", `<< BCAST: UPDATE_DATA;${target.name};${target.currentUsers + 1};${target.maxUsers};${target.isLocked ? "Locked" : "Unlocked"}`);
+    addLog(`SocketThread:FD ${fd}`, "send", "<< SEND: JOIN_SUCCESS");
+    addLog("Broadcast", "bcast", `<< BCAST: UPDATE_DATA;${target.name};${newCount};${target.maxUsers};${target.isLocked ? "Locked" : "Unlocked"}`);
+    addLog(`ChatRoom:${target.name}`, "bcast", `<< BCAST: USER_JOINED;${user};${newCount}/${target.maxUsers}`);
 
     const joinTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     setRooms((prev) =>
@@ -393,12 +1031,13 @@ function InteractiveChatroomStudio() {
         r.name === target.name
           ? {
               ...r,
-              currentUsers: r.currentUsers + 1,
+              currentUsers: newCount,
+              participants: [...r.participants, user],
               messages: [
                 ...r.messages,
                 {
                   sender: "SYSTEM",
-                  text: `${user} joined the room.`,
+                  text: `${user} joined the room. (${newCount}/${r.maxUsers} users)`,
                   time: joinTime,
                   isSystem: true,
                 },
@@ -408,21 +1047,30 @@ function InteractiveChatroomStudio() {
       )
     );
 
-    setActiveRoomName(target.name);
-    setClientState("chat");
-    setJoinPassword("");
+    if (isC1) {
+      setC1ActiveRoomName(target.name);
+      setC1State("chat");
+      setC1JoinPassword("");
+    } else {
+      setC2ActiveRoomName(target.name);
+      setC2State("chat");
+      setC2JoinPassword("");
+    }
   };
 
-  const handleSendMessage = (e?: React.MouseEvent | React.KeyboardEvent) => {
-    if (e) e.stopPropagation();
-    const msg = chatInput.trim();
-    if (!msg || !activeRoomName) return;
+  const handleSendMessage = (clientId: "client1" | "client2") => {
+    const isC1 = clientId === "client1";
+    const user = (isC1 ? c1Username : c2Username).trim() || (isC1 ? "alex" : "maya");
+    const msg = (isC1 ? c1ChatInput : c2ChatInput).trim();
+    const roomName = isC1 ? c1ActiveRoomName : c2ActiveRoomName;
+    const fd = isC1 ? 4 : 5;
 
-    const user = username.trim() || "alex";
-    const roomName = activeRoomName;
-    const userTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    if (!msg || !roomName) return;
 
-    addLog("SocketThreadIndividually:FD 4", "recv", `>> RECV: MESSAGE_ROOM;${roomName};${msg};${user}`);
+    const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+    addLog(`SocketThread:FD ${fd}`, "recv", `>> RECV: MESSAGE_ROOM;${roomName};${msg};${user}`);
+    addLog("MUTEX", "mutex", "std::lock_guard<std::mutex> lock(roomDataMutex)");
     addLog(`ChatRoom:${roomName}`, "bcast", `broadcastMessage >> MESSAGE;${user};${msg}`);
 
     setRooms((prev) =>
@@ -430,53 +1078,28 @@ function InteractiveChatroomStudio() {
         r.name === roomName
           ? {
               ...r,
-              messages: [...r.messages, { sender: user, text: msg, time: userTime }],
+              messages: [...r.messages, { sender: user, text: msg, time }],
             }
           : r
       )
     );
-    setChatInput("");
 
-    // Simulated peer replies
-    setTimeout(() => {
-      let peer = "peer_node";
-      let reply = "Packet acknowledged. Thread pool broadcast completed.";
-      if (roomName === "cyber-den") {
-        peer = "trinity";
-        reply = "POSIX thread lock acquired. Packet integrity 100%.";
-      } else if (roomName === "dev-lounge") {
-        peer = "linus";
-        reply = "Non-blocking TCP socket stream flushed on port 3000.";
-      } else if (roomName === "general") {
-        peer = "dijkstra";
-        reply = "Mutual exclusion invariant preserved.";
-      }
-
-      const peerTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-      addLog("SocketThreadIndividually:FD 6", "recv", `>> RECV: MESSAGE_ROOM;${roomName};${reply};${peer}`);
-      addLog(`ChatRoom:${roomName}`, "bcast", `broadcastMessage >> MESSAGE;${peer};${reply}`);
-
-      setRooms((prev) =>
-        prev.map((r) =>
-          r.name === roomName
-            ? {
-                ...r,
-                messages: [...r.messages, { sender: peer, text: reply, time: peerTime }],
-              }
-            : r
-        )
-      );
-    }, 750);
+    if (isC1) {
+      setC1ChatInput("");
+    } else {
+      setC2ChatInput("");
+    }
   };
 
-  const handleDisconnectRoom = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    if (!activeRoomName) return;
+  const handleDisconnectRoom = (clientId: "client1" | "client2") => {
+    const isC1 = clientId === "client1";
+    const user = (isC1 ? c1Username : c2Username).trim() || (isC1 ? "alex" : "maya");
+    const roomName = isC1 ? c1ActiveRoomName : c2ActiveRoomName;
+    const fd = isC1 ? 4 : 5;
 
-    const user = username.trim() || "alex";
-    const roomName = activeRoomName;
+    if (!roomName) return;
 
-    addLog("SocketThreadIndividually:FD 4", "recv", `>> RECV: DISCONNECT_ROOM;${roomName};${user}`);
+    addLog(`SocketThread:FD ${fd}`, "recv", `>> RECV: DISCONNECT_ROOM;${roomName};${user}`);
     addLog("MUTEX", "mutex", "std::lock_guard<std::mutex> lock(roomDataMutex)");
     addLog("MUTEX", "mutex", "std::lock_guard<std::mutex> lock(connectedClientsMutex)");
 
@@ -491,11 +1114,12 @@ function InteractiveChatroomStudio() {
           ? {
               ...r,
               currentUsers: newCount,
+              participants: r.participants.filter((p) => p !== user),
               messages: [
                 ...r.messages,
                 {
                   sender: "SYSTEM",
-                  text: `${user} left the room.`,
+                  text: `${user} left the room. (${newCount}/${r.maxUsers} users)`,
                   time: leaveTime,
                   isSystem: true,
                 },
@@ -505,12 +1129,16 @@ function InteractiveChatroomStudio() {
       )
     );
 
-    setActiveRoomName(null);
-    setClientState("lobby");
+    if (isC1) {
+      setC1ActiveRoomName(null);
+      setC1State("lobby");
+    } else {
+      setC2ActiveRoomName(null);
+      setC2State("lobby");
+    }
   };
 
-  const handleServerShutdown = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
+  const handleServerShutdown = () => {
     addLog("SignalHandler", "shutdown", "SIGINT caught >> Initiating SERVER_SHUTDOWN sequence");
     addLog("MUTEX", "mutex", "std::lock_guard<std::mutex> lock(connectedClientsMutex)");
     addLog("Broadcast", "shutdown", "<< BCAST: SERVER_SHUTDOWN;All connections terminating");
@@ -519,31 +1147,37 @@ function InteractiveChatroomStudio() {
     addLog("ServerThread", "info", "All socket descriptors released cleanly. Exit code 0.");
     setIsServerRunning(false);
 
-    if (clientState === "chat") {
-      setActiveRoomName(null);
-      setClientState("lobby");
-      setWarningModal({
+    if (c1State === "chat") {
+      setC1ActiveRoomName(null);
+      setC1State("lobby");
+      setC1WarningModal({
+        title: "QMessageBox - Server Shutdown",
+        message: "Connection Closed: The C++ server sent a SERVER_SHUTDOWN broadcast and closed all sockets.",
+      });
+    }
+    if (c2State === "chat") {
+      setC2ActiveRoomName(null);
+      setC2State("lobby");
+      setC2WarningModal({
         title: "QMessageBox - Server Shutdown",
         message: "Connection Closed: The C++ server sent a SERVER_SHUTDOWN broadcast and closed all sockets.",
       });
     }
   };
 
-  const handleServerRestart = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
+  const handleServerRestart = () => {
     addLog("ServerThread", "info", "=== REBOOTING C++ POSIX SOCKET SERVER ===");
     addLog("ServerThread", "info", "bind(AF_INET, SOCK_STREAM, port 3000) SUCCESS");
     addLog("ServerThread", "info", "listen(backlog=10) SUCCESS. Listening on 127.0.0.1:3000");
-    addLog("ServerThread", "info", "Client FD 4 reconnected. Worker thread spawned.");
+    addLog("ServerThread", "info", "Socket workers active for Client 1 (FD 4) & Client 2 (FD 5).");
     setIsServerRunning(true);
   };
 
-  const handleCustomPacketSend = (e?: React.MouseEvent | React.KeyboardEvent) => {
-    if (e) e.stopPropagation();
+  const handleCustomPacketSend = () => {
     const packet = customPacketInput.trim();
     if (!packet) return;
 
-    addLog("SocketThreadIndividually:FD 4", "recv", `>> RECV: ${packet}`);
+    addLog("SocketThread:FD 4", "recv", `>> RECV: ${packet}`);
     const parts = packet.split(";");
     const cmd = parts[0]?.toUpperCase();
 
@@ -551,50 +1185,137 @@ function InteractiveChatroomStudio() {
       handleServerShutdown();
     } else if (cmd === "CREATE_ROOM" && parts[1]) {
       addLog("MUTEX", "mutex", "std::lock_guard<std::mutex> lock(roomsMutex)");
-      addLog("SocketThreadIndividually:FD 4", "send", "<< SEND: CREATE_SUCCESS");
+      addLog("SocketThread:FD 4", "send", "<< SEND: CREATE_SUCCESS");
       addLog("Broadcast", "bcast", `<< BCAST: UPDATE_DATA;${parts[1]};1;${parts[4] || 4};Unlocked`);
     } else if (cmd === "JOIN_ROOM" && parts[1]) {
       addLog("MUTEX", "mutex", "std::lock_guard<std::mutex> lock(roomDataMutex)");
-      addLog("SocketThreadIndividually:FD 4", "send", "<< SEND: JOIN_SUCCESS");
+      addLog("SocketThread:FD 4", "send", "<< SEND: JOIN_SUCCESS");
     } else if (cmd === "MESSAGE_ROOM" && parts[1]) {
       addLog(`ChatRoom:${parts[1]}`, "bcast", `broadcastMessage >> MESSAGE;${parts[3] || "user"};${parts[2] || "hello"}`);
     } else {
-      addLog("SocketThreadIndividually:FD 4", "send", `<< SEND: ACK;PROCESSED;${packet.length}_BYTES`);
+      addLog("SocketThread:FD 4", "send", `<< SEND: ACK;PROCESSED;${packet.length}_BYTES`);
     }
 
     setCustomPacketInput("");
+  };
+
+  const handleQuickDemo = () => {
+    const time1 = "10:22:10";
+    const time2 = "10:22:25";
+    const demoMessages: ChatMessage[] = [
+      { sender: "SYSTEM", text: "Room cyber-den created with password protection", time: "10:14:02", isSystem: true },
+      { sender: "cypher", text: "POSIX worker thread pool spawned on FD 6.", time: "10:15:30" },
+      { sender: "SYSTEM", text: "alex & maya connected via POSIX socket threads (FD 4 & FD 5)", time: "10:22:00", isSystem: true },
+      { sender: "alex", text: "Hey Maya! Sockets connected and mutex lock acquired.", time: time1 },
+      { sender: "maya", text: "Received loud and clear on FD 5! Ready for real-time messaging.", time: time2 },
+    ];
+
+    setRooms((prev) =>
+      prev.map((r) =>
+        r.name === "cyber-den"
+          ? {
+              ...r,
+              currentUsers: 3,
+              maxUsers: 4,
+              participants: ["cypher", "alex", "maya"],
+              messages: demoMessages,
+            }
+          : r
+      )
+    );
+
+    setC1Username("alex");
+    setC1ActiveRoomName("cyber-den");
+    setC1State("chat");
+
+    setC2Username("maya");
+    setC2ActiveRoomName("cyber-den");
+    setC2State("chat");
+
+    addLog("ServerThread", "info", "=== QUICK DEMO INITIALIZED: Alex (FD 4) & Maya (FD 5) in cyber-den ===");
+    addLog("MUTEX", "mutex", "std::lock_guard<std::mutex> lock(roomDataMutex)");
+    addLog("Broadcast", "bcast", "<< BCAST: UPDATE_DATA;cyber-den;3;4;Locked");
+  };
+
+  const handleResetLobby = () => {
+    setRooms(INITIAL_ROOMS);
+    setC1Username("alex");
+    setC1State("lobby");
+    setC1ActiveRoomName(null);
+    setC1CreateName("");
+    setC1CreatePassword("");
+    setC1SelectedRoomName("cyber-den");
+    setC1JoinPassword("");
+    setC1ChatInput("");
+    setC1WarningModal(null);
+
+    setC2Username("maya");
+    setC2State("lobby");
+    setC2ActiveRoomName(null);
+    setC2CreateName("");
+    setC2CreatePassword("");
+    setC2SelectedRoomName("cyber-den");
+    setC2JoinPassword("");
+    setC2ChatInput("");
+    setC2WarningModal(null);
+
+    addLog("ServerThread", "info", "=== ENVIRONMENT RESET: Both Client 1 & Client 2 returned to Lobby ===");
   };
 
   return (
     <div className="rounded-2xl border border-white/10 bg-[#0d0d0d] overflow-hidden shadow-2xl my-8">
       {/* Studio Top Bar */}
       <div className="flex flex-wrap items-center justify-between p-4 bg-neutral-900/80 border-b border-white/10 gap-3">
-        {/* Mode Selector */}
-        <div className="flex items-center bg-black/60 rounded-xl p-1 border border-white/10">
+        {/* Mode Selector Tabs */}
+        <div className="flex flex-wrap items-center bg-black/60 rounded-xl p-1 border border-white/10 gap-1">
           <button
             type="button"
-            onClick={() => setMode("client")}
+            onClick={() => setViewMode("dual")}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
-              mode === "client"
+              viewMode === "dual"
+                ? "bg-white text-black font-bold shadow-md"
+                : "text-neutral-400 hover:text-white"
+            }`}
+          >
+            <Users size={14} />
+            <span>Dual Clients (Side-by-Side)</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode("client1")}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
+              viewMode === "client1"
                 ? "bg-white text-black font-bold shadow-md"
                 : "text-neutral-400 hover:text-white"
             }`}
           >
             <Monitor size={14} />
-            <span>PyQt5 Desktop Client</span>
+            <span>Client 1 (Alex · FD 4)</span>
           </button>
           <button
             type="button"
-            onClick={() => setMode("server")}
+            onClick={() => setViewMode("client2")}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
-              mode === "server"
+              viewMode === "client2"
+                ? "bg-white text-black font-bold shadow-md"
+                : "text-neutral-400 hover:text-white"
+            }`}
+          >
+            <Monitor size={14} />
+            <span>Client 2 (Maya · FD 5)</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode("server")}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
+              viewMode === "server"
                 ? "bg-white text-black font-bold shadow-md"
                 : "text-neutral-400 hover:text-white"
             }`}
           >
             <Terminal size={14} />
             <span>C++ Socket Server Bus</span>
-            {mode !== "server" && isServerRunning && (
+            {isServerRunning && (
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
             )}
           </button>
@@ -615,448 +1336,253 @@ function InteractiveChatroomStudio() {
             )}
           </div>
           <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-neutral-400">
-            <span>POSIX Socket FD: 4</span>
+            <span>POSIX Sockets: FD 4 &amp; 5</span>
             <span className="text-white/20">·</span>
             <span className="text-cyan-400 font-semibold">std::mutex</span>
           </div>
         </div>
       </div>
 
+      {/* Preset Action Bar */}
+      <div className="flex flex-wrap items-center justify-between px-4 py-2.5 bg-neutral-950/70 border-b border-white/10 gap-2">
+        <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
+          <span className="text-neutral-400 hidden sm:inline">Presets:</span>
+          <button
+            type="button"
+            onClick={handleQuickDemo}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-medium transition-colors"
+          >
+            <Sparkles size={12} />
+            <span>Quick Demo: Alex &amp; Maya in cyber-den</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleResetLobby}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-white/5 hover:bg-white/10 text-neutral-300 border border-white/10 text-xs transition-colors"
+          >
+            <RotateCcw size={12} />
+            <span>Reset to Empty Lobby</span>
+          </button>
+        </div>
+
+        {viewMode !== "server" && (
+          <button
+            type="button"
+            onClick={() => setShowServerDrawer((prev) => !prev)}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-md border text-xs font-mono transition-colors ${
+              showServerDrawer
+                ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 font-bold"
+                : "bg-white/5 text-neutral-400 border-white/10 hover:text-white"
+            }`}
+          >
+            <Activity size={12} />
+            <span>{showServerDrawer ? "Hide Server Bus Split" : "Show Live Server Bus Below"}</span>
+          </button>
+        )}
+      </div>
+
       {/* Main View Area */}
       <div className="p-4 sm:p-6 min-h-[580px] flex flex-col justify-center">
-        {mode === "client" ? (
+        {viewMode === "dual" ? (
           /* =============================================================== */
-          /* Simulated PyQt5 Desktop Window Frame                            */
+          /* View 1: Dual Clients Side-by-Side                               */
           /* =============================================================== */
-          <div className="w-full max-w-xl mx-auto rounded-2xl border-2 border-white/20 bg-[#121212] overflow-hidden shadow-2xl relative font-sans">
-            {/* Desktop Window Title Bar */}
-            <div className="flex items-center justify-between px-4 py-2 bg-[#181818] border-b border-white/10">
-              <div className="flex items-center gap-2.5">
-                <img
-                  src="/images/projects/chatroom/logo.png"
-                  alt="Chatroom Whisperers"
-                  className="w-4 h-4 rounded-sm object-contain bg-white/5 p-0.5"
-                />
-                <span className="text-xs font-semibold text-neutral-200 font-mono">
-                  {clientState === "chat" && activeRoom
-                    ? `${activeRoom.name} - Chatroom Whisperers`
-                    : "Chatroom Whisperers"}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-neutral-400 text-xs font-mono">
-                <div className="w-5 h-5 rounded flex items-center justify-center hover:bg-white/10 transition-colors">
-                  <Minus size={12} />
-                </div>
-                <div className="w-5 h-5 rounded flex items-center justify-center hover:bg-white/10 transition-colors">
-                  <Square size={10} />
-                </div>
-                <button
-                  type="button"
-                  title="Close / Disconnect"
-                  onClick={() => {
-                    if (clientState === "chat") {
-                      handleDisconnectRoom();
-                    } else {
-                      setCreateName("");
-                      setCreatePassword("");
-                      setJoinPassword("");
-                    }
-                  }}
-                  className="w-5 h-5 rounded flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors"
-                >
-                  <X size={12} />
-                </button>
-              </div>
+          <div className="w-full max-w-6xl mx-auto space-y-6">
+            <div className="grid lg:grid-cols-2 gap-6 items-start">
+              {/* Client 1: Alex (FD 4) */}
+              <PyQt5ClientWindow
+                clientId="client1"
+                clientLabel="Client 1 (Alex · FD: 4)"
+                defaultUsername="alex"
+                fd={4}
+                port="54210"
+                accent="cyan"
+                state={c1State}
+                username={c1Username}
+                setUsername={setC1Username}
+                activeRoom={c1ActiveRoom}
+                rooms={rooms}
+                createName={c1CreateName}
+                setCreateName={setC1CreateName}
+                createPassword={c1CreatePassword}
+                setCreatePassword={setC1CreatePassword}
+                createMaxUsers={c1CreateMaxUsers}
+                setCreateMaxUsers={setC1CreateMaxUsers}
+                selectedRoomName={c1SelectedRoomName}
+                setSelectedRoomName={setC1SelectedRoomName}
+                joinPassword={c1JoinPassword}
+                setJoinPassword={setC1JoinPassword}
+                chatInput={c1ChatInput}
+                setChatInput={setC1ChatInput}
+                warningModal={c1WarningModal}
+                setWarningModal={setC1WarningModal}
+                chatContainerRef={c1ChatContainerRef}
+                onCreateRoom={() => handleCreateRoom("client1")}
+                onJoinRoom={() => handleJoinRoom("client1")}
+                onSendMessage={() => handleSendMessage("client1")}
+                onDisconnectRoom={() => handleDisconnectRoom("client1")}
+                isServerRunning={isServerRunning}
+              />
+
+              {/* Client 2: Maya (FD 5) */}
+              <PyQt5ClientWindow
+                clientId="client2"
+                clientLabel="Client 2 (Maya · FD: 5)"
+                defaultUsername="maya"
+                fd={5}
+                port="54212"
+                accent="purple"
+                state={c2State}
+                username={c2Username}
+                setUsername={setC2Username}
+                activeRoom={c2ActiveRoom}
+                rooms={rooms}
+                createName={c2CreateName}
+                setCreateName={setC2CreateName}
+                createPassword={c2CreatePassword}
+                setCreatePassword={setC2CreatePassword}
+                createMaxUsers={c2CreateMaxUsers}
+                setCreateMaxUsers={setC2CreateMaxUsers}
+                selectedRoomName={c2SelectedRoomName}
+                setSelectedRoomName={setC2SelectedRoomName}
+                joinPassword={c2JoinPassword}
+                setJoinPassword={setC2JoinPassword}
+                chatInput={c2ChatInput}
+                setChatInput={setC2ChatInput}
+                warningModal={c2WarningModal}
+                setWarningModal={setC2WarningModal}
+                chatContainerRef={c2ChatContainerRef}
+                onCreateRoom={() => handleCreateRoom("client2")}
+                onJoinRoom={() => handleJoinRoom("client2")}
+                onSendMessage={() => handleSendMessage("client2")}
+                onDisconnectRoom={() => handleDisconnectRoom("client2")}
+                isServerRunning={isServerRunning}
+              />
             </div>
-
-            {/* Window Content */}
-            {clientState === "lobby" ? (
-              /* State 1: Lobby (ChatRoomGUI in client.py) - EXACT Single Vertical Stack! */
-              <div className="p-6 space-y-4 text-xs select-none bg-[#121212]">
-                {/* 1. QLabel("Username:") + QLineEdit */}
-                <div>
-                  <label className="text-xs font-semibold text-neutral-300 block mb-1 font-mono">
-                    Username:
-                  </label>
-                  <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Enter username"
-                    className="w-full bg-black/60 border border-white/20 rounded-md px-3 py-1.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-white/50 font-mono shadow-inner"
-                  />
-                </div>
-
-                {/* 2. QLabel("Create Chatroom") [Underlined Title] */}
-                <div className="pt-2">
-                  <span className="text-sm font-bold text-white underline tracking-wide">
-                    Create Chatroom
-                  </span>
-                </div>
-
-                {/* 3. QLabel("Chatroom Name:") + QLineEdit */}
-                <div>
-                  <label className="text-xs text-neutral-300 block mb-1">
-                    Chatroom Name:
-                  </label>
-                  <input
-                    type="text"
-                    value={createName}
-                    onChange={(e) => setCreateName(e.target.value)}
-                    placeholder="e.g. distributed-systems"
-                    className="w-full bg-black/60 border border-white/20 rounded-md px-3 py-1.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-white/50 font-mono shadow-inner"
-                  />
-                </div>
-
-                {/* 4. QLabel("Chatroom Password (Optional):") + QLineEdit(Password) */}
-                <div>
-                  <label className="text-xs text-neutral-300 block mb-1">
-                    Chatroom Password (Optional):
-                  </label>
-                  <input
-                    type="password"
-                    value={createPassword}
-                    onChange={(e) => setCreatePassword(e.target.value)}
-                    placeholder="Leave blank for public room"
-                    className="w-full bg-black/60 border border-white/20 rounded-md px-3 py-1.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-white/50 font-mono shadow-inner"
-                  />
-                </div>
-
-                {/* 5. QLabel("Lobby Size (2-5):") + QSlider(min=2, max=5) */}
-                <div>
-                  <div className="flex items-center justify-between text-xs text-neutral-300 mb-1">
-                    <span>Lobby Size (2-5):</span>
-                    <span className="text-cyan-400 font-mono font-bold">{createMaxUsers} Users</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="2"
-                    max="5"
-                    step="1"
-                    value={createMaxUsers}
-                    onChange={(e) => setCreateMaxUsers(Number(e.target.value))}
-                    className="w-full accent-white cursor-pointer h-2 bg-neutral-800 rounded-lg"
-                  />
-                  <div className="flex justify-between text-[10px] font-mono text-neutral-500 mt-1 px-1">
-                    <span className={createMaxUsers === 2 ? "text-white font-bold" : ""}>2 min</span>
-                    <span className={createMaxUsers === 3 ? "text-white font-bold" : ""}>3</span>
-                    <span className={createMaxUsers === 4 ? "text-white font-bold" : ""}>4</span>
-                    <span className={createMaxUsers === 5 ? "text-white font-bold" : ""}>5 max</span>
-                  </div>
-                </div>
-
-                {/* 6. QPushButton("Create Chatroom") */}
-                <button
-                  type="button"
-                  onClick={handleCreateRoom}
-                  className="w-full py-2 rounded-md bg-white/10 hover:bg-white/20 active:bg-white/5 border border-white/20 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 shadow-sm"
-                >
-                  <MessageSquare size={13} />
-                  <span>Create Chatroom</span>
-                </button>
-
-                {/* 7. Spacing(20) & QLabel("Join Chat Room") [Underlined Title] */}
-                <div className="pt-4 border-t border-white/10">
-                  <span className="text-sm font-bold text-white underline tracking-wide">
-                    Join Chat Room
-                  </span>
-                </div>
-
-                {/* 8. QLabel("Available Chatrooms:") + QComboBox */}
-                <div>
-                  <label className="text-xs text-neutral-300 block mb-1">
-                    Available Chatrooms:
-                  </label>
-                  <select
-                    value={selectedRoomName}
-                    onChange={(e) => setSelectedRoomName(e.target.value)}
-                    className="w-full bg-black/60 border border-white/20 rounded-md px-3 py-2 text-xs text-white focus:outline-none focus:border-white/50 font-mono shadow-inner cursor-pointer"
-                  >
-                    {rooms.map((r) => (
-                      <option key={r.name} value={r.name} className="bg-neutral-900 text-white py-1">
-                        {r.name} - [{r.isLocked ? "Locked" : "Unlocked"}], {r.currentUsers}/{r.maxUsers} users
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* 9. QLabel("Password:") & QLineEdit (Dynamically revealed when locked room selected) */}
-                {selectedRoom?.isLocked ? (
-                  <div className="space-y-1 animate-in fade-in duration-200">
-                    <div className="flex items-center justify-between text-xs font-mono text-neutral-300">
-                      <span className="flex items-center gap-1.5 text-amber-400 font-semibold">
-                        <Lock size={12} />
-                        <span>Password:</span>
-                      </span>
-                      <span className="text-[10px] text-neutral-500">
-                        Room is locked (Hint: &apos;{selectedRoom.password}&apos;)
-                      </span>
-                    </div>
-                    <input
-                      type="password"
-                      value={joinPassword}
-                      onChange={(e) => setJoinPassword(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && handleJoinRoom()}
-                      placeholder="Enter room password to unlock..."
-                      className="w-full bg-black/60 border border-amber-500/40 rounded-md px-3 py-1.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none focus:border-amber-400 font-mono shadow-inner"
-                    />
-                  </div>
-                ) : (
-                  <div className="p-2 rounded-md bg-white/5 border border-white/10 text-[11px] font-mono text-neutral-400 flex items-center gap-2">
-                    <Unlock size={13} className="text-emerald-400 shrink-0" />
-                    <span>This chatroom is public. No password required.</span>
-                  </div>
-                )}
-
-                {/* 10. QPushButton("Connect") */}
-                <button
-                  type="button"
-                  onClick={handleJoinRoom}
-                  className="w-full py-2.5 rounded-md bg-white hover:bg-neutral-200 active:bg-neutral-300 text-black font-bold text-xs tracking-wider transition-colors flex items-center justify-center gap-2 shadow"
-                >
-                  <Radio size={14} />
-                  <span>Connect</span>
-                </button>
-              </div>
-            ) : (
-              /* State 2: Active Room (ChatWindow in client.py) */
-              <div className="p-5 space-y-3 flex flex-col h-[520px]">
-                {/* Header Strip */}
-                <div className="flex items-center justify-between pb-3 border-b border-white/10 shrink-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-base font-bold text-white font-mono">{activeRoom?.name}</span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border border-white/15 bg-white/5 text-neutral-300">
-                      {activeRoom?.isLocked ? "🔒 Locked" : "🔓 Public"}
-                    </span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border border-white/15 bg-white/5 text-neutral-300 flex items-center gap-1">
-                      <Users size={11} />
-                      <span>{activeRoom?.currentUsers}/{activeRoom?.maxUsers} Users</span>
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleDisconnectRoom}
-                    className="px-3 py-1 rounded-md bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-500/30 text-xs font-medium transition-colors flex items-center gap-1.5"
-                  >
-                    <Power size={13} />
-                    <span>Disconnect</span>
-                  </button>
-                </div>
-
-                {/* QTextEdit(readOnly=True) - Messages Display */}
-                <div className="flex-1 min-h-0 bg-black/75 rounded-lg border border-white/10 p-4 overflow-y-auto space-y-2.5 text-xs font-mono">
-                  {activeRoom?.messages.map((m, i) => (
-                    <div key={i} className="leading-relaxed">
-                      {m.isSystem ? (
-                        <div className="text-neutral-500 italic text-[11px] py-0.5">
-                          *** {m.text} ({m.time}) ***
-                        </div>
-                      ) : (
-                        <div className="flex items-start gap-2">
-                          <span className="text-neutral-500 text-[10px] shrink-0 mt-0.5">{m.time}</span>
-                          <span
-                            className={
-                              m.sender === username
-                                ? "text-cyan-400 font-bold shrink-0"
-                                : "text-neutral-300 font-bold shrink-0"
-                            }
-                          >
-                            {m.sender}:
-                          </span>
-                          <span className={m.sender === username ? "text-white" : "text-neutral-200"}>
-                            {m.text}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                  <div ref={chatMessagesEndRef} />
-                </div>
-
-                {/* QLineEdit() + Send Button */}
-                <div className="flex items-center gap-2 pt-1 shrink-0">
-                  <input
-                    type="text"
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-                    placeholder="Type message to room..."
-                    className="flex-1 bg-black/70 border border-white/20 rounded-md px-3.5 py-2 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-white/50 font-mono"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleSendMessage}
-                    className="px-5 py-2 rounded-md bg-white text-black font-bold text-xs hover:bg-neutral-200 transition-colors flex items-center gap-1.5 shrink-0 shadow"
-                  >
-                    <Send size={13} />
-                    <span>Send</span>
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Simulated QMessageBox Warning Modal */}
-            {warningModal && (
-              <div
-                onClick={() => setWarningModal(null)}
-                className="absolute inset-0 bg-black/80 backdrop-blur-sm z-30 flex items-center justify-center p-4 animate-in fade-in duration-150"
-              >
-                <div
-                  onClick={(e) => e.stopPropagation()}
-                  className="w-full max-w-sm bg-[#1e1e1e] border border-amber-500/40 rounded-xl shadow-2xl p-5 text-left space-y-4"
-                >
-                  <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                    <div className="flex items-center gap-2 text-amber-400 text-xs font-semibold">
-                      <AlertTriangle size={16} />
-                      <span>{warningModal.title}</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setWarningModal(null)}
-                      className="text-neutral-400 hover:text-white"
-                    >
-                      <X size={14} />
-                    </button>
-                  </div>
-                  <p className="text-xs text-neutral-200 leading-relaxed font-sans">
-                    {warningModal.message}
-                  </p>
-                  <div className="flex justify-end pt-2">
-                    <button
-                      type="button"
-                      onClick={() => setWarningModal(null)}
-                      className="px-4 py-1.5 rounded-lg bg-white text-black text-xs font-bold hover:bg-neutral-200 transition-colors shadow"
-                    >
-                      OK
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
+          </div>
+        ) : viewMode === "client1" ? (
+          /* =============================================================== */
+          /* View 2: Client 1 Solo (Alex - FD 4)                             */
+          /* =============================================================== */
+          <div className="w-full max-w-xl mx-auto">
+            <PyQt5ClientWindow
+              clientId="client1"
+              clientLabel="Client 1 (Alex · FD: 4)"
+              defaultUsername="alex"
+              fd={4}
+              port="54210"
+              accent="cyan"
+              state={c1State}
+              username={c1Username}
+              setUsername={setC1Username}
+              activeRoom={c1ActiveRoom}
+              rooms={rooms}
+              createName={c1CreateName}
+              setCreateName={setC1CreateName}
+              createPassword={c1CreatePassword}
+              setCreatePassword={setC1CreatePassword}
+              createMaxUsers={c1CreateMaxUsers}
+              setCreateMaxUsers={setC1CreateMaxUsers}
+              selectedRoomName={c1SelectedRoomName}
+              setSelectedRoomName={setC1SelectedRoomName}
+              joinPassword={c1JoinPassword}
+              setJoinPassword={setC1JoinPassword}
+              chatInput={c1ChatInput}
+              setChatInput={setC1ChatInput}
+              warningModal={c1WarningModal}
+              setWarningModal={setC1WarningModal}
+              chatContainerRef={c1ChatContainerRef}
+              onCreateRoom={() => handleCreateRoom("client1")}
+              onJoinRoom={() => handleJoinRoom("client1")}
+              onSendMessage={() => handleSendMessage("client1")}
+              onDisconnectRoom={() => handleDisconnectRoom("client1")}
+              isServerRunning={isServerRunning}
+            />
+          </div>
+        ) : viewMode === "client2" ? (
+          /* =============================================================== */
+          /* View 3: Client 2 Solo (Maya - FD 5)                             */
+          /* =============================================================== */
+          <div className="w-full max-w-xl mx-auto">
+            <PyQt5ClientWindow
+              clientId="client2"
+              clientLabel="Client 2 (Maya · FD: 5)"
+              defaultUsername="maya"
+              fd={5}
+              port="54212"
+              accent="purple"
+              state={c2State}
+              username={c2Username}
+              setUsername={setC2Username}
+              activeRoom={c2ActiveRoom}
+              rooms={rooms}
+              createName={c2CreateName}
+              setCreateName={setC2CreateName}
+              createPassword={c2CreatePassword}
+              setCreatePassword={setC2CreatePassword}
+              createMaxUsers={c2CreateMaxUsers}
+              setCreateMaxUsers={setC2CreateMaxUsers}
+              selectedRoomName={c2SelectedRoomName}
+              setSelectedRoomName={setC2SelectedRoomName}
+              joinPassword={c2JoinPassword}
+              setJoinPassword={setC2JoinPassword}
+              chatInput={c2ChatInput}
+              setChatInput={setC2ChatInput}
+              warningModal={c2WarningModal}
+              setWarningModal={setC2WarningModal}
+              chatContainerRef={c2ChatContainerRef}
+              onCreateRoom={() => handleCreateRoom("client2")}
+              onJoinRoom={() => handleJoinRoom("client2")}
+              onSendMessage={() => handleSendMessage("client2")}
+              onDisconnectRoom={() => handleDisconnectRoom("client2")}
+              isServerRunning={isServerRunning}
+            />
           </div>
         ) : (
           /* =============================================================== */
-          /* Simulated C++ Socket Server Bus Terminal                        */
+          /* View 4: C++ Socket Server Bus Terminal Full View                */
           /* =============================================================== */
-          <div className="w-full max-w-4xl mx-auto rounded-2xl border-2 border-white/20 bg-black/95 overflow-hidden shadow-2xl flex flex-col h-[560px]">
-            {/* Terminal Header */}
-            <div className="flex flex-wrap items-center justify-between px-4 py-2.5 bg-neutral-900 border-b border-white/10 gap-2 shrink-0">
-              <div className="flex items-center gap-2">
-                <Terminal size={14} className="text-cyan-400" />
-                <span className="text-xs font-bold text-neutral-200 font-mono">
-                  POSIX TCP Server Bus · 127.0.0.1:3000
-                </span>
+          <ServerBusTerminal
+            serverLogs={serverLogs}
+            logFilter={logFilter}
+            setLogFilter={setLogFilter}
+            isServerRunning={isServerRunning}
+            onShutdown={handleServerShutdown}
+            onRestart={handleServerRestart}
+            customPacketInput={customPacketInput}
+            setCustomPacketInput={setCustomPacketInput}
+            onDispatchPacket={handleCustomPacketSend}
+            logsContainerRef={logsContainerRef}
+            isDrawer={false}
+          />
+        )}
+
+        {/* Live Server Bus Telemetry Split Drawer */}
+        {viewMode !== "server" && showServerDrawer && (
+          <div className="w-full max-w-6xl mx-auto mt-6 pt-6 border-t border-white/10 animate-in fade-in duration-200">
+            <div className="flex items-center justify-between mb-2 px-1">
+              <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 font-semibold">
+                <Terminal size={14} />
+                <span>Live C++ Server Telemetry Stream (Port 3000)</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse ml-1" />
               </div>
-
-              {/* Log Filters */}
-              <div className="flex items-center gap-1.5 text-[11px] font-mono">
-                <button
-                  type="button"
-                  onClick={() => setLogFilter("all")}
-                  className={`px-2 py-0.5 rounded ${
-                    logFilter === "all" ? "bg-white text-black font-bold" : "text-neutral-400 hover:text-white"
-                  }`}
-                >
-                  All ({serverLogs.length})
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setLogFilter("packets")}
-                  className={`px-2 py-0.5 rounded ${
-                    logFilter === "packets" ? "bg-white text-black font-bold" : "text-neutral-400 hover:text-white"
-                  }`}
-                >
-                  Packets
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setLogFilter("mutex")}
-                  className={`px-2 py-0.5 rounded ${
-                    logFilter === "mutex" ? "bg-white text-black font-bold" : "text-neutral-400 hover:text-white"
-                  }`}
-                >
-                  Mutex
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setLogFilter("broadcast")}
-                  className={`px-2 py-0.5 rounded ${
-                    logFilter === "broadcast" ? "bg-white text-black font-bold" : "text-neutral-400 hover:text-white"
-                  }`}
-                >
-                  Broadcasts
-                </button>
-              </div>
-
-              {/* Server Power Button */}
-              <div className="flex items-center gap-2">
-                {isServerRunning ? (
-                  <button
-                    type="button"
-                    onClick={() => handleServerShutdown()}
-                    className="px-2.5 py-1 rounded bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-500/30 text-[11px] font-mono font-medium transition-colors flex items-center gap-1.5"
-                  >
-                    <Power size={11} />
-                    <span>SIGINT (Stop)</span>
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => handleServerRestart()}
-                    className="px-2.5 py-1 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-[11px] font-mono font-bold transition-colors flex items-center gap-1.5 shadow"
-                  >
-                    <Play size={11} className="fill-emerald-300" />
-                    <span>Reboot Server</span>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Terminal Output Stream */}
-            <div className="flex-1 min-h-0 p-4 font-mono text-xs overflow-y-auto space-y-1.5 bg-black/90">
-              {filteredLogs.map((log) => {
-                let badgeColor = "bg-neutral-800 text-neutral-300";
-                if (log.type === "recv") badgeColor = "bg-cyan-950 text-cyan-300 border border-cyan-800/50";
-                if (log.type === "send") badgeColor = "bg-emerald-950 text-emerald-300 border border-emerald-800/50";
-                if (log.type === "mutex") badgeColor = "bg-amber-950 text-amber-300 border border-amber-800/50";
-                if (log.type === "bcast") badgeColor = "bg-purple-950 text-purple-300 border border-purple-800/50";
-                if (log.type === "err" || log.type === "shutdown") badgeColor = "bg-red-950 text-red-300 border border-red-800/50";
-
-                return (
-                  <div key={log.id} className="flex items-start gap-2.5 leading-relaxed hover:bg-white/5 px-2 py-0.5 rounded transition-colors">
-                    <span className="text-neutral-600 text-[10px] shrink-0 mt-0.5">{log.timestamp}</span>
-                    <span className="text-neutral-400 font-semibold shrink-0 text-[11px]">[{log.thread}]</span>
-                    <span className={`px-1.5 py-0.2 rounded text-[9px] uppercase font-bold shrink-0 ${badgeColor}`}>
-                      {log.type}
-                    </span>
-                    <span className="text-neutral-200 break-all">{log.text}</span>
-                  </div>
-                );
-              })}
-              <div ref={logsEndRef} />
-            </div>
-
-            {/* Custom Semicolon Packet Injector */}
-            <div className="p-3 bg-neutral-900 border-t border-white/10 flex items-center gap-2 shrink-0">
-              <span className="text-xs font-mono text-neutral-400 whitespace-nowrap hidden sm:inline">
-                Packet Injector:
+              <span className="text-[11px] font-mono text-neutral-400">
+                Observing live packets &amp; mutex locks as clients interact
               </span>
-              <input
-                type="text"
-                value={customPacketInput}
-                onChange={(e) => setCustomPacketInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleCustomPacketSend()}
-                placeholder="e.g. MESSAGE_ROOM;cyber-den;POSIX mutex stream verified;alex"
-                className="flex-1 bg-black/80 border border-white/20 rounded-md px-3 py-1.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-white/50 font-mono"
-              />
-              <button
-                type="button"
-                onClick={handleCustomPacketSend}
-                className="px-4 py-1.5 rounded-md bg-white text-black font-bold text-xs hover:bg-neutral-200 transition-colors shadow shrink-0 font-mono"
-              >
-                Dispatch
-              </button>
             </div>
+            <ServerBusTerminal
+              serverLogs={serverLogs}
+              logFilter={logFilter}
+              setLogFilter={setLogFilter}
+              isServerRunning={isServerRunning}
+              onShutdown={handleServerShutdown}
+              onRestart={handleServerRestart}
+              customPacketInput={customPacketInput}
+              setCustomPacketInput={setCustomPacketInput}
+              onDispatchPacket={handleCustomPacketSend}
+              logsContainerRef={logsContainerRef}
+              isDrawer={true}
+            />
           </div>
         )}
       </div>
@@ -1110,7 +1636,7 @@ export default function ChatroomProject() {
             </div>
             <p className="text-xs text-neutral-400 leading-relaxed">
               Main <code>ServerThread</code> runs a dedicated POSIX <code>accept()</code> loop, dynamically
-              spawning worker threads (<code>SocketThreadIndividually</code>) with isolated file descriptors.
+              spawning worker threads with isolated file descriptors.
             </p>
           </div>
 
@@ -1150,15 +1676,15 @@ export default function ChatroomProject() {
       <ArticleSection id="threading" number="02" title="POSIX Multi-Threading & Worker Thread Allocation">
         <div className="research-prose">
           <p>
-            The networking backbone is implemented across <code>Server.cpp</code>, <code>SocketServer.cpp</code>,
-            and <code>SocketThreadIndividually.cpp</code>. When the server launches, <code>SocketServer</code> creates
-            a master streaming socket (<code>SOCK_STREAM</code>) and binds it to <code>127.0.0.1:3000</code>.
+            The networking backbone is implemented across <code>Server.cpp</code>, <code>socketserver.cpp</code>,
+            <code>socket.cpp</code>, <code>thread.cpp</code>, and <code>Blockable.cpp</code>. When the server launches,
+            <code>socketserver</code> creates a master streaming socket (<code>SOCK_STREAM</code>) and binds it to <code>127.0.0.1:3000</code>.
           </p>
           <p>
             To support concurrent connections without blocking the accept loop, the server allocates a dedicated
             worker thread per connected client. When a new TCP connection arrives, <code>accept()</code> returns a
-            distinct socket file descriptor (e.g. FD 4). The server immediately encapsulates this descriptor into a
-            new <code>SocketThreadIndividually</code> worker object and invokes its thread entry routine.
+            distinct socket file descriptor (e.g. FD 4 for Client 1, FD 5 for Client 2). The server encapsulates each descriptor
+            into an isolated thread worker instance and starts its event pump.
           </p>
         </div>
 
@@ -1176,7 +1702,7 @@ export default function ChatroomProject() {
             &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-purple-400">if</span> (clientFd &gt;= 0) &#123;<br />
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-neutral-500">// Guard client thread registry</span><br />
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;std::lock_guard&lt;std::mutex&gt; lock(connectedClientsMutex);<br />
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SocketThreadIndividually* worker = <span className="text-purple-400">new</span> SocketThreadIndividually(clientFd);<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ClientWorkerThread* worker = <span className="text-purple-400">new</span> ClientWorkerThread(clientFd);<br />
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;worker-&gt;start();<br />
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;clientThreads.push_back(worker);<br />
             &nbsp;&nbsp;&nbsp;&nbsp;&#125;<br />
@@ -1221,7 +1747,7 @@ export default function ChatroomProject() {
         {/* Mutex Guard Snippet */}
         <div className="research-figure my-8">
           <div className="p-4 bg-black/80 font-mono text-xs overflow-x-auto text-neutral-300">
-            <div className="text-neutral-500 mb-2">// SocketThreadIndividually.cpp - RAII Mutex Synchronization</div>
+            <div className="text-neutral-500 mb-2">// Server.cpp - RAII Mutex Synchronization</div>
             <span className="text-purple-400">bool</span> Server::joinRoom(<span className="text-cyan-400">const</span> std::string&amp; roomName, <span className="text-cyan-400">const</span> std::string&amp; password, <span className="text-purple-400">int</span> clientFd) &#123;<br />
             &nbsp;&nbsp;<span className="text-neutral-500">// RAII lock acquisition: releases automatically on return</span><br />
             &nbsp;&nbsp;std::lock_guard&lt;std::mutex&gt; lock(roomDataMutex);<br />
@@ -1396,9 +1922,9 @@ export default function ChatroomProject() {
       <ArticleSection id="interactive-studio" number="06" title="Interactive PyQt5 & C++ Server Studio">
         <div className="research-prose">
           <p>
-            Test the authentic full-stack application directly in the browser. You can create password-protected
-            or public rooms, adjust the 2-5 user capacity slider, join locked rooms, chat with simulated network
-            peers, and switch to the <strong>C++ Server Bus</strong> to view live TCP packet telemetry and mutex locks.
+            Test the authentic full-stack application directly in the browser with <strong>dual side-by-side PyQt5 desktop clients</strong>{" "}
+            (Alex on FD 4 and Maya on FD 5). Watch in real time as Alex creates a room in Client 1, Maya discovers and connects to it in Client 2,
+            and both clients exchange messages over the simulated C++ socket server on port 3000 synchronized via <code>std::mutex</code>.
           </p>
         </div>
 
@@ -1410,7 +1936,15 @@ export default function ChatroomProject() {
           <ul className="space-y-2 text-xs text-neutral-400">
             <li className="flex items-start gap-2">
               <span className="text-cyan-400 font-bold">•</span>
-              <span><strong>Locked Room Password Check:</strong> Select <code>cyber-den</code> and enter password <code>matrix</code> to connect. Trying any other password triggers a simulated <code>QMessageBox.warning</code>.</span>
+              <span><strong>Cross-Client Room Discovery:</strong> In Client 1 (Alex), create a new room (e.g. <code>distributed-nodes</code>, password <code>cluster</code>). Notice that Client 2 (Maya) immediately discovers it in her &quot;Available Chatrooms&quot; dropdown.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-cyan-400 font-bold">•</span>
+              <span><strong>Two-Way Real-Time Chat:</strong> Once Maya connects in Client 2, send messages back and forth between Alex and Maya. Observe the packets routed through port 3000 and displayed simultaneously in both windows.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-cyan-400 font-bold">•</span>
+              <span><strong>Locked Room Password Verification:</strong> Select <code>cyber-den</code> and enter password <code>matrix</code> to connect. Trying any other password triggers an authentic simulated <code>QMessageBox.warning</code>.</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-cyan-400 font-bold">•</span>
@@ -1418,7 +1952,7 @@ export default function ChatroomProject() {
             </li>
             <li className="flex items-start gap-2">
               <span className="text-cyan-400 font-bold">•</span>
-              <span><strong>Server Bus Telemetry:</strong> Switch to the <strong>C++ Socket Server Bus</strong> tab to observe raw <code>std::lock_guard</code> mutex acquisitions and semicolon packet parsing on port 3000.</span>
+              <span><strong>Server Bus Telemetry:</strong> Switch to the <strong>C++ Socket Server Bus</strong> tab or toggle the live server split drawer to observe raw <code>std::lock_guard</code> mutex acquisitions and semicolon packet parsing on port 3000 without any page jumping.</span>
             </li>
           </ul>
         </div>
@@ -1474,49 +2008,65 @@ export default function ChatroomProject() {
         <div className="research-prose">
           <p>
             The project repository is structured into modular components separating network transport,
-            protocol serialization, and GUI presentation:
+            POSIX thread execution, protocol serialization, and GUI presentation:
           </p>
         </div>
 
         <div className="space-y-3 my-8">
           <div className="editorial-card p-4 flex items-center justify-between">
             <div>
-              <span className="font-mono text-xs text-white font-semibold">Server.cpp / Server.h</span>
+              <span className="font-mono text-xs text-white font-semibold">Server.cpp</span>
               <p className="text-xs text-neutral-400 mt-0.5">Master TCP accept loop and client thread lifecycle management</p>
             </div>
-            <SourceLink href={`${repo}/blob/main/Server.cpp`} label="Source" />
+            <SourceLink href={`${repo}/blob/master/Server.cpp`} label="Source" />
           </div>
 
           <div className="editorial-card p-4 flex items-center justify-between">
             <div>
-              <span className="font-mono text-xs text-white font-semibold">SocketServer.cpp / SocketServer.h</span>
-              <p className="text-xs text-neutral-400 mt-0.5">POSIX socket wrapper encapsulating bind, listen, and accept syscalls</p>
+              <span className="font-mono text-xs text-white font-semibold">socketserver.cpp / socketserver.h</span>
+              <p className="text-xs text-neutral-400 mt-0.5">POSIX socket server wrapper inheriting from Blockable</p>
             </div>
-            <SourceLink href={`${repo}/blob/main/SocketServer.cpp`} label="Source" />
+            <SourceLink href={`${repo}/blob/master/socketserver.cpp`} label="Source" />
           </div>
 
           <div className="editorial-card p-4 flex items-center justify-between">
             <div>
-              <span className="font-mono text-xs text-white font-semibold">SocketThreadIndividually.cpp</span>
-              <p className="text-xs text-neutral-400 mt-0.5">Dedicated client worker thread and semicolon-delimited protocol interpreter</p>
+              <span className="font-mono text-xs text-white font-semibold">socket.cpp / socket.h</span>
+              <p className="text-xs text-neutral-400 mt-0.5">TCP streaming socket encapsulation</p>
             </div>
-            <SourceLink href={`${repo}/blob/main/SocketThreadIndividually.cpp`} label="Source" />
+            <SourceLink href={`${repo}/blob/master/socket.cpp`} label="Source" />
+          </div>
+
+          <div className="editorial-card p-4 flex items-center justify-between">
+            <div>
+              <span className="font-mono text-xs text-white font-semibold">thread.cpp / thread.h</span>
+              <p className="text-xs text-neutral-400 mt-0.5">POSIX pthread wrapper with virtual ThreadMain()</p>
+            </div>
+            <SourceLink href={`${repo}/blob/master/thread.cpp`} label="Source" />
+          </div>
+
+          <div className="editorial-card p-4 flex items-center justify-between">
+            <div>
+              <span className="font-mono text-xs text-white font-semibold">Blockable.cpp / Blockable.h</span>
+              <p className="text-xs text-neutral-400 mt-0.5">I/O multiplexing event and termination abstraction</p>
+            </div>
+            <SourceLink href={`${repo}/blob/master/Blockable.cpp`} label="Source" />
           </div>
 
           <div className="editorial-card p-4 flex items-center justify-between">
             <div>
               <span className="font-mono text-xs text-white font-semibold">client.py</span>
-              <p className="text-xs text-neutral-400 mt-0.5">PyQt5 desktop client with single vertical stack lobby and chat window</p>
+              <p className="text-xs text-neutral-400 mt-0.5">PyQt5 client with single vertical stack lobby and chat window</p>
             </div>
-            <SourceLink href={`${repo}/blob/main/client.py`} label="Source" />
+            <SourceLink href={`${repo}/blob/master/client.py`} label="Source" />
           </div>
 
           <div className="editorial-card p-4 flex items-center justify-between">
             <div>
               <span className="font-mono text-xs text-white font-semibold">Makefile</span>
-              <p className="text-xs text-neutral-400 mt-0.5">Build configuration with g++ flags -std=c++11 -pthread -lrt</p>
+              <p className="text-xs text-neutral-400 mt-0.5">Build rules linking Server.o, thread.o, socket.o, socketserver.o, Blockable.o</p>
             </div>
-            <SourceLink href={`${repo}/blob/main/Makefile`} label="Source" />
+            <SourceLink href={`${repo}/blob/master/Makefile`} label="Source" />
           </div>
         </div>
       </ArticleSection>
@@ -1539,9 +2089,9 @@ export default function ChatroomProject() {
             </div>
             <div className="p-3 bg-black/90 rounded-lg border border-white/10 font-mono text-xs text-neutral-200 overflow-x-auto">
               make clean &amp;&amp; make<br />
-              <span className="text-neutral-500"># Or manual compilation:</span><br />
-              g++ -std=c++11 -pthread Server.cpp SocketServer.cpp SocketThreadIndividually.cpp -o server -lrt<br />
-              ./server 3000
+              <span className="text-neutral-500"># Or direct g++ compilation:</span><br />
+              g++ -o Server Server.o thread.o socket.o socketserver.o Blockable.o -pthread -l rt<br />
+              ./Server 3000
             </div>
           </div>
 
