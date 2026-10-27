@@ -28,6 +28,17 @@ import {
   Shield,
   Gamepad2,
   Crosshair,
+  Monitor,
+  Lock,
+  Unlock,
+  Users,
+  Send,
+  MessageSquare,
+  Power,
+  AlertTriangle,
+  Radio,
+  Minus,
+  Square,
 } from "lucide-react";
 import CursorGlow from "@/components/CursorGlow";
 import { projects, profile, type Project } from "@/data/profile";
@@ -541,88 +552,1105 @@ const EnginereaWidget = () => {
 };
 
 /* ------------------------------------------------------------------------- */
-/* 5. Chatroom Whisperers Live C++ Socket Terminal                            */
+/* 5. Chatroom Whisperers Live Dual-Mode Widget (PyQt5 GUI & C++ POSIX Bus)  */
 /* ------------------------------------------------------------------------- */
-const ChatroomWidget = () => {
-  const [messages, setMessages] = useState([
-    { sender: "SERVER", text: "TCP Socket listening on port 8080. Ready for connections.", type: "sys" },
-    { sender: "client_1", text: "Connected via socket FD 4.", type: "client" },
-    { sender: "client_2", text: "/whisper client_1 'AES token handshake verified'", type: "whisper" },
-  ]);
-  const [inputVal, setInputVal] = useState("");
 
-  const handleSend = () => {
-    if (!inputVal.trim()) return;
-    const isWhisper = inputVal.startsWith("/whisper");
-    setMessages((prev) => [
+interface ChatMessage {
+  sender: string;
+  text: string;
+  time: string;
+  isSystem?: boolean;
+}
+
+interface RoomData {
+  name: string;
+  password: string | null;
+  isLocked: boolean;
+  currentUsers: number;
+  maxUsers: number;
+  messages: ChatMessage[];
+}
+
+interface ServerLog {
+  id: string;
+  timestamp: string;
+  thread: string;
+  type: "info" | "mutex" | "recv" | "send" | "bcast" | "err" | "shutdown";
+  text: string;
+}
+
+const INITIAL_ROOMS: RoomData[] = [
+  {
+    name: "cyber-den",
+    password: "matrix",
+    isLocked: true,
+    currentUsers: 2,
+    maxUsers: 4,
+    messages: [
+      { sender: "SYSTEM", text: "Room cyber-den created with password protection", time: "10:14:02", isSystem: true },
+      { sender: "cypher", text: "POSIX worker thread pool spawned on FD 6.", time: "10:15:30" },
+      { sender: "trinity", text: "std::lock_guard on roomDataMutex active.", time: "10:16:11" },
+    ],
+  },
+  {
+    name: "dev-lounge",
+    password: null,
+    isLocked: false,
+    currentUsers: 1,
+    maxUsers: 5,
+    messages: [
+      { sender: "SYSTEM", text: "Public developer lounge online", time: "10:12:00", isSystem: true },
+      { sender: "linus", text: "POSIX select vs epoll benchmarks looking clean on port 3000.", time: "10:18:22" },
+    ],
+  },
+  {
+    name: "general",
+    password: null,
+    isLocked: false,
+    currentUsers: 3,
+    maxUsers: 5,
+    messages: [
+      { sender: "SYSTEM", text: "General chatter room initialized", time: "10:00:00", isSystem: true },
+      { sender: "dijkstra", text: "Mutual exclusion guarantees zero race conditions.", time: "10:20:05" },
+      { sender: "turing", text: "Protocol ASCII packets serialized cleanly.", time: "10:21:40" },
+    ],
+  },
+  {
+    name: "algo-lab",
+    password: "algo",
+    isLocked: true,
+    currentUsers: 4,
+    maxUsers: 4,
+    messages: [
+      { sender: "SYSTEM", text: "Algorithm laboratory room initialized", time: "09:55:00", isSystem: true },
+      { sender: "knuth", text: "Room capacity full test initialized [4/4].", time: "10:01:00" },
+    ],
+  },
+];
+
+const INITIAL_LOGS: ServerLog[] = [
+  {
+    id: "l1",
+    timestamp: "10:12:00.012",
+    thread: "ServerThread",
+    type: "info",
+    text: "SocketServer initialized on 127.0.0.1:3000",
+  },
+  {
+    id: "l2",
+    timestamp: "10:12:00.015",
+    thread: "ServerThread",
+    type: "info",
+    text: "bind(AF_INET, SOCK_STREAM, port 3000) SUCCESS",
+  },
+  {
+    id: "l3",
+    timestamp: "10:12:00.018",
+    thread: "ServerThread",
+    type: "info",
+    text: "listen(backlog=10) SUCCESS | Concurrency: POSIX Threads",
+  },
+  {
+    id: "l4",
+    timestamp: "10:14:02.110",
+    thread: "ServerThread",
+    type: "info",
+    text: "Accepted new client TCP socket (FD 4) from 127.0.0.1:54210",
+  },
+  {
+    id: "l5",
+    timestamp: "10:14:02.112",
+    thread: "MUTEX",
+    type: "mutex",
+    text: "std::lock_guard<std::mutex> lock(connectedClientsMutex)",
+  },
+  {
+    id: "l6",
+    timestamp: "10:14:02.114",
+    thread: "ServerThread",
+    type: "info",
+    text: "Spawned SocketThreadIndividually worker for client socket FD 4",
+  },
+  {
+    id: "l7",
+    timestamp: "10:14:02.204",
+    thread: "SocketThreadIndividually:FD 4",
+    type: "recv",
+    text: ">> RECV: UPDATE_DATA_REQUEST;alex",
+  },
+  {
+    id: "l8",
+    timestamp: "10:14:02.206",
+    thread: "MUTEX",
+    type: "mutex",
+    text: "std::lock_guard<std::mutex> lock(roomDataMutex)",
+  },
+  {
+    id: "l9",
+    timestamp: "10:14:02.208",
+    thread: "SocketThreadIndividually:FD 4",
+    type: "send",
+    text: "<< SEND: UPDATE_DATA;cyber-den:2/4:Locked;dev-lounge:1/5:Unlocked;general:3/5:Unlocked;algo-lab:4/4:Locked",
+  },
+];
+
+const ChatroomWidget = () => {
+  const [mode, setMode] = useState<"client" | "server">("client");
+  const [rooms, setRooms] = useState<RoomData[]>(INITIAL_ROOMS);
+  const [username, setUsername] = useState<string>("alex");
+  const [clientState, setClientState] = useState<"lobby" | "chat">("lobby");
+  const [activeRoomName, setActiveRoomName] = useState<string | null>(null);
+
+  // Lobby Form
+  const [createName, setCreateName] = useState<string>("");
+  const [createPassword, setCreatePassword] = useState<string>("");
+  const [createMaxUsers, setCreateMaxUsers] = useState<number>(2);
+  const [selectedRoomName, setSelectedRoomName] = useState<string>("cyber-den");
+  const [joinPassword, setJoinPassword] = useState<string>("");
+  const [warningModal, setWarningModal] = useState<{ title: string; message: string } | null>(null);
+
+  // Chat Form
+  const [chatInput, setChatInput] = useState<string>("");
+
+  // Server & Bus State
+  const [serverLogs, setServerLogs] = useState<ServerLog[]>(INITIAL_LOGS);
+  const [logFilter, setLogFilter] = useState<"all" | "packets" | "mutex" | "broadcast">("all");
+  const [isServerRunning, setIsServerRunning] = useState<boolean>(true);
+  const [customPacketInput, setCustomPacketInput] = useState<string>("");
+
+  const logsEndRef = useRef<HTMLDivElement>(null);
+  const chatMessagesEndRef = useRef<HTMLDivElement>(null);
+
+  const getTimestamp = () => {
+    const d = new Date();
+    const pad = (n: number, z = 2) => n.toString().padStart(z, "0");
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(d.getMilliseconds(), 3)}`;
+  };
+
+  const addLog = (thread: string, type: ServerLog["type"], text: string) => {
+    setServerLogs((prev) => [
       ...prev,
       {
-        sender: "you (client_0)",
-        text: inputVal,
-        type: isWhisper ? "whisper" : "client",
+        id: Math.random().toString(36).substring(2, 9),
+        timestamp: getTimestamp(),
+        thread,
+        type,
+        text,
       },
     ]);
-    setInputVal("");
+  };
+
+  // Auto-scroll server logs
+  useEffect(() => {
+    if (mode === "server") {
+      logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [serverLogs, mode]);
+
+  // Auto-scroll chat messages
+  useEffect(() => {
+    if (clientState === "chat") {
+      chatMessagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [rooms, clientState]);
+
+  const activeRoom = useMemo(() => {
+    return rooms.find((r) => r.name === activeRoomName) || null;
+  }, [rooms, activeRoomName]);
+
+  const selectedRoom = useMemo(() => {
+    return rooms.find((r) => r.name === selectedRoomName) || null;
+  }, [rooms, selectedRoomName]);
+
+  // Filtered logs
+  const filteredLogs = useMemo(() => {
+    if (logFilter === "all") return serverLogs;
+    if (logFilter === "packets") return serverLogs.filter((l) => l.type === "recv" || l.type === "send");
+    if (logFilter === "mutex") return serverLogs.filter((l) => l.type === "mutex");
+    if (logFilter === "broadcast") return serverLogs.filter((l) => l.type === "bcast" || l.type === "shutdown");
+    return serverLogs;
+  }, [serverLogs, logFilter]);
+
+  /* ----------------------------------------------------------------------- */
+  /* Client Handlers (Sync with C++ Server Sockets & Mutexes)                */
+  /* ----------------------------------------------------------------------- */
+
+  const handleCreateRoom = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isServerRunning) {
+      setWarningModal({
+        title: "QMessageBox - Server Offline",
+        message: "Cannot connect: The C++ TCP server on port 3000 is stopped. Restart it in the Server Bus tab.",
+      });
+      return;
+    }
+
+    const name = createName.trim();
+    if (!name) {
+      setWarningModal({
+        title: "QMessageBox - Warning",
+        message: "Room Name Required: Please enter a valid name for the new chatroom.",
+      });
+      return;
+    }
+
+    if (rooms.some((r) => r.name.toLowerCase() === name.toLowerCase())) {
+      setWarningModal({
+        title: "QMessageBox - Warning",
+        message: `Existing Room: A chatroom named '${name}' already exists.`,
+      });
+      return;
+    }
+
+    const pwd = createPassword.trim();
+    const isLocked = pwd.length > 0;
+    const maxUsers = createMaxUsers;
+    const user = username.trim() || "alex";
+
+    // 1. Semicolon-delimited ASCII packet received by C++ server thread
+    addLog("SocketThreadIndividually:FD 4", "recv", `>> RECV: CREATE_ROOM;${name};${pwd || "NO_PASSWORD"};1;${maxUsers};${user}`);
+    addLog("MUTEX", "mutex", "std::lock_guard<std::mutex> lock(roomsMutex)");
+    addLog("MUTEX", "mutex", "std::lock_guard<std::mutex> lock(roomDataMutex)");
+    addLog("SocketThreadIndividually:FD 4", "send", "<< SEND: CREATE_SUCCESS");
+    addLog("Broadcast", "bcast", `<< BCAST: UPDATE_DATA;${name};1;${maxUsers};${isLocked ? "Locked" : "Unlocked"}`);
+
+    const newRoom: RoomData = {
+      name,
+      password: pwd || null,
+      isLocked,
+      currentUsers: 1,
+      maxUsers,
+      messages: [
+        {
+          sender: "SYSTEM",
+          text: `Room '${name}' created by ${user} (Capacity: 1/${maxUsers})`,
+          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          isSystem: true,
+        },
+      ],
+    };
+
+    setRooms((prev) => [...prev, newRoom]);
+    setSelectedRoomName(name);
+    setActiveRoomName(name);
+    setClientState("chat");
+    setCreateName("");
+    setCreatePassword("");
+    setCreateMaxUsers(2);
+  };
+
+  const handleJoinRoom = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isServerRunning) {
+      setWarningModal({
+        title: "QMessageBox - Server Offline",
+        message: "Cannot connect: The C++ TCP server on port 3000 is stopped. Restart it in the Server Bus tab.",
+      });
+      return;
+    }
+
+    const target = rooms.find((r) => r.name === selectedRoomName);
+    if (!target) {
+      setWarningModal({
+        title: "QMessageBox - Warning",
+        message: "No Room: Please select an existing chatroom from the list.",
+      });
+      return;
+    }
+
+    const user = username.trim() || "alex";
+
+    // Capacity validation (matching Server.cpp current_users < max_users)
+    if (target.currentUsers >= target.maxUsers) {
+      addLog("SocketThreadIndividually:FD 4", "recv", `>> RECV: JOIN_ROOM;${target.name};${target.isLocked ? "***" : "NO_PASSWORD"};${user}`);
+      addLog("SocketThreadIndividually:FD 4", "err", "<< SEND: ROOM_FULL");
+      setWarningModal({
+        title: "QMessageBox - Warning",
+        message: `Room Full: The chatroom '${target.name}' is currently at capacity (${target.maxUsers}/${target.maxUsers} users).`,
+      });
+      return;
+    }
+
+    // Password validation (matching Server.cpp password check)
+    if (target.isLocked && joinPassword.trim() !== target.password) {
+      addLog("SocketThreadIndividually:FD 4", "recv", `>> RECV: JOIN_ROOM;${target.name};***;${user}`);
+      addLog("SocketThreadIndividually:FD 4", "err", "<< SEND: INVALID_PASSWORD");
+      setWarningModal({
+        title: "QMessageBox - Warning",
+        message: `Invalid Password: Password entered for '${target.name}' is incorrect.`,
+      });
+      return;
+    }
+
+    // Success: JOIN_SUCCESS & mutex lock
+    addLog("SocketThreadIndividually:FD 4", "recv", `>> RECV: JOIN_ROOM;${target.name};${target.isLocked ? "***" : "NO_PASSWORD"};${user}`);
+    addLog("MUTEX", "mutex", "std::lock_guard<std::mutex> lock(roomDataMutex)");
+    addLog("MUTEX", "mutex", "std::lock_guard<std::mutex> lock(connectedClientsMutex)");
+    addLog("SocketThreadIndividually:FD 4", "send", "<< SEND: JOIN_SUCCESS");
+    addLog("Broadcast", "bcast", `<< BCAST: UPDATE_DATA;${target.name};${target.currentUsers + 1};${target.maxUsers};${target.isLocked ? "Locked" : "Unlocked"}`);
+
+    const joinTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    setRooms((prev) =>
+      prev.map((r) =>
+        r.name === target.name
+          ? {
+              ...r,
+              currentUsers: r.currentUsers + 1,
+              messages: [
+                ...r.messages,
+                {
+                  sender: "SYSTEM",
+                  text: `${user} joined the room.`,
+                  time: joinTime,
+                  isSystem: true,
+                },
+              ],
+            }
+          : r
+      )
+    );
+
+    setActiveRoomName(target.name);
+    setClientState("chat");
+    setJoinPassword("");
+  };
+
+  const handleSendMessage = (e?: React.MouseEvent | React.KeyboardEvent) => {
+    if (e) e.stopPropagation();
+    const msg = chatInput.trim();
+    if (!msg || !activeRoomName) return;
+
+    const user = username.trim() || "alex";
+    const roomName = activeRoomName;
+    const userTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+    // ASCII Packet: MESSAGE_ROOM;{roomName};{message};{username}
+    addLog("SocketThreadIndividually:FD 4", "recv", `>> RECV: MESSAGE_ROOM;${roomName};${msg};${user}`);
+    addLog(`ChatRoom:${roomName}`, "bcast", `broadcastMessage >> MESSAGE;${user};${msg}`);
+
+    setRooms((prev) =>
+      prev.map((r) =>
+        r.name === roomName
+          ? {
+              ...r,
+              messages: [...r.messages, { sender: user, text: msg, time: userTime }],
+            }
+          : r
+      )
+    );
+    setChatInput("");
+
+    // Simulated peer responses in the chatroom
+    setTimeout(() => {
+      let peer = "peer_node";
+      let reply = "Packet acknowledged. Thread pool broadcast completed.";
+      if (roomName === "cyber-den") {
+        peer = "trinity";
+        reply = "POSIX thread lock acquired. Packet integrity 100%.";
+      } else if (roomName === "dev-lounge") {
+        peer = "linus";
+        reply = "Non-blocking TCP socket stream flushed on port 3000.";
+      } else if (roomName === "general") {
+        peer = "dijkstra";
+        reply = "Mutual exclusion invariant preserved.";
+      }
+
+      const peerTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      addLog("SocketThreadIndividually:FD 6", "recv", `>> RECV: MESSAGE_ROOM;${roomName};${reply};${peer}`);
+      addLog(`ChatRoom:${roomName}`, "bcast", `broadcastMessage >> MESSAGE;${peer};${reply}`);
+
+      setRooms((prev) =>
+        prev.map((r) =>
+          r.name === roomName
+            ? {
+                ...r,
+                messages: [...r.messages, { sender: peer, text: reply, time: peerTime }],
+              }
+            : r
+        )
+      );
+    }, 750);
+  };
+
+  const handleDisconnectRoom = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!activeRoomName) return;
+
+    const user = username.trim() || "alex";
+    const roomName = activeRoomName;
+
+    // ASCII Packet: DISCONNECT_ROOM;{roomName};{username}
+    addLog("SocketThreadIndividually:FD 4", "recv", `>> RECV: DISCONNECT_ROOM;${roomName};${user}`);
+    addLog("MUTEX", "mutex", "std::lock_guard<std::mutex> lock(roomDataMutex)");
+    addLog("MUTEX", "mutex", "std::lock_guard<std::mutex> lock(connectedClientsMutex)");
+
+    const target = rooms.find((r) => r.name === roomName);
+    const newCount = target ? Math.max(0, target.currentUsers - 1) : 0;
+    addLog("Broadcast", "bcast", `<< BCAST: UPDATE_DATA;${roomName};${newCount};${target?.maxUsers || 5};${target?.isLocked ? "Locked" : "Unlocked"}`);
+
+    const leaveTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    setRooms((prev) =>
+      prev.map((r) =>
+        r.name === roomName
+          ? {
+              ...r,
+              currentUsers: newCount,
+              messages: [
+                ...r.messages,
+                {
+                  sender: "SYSTEM",
+                  text: `${user} left the room.`,
+                  time: leaveTime,
+                  isSystem: true,
+                },
+              ],
+            }
+          : r
+      )
+    );
+
+    setActiveRoomName(null);
+    setClientState("lobby");
+  };
+
+  const handleServerShutdown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    addLog("SignalHandler", "shutdown", "SIGINT caught >> Initiating SERVER_SHUTDOWN sequence");
+    addLog("MUTEX", "mutex", "std::lock_guard<std::mutex> lock(connectedClientsMutex)");
+    addLog("Broadcast", "shutdown", "<< BCAST: SERVER_SHUTDOWN;All connections terminating");
+    addLog("ServerThread", "info", "Terminating worker threads for FD 4, FD 5, FD 6");
+    addLog("ServerThread", "info", "close(listening_socket_fd=3) SUCCESS on port 3000");
+    addLog("ServerThread", "info", "All socket descriptors released cleanly. Exit code 0.");
+    setIsServerRunning(false);
+
+    if (clientState === "chat") {
+      setActiveRoomName(null);
+      setClientState("lobby");
+      setWarningModal({
+        title: "QMessageBox - Server Shutdown",
+        message: "Connection Closed: The C++ server sent a SERVER_SHUTDOWN broadcast and closed all sockets.",
+      });
+    }
+  };
+
+  const handleServerRestart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    addLog("ServerThread", "info", "=== REBOOTING C++ POSIX SOCKET SERVER ===");
+    addLog("ServerThread", "info", "bind(AF_INET, SOCK_STREAM, port 3000) SUCCESS");
+    addLog("ServerThread", "info", "listen(backlog=10) SUCCESS. Listening on 127.0.0.1:3000");
+    addLog("ServerThread", "info", "Client FD 4 reconnected. Worker thread spawned.");
+    setIsServerRunning(true);
+  };
+
+  const handleCustomPacketSend = (e?: React.MouseEvent | React.KeyboardEvent) => {
+    if (e) e.stopPropagation();
+    const packet = customPacketInput.trim();
+    if (!packet) return;
+
+    addLog("SocketThreadIndividually:FD 4", "recv", `>> RECV: ${packet}`);
+    const parts = packet.split(";");
+    const cmd = parts[0]?.toUpperCase();
+
+    if (cmd === "SERVER_SHUTDOWN") {
+      handleServerShutdown(e as any);
+    } else if (cmd === "CREATE_ROOM" && parts[1]) {
+      addLog("MUTEX", "mutex", "std::lock_guard<std::mutex> lock(roomsMutex)");
+      addLog("SocketThreadIndividually:FD 4", "send", "<< SEND: CREATE_SUCCESS");
+      addLog("Broadcast", "bcast", `<< BCAST: UPDATE_DATA;${parts[1]};1;${parts[4] || 4};Unlocked`);
+    } else if (cmd === "JOIN_ROOM" && parts[1]) {
+      addLog("MUTEX", "mutex", "std::lock_guard<std::mutex> lock(roomDataMutex)");
+      addLog("SocketThreadIndividually:FD 4", "send", "<< SEND: JOIN_SUCCESS");
+    } else if (cmd === "MESSAGE_ROOM" && parts[1]) {
+      addLog(`ChatRoom:${parts[1]}`, "bcast", `broadcastMessage >> MESSAGE;${parts[3] || "user"};${parts[2] || "hello"}`);
+    } else {
+      addLog("SocketThreadIndividually:FD 4", "send", `<< SEND: ACK;PROCESSED;${packet.length}_BYTES`);
+    }
+
+    setCustomPacketInput("");
   };
 
   return (
-    <div className="flex flex-col h-[480px] sm:h-[520px] md:h-[560px] bg-neutral-950/90 p-5 justify-between relative group/widget font-mono">
-      <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
-        <div className="flex items-center gap-2">
-          <img
-            src="/images/projects/chatroom/logo.png"
-            alt="C++ Logo"
-            className="w-5 h-5 rounded object-contain bg-white/10 p-0.5"
-          />
-          <div className="w-2.5 h-2.5 rounded-full bg-neutral-400 animate-pulse" />
-          <span className="text-xs text-neutral-200 font-semibold uppercase tracking-wider">
-            C++ POSIX Sockets Terminal
-          </span>
-        </div>
-        <div className="text-[10px] text-neutral-400">Ping: 1.4ms | FD: 5</div>
-      </div>
-
-      {/* Terminal Output */}
-      <div className="flex-1 bg-black/70 rounded-xl p-3 border border-white/10 overflow-y-auto space-y-1.5 mb-3 text-xs">
-        {messages.map((m, i) => (
-          <div key={i} className="leading-relaxed">
-            <span
-              className={
-                m.type === "sys"
-                  ? "text-neutral-400 font-bold"
-                  : m.type === "whisper"
-                  ? "text-neutral-400 font-bold"
-                  : "text-neutral-400 font-bold"
-              }
+    <div
+      onClick={(e) => e.stopPropagation()}
+      className="flex flex-col h-[480px] sm:h-[520px] md:h-[560px] bg-neutral-950/95 p-3 sm:p-4 justify-between relative font-sans select-none overflow-hidden"
+    >
+      {/* Top Bar: Mode Switcher & Server Status Pill */}
+      <div className="flex items-center justify-between pb-2.5 sm:pb-3 border-b border-white/10 mb-2.5 shrink-0 gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Mode Switcher Buttons */}
+          <div className="flex items-center bg-black/60 rounded-xl p-0.5 border border-white/10">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setMode("client");
+              }}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono transition-all ${
+                mode === "client"
+                  ? "bg-white text-black font-bold shadow-md"
+                  : "text-neutral-400 hover:text-white"
+              }`}
             >
-              [{m.sender}]:
-            </span>{" "}
-            <span className={m.type === "whisper" ? "text-neutral-300 italic" : "text-neutral-300"}>
-              {m.text}
-            </span>
+              <Monitor size={13} />
+              <span>PyQt5 Client</span>
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setMode("server");
+              }}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono transition-all ${
+                mode === "server"
+                  ? "bg-white text-black font-bold shadow-md"
+                  : "text-neutral-400 hover:text-white"
+              }`}
+            >
+              <Terminal size={13} />
+              <span>C++ Server Bus</span>
+              {mode !== "server" && isServerRunning && (
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
+              )}
+            </button>
           </div>
-        ))}
+        </div>
+
+        {/* Live Status Indicators */}
+        <div className="flex items-center gap-2 text-[10px] sm:text-[11px] font-mono text-neutral-400">
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                isServerRunning ? "bg-emerald-400 animate-pulse" : "bg-red-500"
+              }`}
+            />
+            {isServerRunning ? (
+              <>
+                <span className="hidden sm:inline">127.0.0.1:</span>
+                <span>3000 LISTENING</span>
+              </>
+            ) : (
+              <span className="text-red-400 font-semibold">SERVER OFFLINE</span>
+            )}
+          </div>
+          <div className="hidden md:flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-neutral-400">
+            <span>FD: 4</span>
+            <span className="text-white/20">·</span>
+            <span>POSIX</span>
+          </div>
+        </div>
       </div>
 
-      {/* Terminal Input */}
-      <div className="flex gap-2">
-        <div className="flex-1 flex items-center bg-black/60 rounded-xl border border-white/10 px-3">
-          <span className="text-neutral-400 text-xs mr-1.5">$</span>
-          <input
-            type="text"
-            value={inputVal}
-            onChange={(e) => setInputVal(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder="Type message or /whisper <client_id> <msg>..."
-            className="w-full bg-transparent text-xs text-white placeholder:text-neutral-600 focus:outline-none py-2"
-          />
-        </div>
-        <button
-          onClick={handleSend}
-          className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs border border-white/20 transition-colors font-bold"
-        >
-          Send
-        </button>
+      {/* Main View Area: PyQt5 Client View or C++ Server Terminal */}
+      <div className="flex-1 min-h-0 flex flex-col relative overflow-hidden">
+        {mode === "client" ? (
+          /* =============================================================== */
+          /* Simulated PyQt5 Desktop Window Frame                            */
+          /* =============================================================== */
+          <div className="flex-1 min-h-0 flex flex-col rounded-2xl border border-white/15 bg-[#121212] overflow-hidden shadow-2xl relative">
+            {/* Desktop Window Title Bar */}
+            <div className="flex items-center justify-between px-3 py-1.5 bg-[#181818] border-b border-white/10 shrink-0">
+              <div className="flex items-center gap-2 min-w-0">
+                <img
+                  src="/images/projects/chatroom/logo.png"
+                  alt="Chatroom Whisperers Logo"
+                  className="w-4 h-4 rounded-sm object-contain bg-white/5 p-0.5 shrink-0"
+                />
+                <span className="text-xs font-medium text-neutral-200 truncate">
+                  {clientState === "chat" && activeRoom
+                    ? `${activeRoom.name} - Chatroom Whisperers`
+                    : "Chatroom Whisperers"}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 text-neutral-400 text-xs font-mono">
+                <button
+                  type="button"
+                  title="Minimize"
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-4 h-4 rounded flex items-center justify-center hover:bg-white/10 transition-colors"
+                >
+                  <Minus size={11} />
+                </button>
+                <button
+                  type="button"
+                  title="Maximize"
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-4 h-4 rounded flex items-center justify-center hover:bg-white/10 transition-colors"
+                >
+                  <Square size={9} />
+                </button>
+                <button
+                  type="button"
+                  title="Close / Disconnect"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (clientState === "chat") {
+                      handleDisconnectRoom();
+                    } else {
+                      setCreateName("");
+                      setCreatePassword("");
+                      setJoinPassword("");
+                    }
+                  }}
+                  className="w-4 h-4 rounded flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors"
+                >
+                  <X size={11} />
+                </button>
+              </div>
+            </div>
+
+            {/* Window Content */}
+            {clientState === "lobby" ? (
+              /* State 1: Lobby (ChatRoomGUI) */
+              <div className="flex-1 min-h-0 flex flex-col p-3 overflow-y-auto space-y-3">
+                {/* Username Input Field */}
+                <div className="flex items-center gap-2 p-2 rounded-xl bg-black/40 border border-white/10 shrink-0">
+                  <span className="text-xs font-medium text-neutral-300 font-mono shrink-0">Username:</span>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                    placeholder="Enter username"
+                    className="flex-1 bg-black/60 border border-white/15 rounded-lg px-2.5 py-1 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-white/40 font-mono"
+                  />
+                  <div className="text-[10px] font-mono text-neutral-500 hidden sm:block">
+                    Socket: 127.0.0.1:3000
+                  </div>
+                </div>
+
+                {/* Dual Column Layout: Create Chatroom & Join Chat Room */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 flex-1 min-h-0">
+                  {/* Left Column: Create Chatroom */}
+                  <div className="bg-black/40 rounded-xl border border-white/10 p-3 flex flex-col justify-between space-y-2.5">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-neutral-200">
+                        <Sliders size={13} className="text-neutral-400" />
+                        <span>Create Chatroom</span>
+                      </div>
+                      <input
+                        type="text"
+                        value={createName}
+                        onChange={(e) => setCreateName(e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder="Room Name (e.g. system-core)"
+                        className="w-full bg-black/60 border border-white/15 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none focus:border-white/40 font-mono"
+                      />
+                      <input
+                        type="password"
+                        value={createPassword}
+                        onChange={(e) => setCreatePassword(e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder="Password (Optional)"
+                        className="w-full bg-black/60 border border-white/15 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none focus:border-white/40 font-mono"
+                      />
+
+                      {/* Lobby Size Slider (QSlider 2-5 users) */}
+                      <div className="pt-1 space-y-1">
+                        <div className="flex items-center justify-between text-[11px] font-mono text-neutral-400">
+                          <span>Lobby Capacity (QSlider):</span>
+                          <span className="text-white font-bold">{createMaxUsers} Users</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="2"
+                          max="5"
+                          step="1"
+                          value={createMaxUsers}
+                          onChange={(e) => setCreateMaxUsers(Number(e.target.value))}
+                          onClick={(e) => e.stopPropagation()}
+                          className="w-full accent-white cursor-pointer h-1.5 bg-neutral-800 rounded-lg"
+                        />
+                        <div className="flex justify-between text-[9px] font-mono text-neutral-500 px-0.5">
+                          <span>2 min</span>
+                          <span>3</span>
+                          <span>4</span>
+                          <span>5 max</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleCreateRoom}
+                      className="w-full py-1.5 rounded-lg bg-white/10 hover:bg-white/20 active:bg-white/5 border border-white/20 text-white text-xs font-medium transition-colors flex items-center justify-center gap-1.5 mt-2 shadow-sm"
+                    >
+                      <MessageSquare size={13} />
+                      <span>Create Chatroom</span>
+                    </button>
+                  </div>
+
+                  {/* Right Column: Join Chat Room */}
+                  <div className="bg-black/40 rounded-xl border border-white/10 p-3 flex flex-col justify-between space-y-2.5">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-xs font-semibold text-neutral-200">
+                        <div className="flex items-center gap-1.5">
+                          <Users size={13} className="text-neutral-400" />
+                          <span>Join Chat Room</span>
+                        </div>
+                        <span className="text-[10px] font-mono text-neutral-500">
+                          {rooms.length} active
+                        </span>
+                      </div>
+
+                      {/* Room Combo Box (QComboBox) */}
+                      <select
+                        value={selectedRoomName}
+                        onChange={(e) => setSelectedRoomName(e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-full bg-black/60 border border-white/15 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-white/40 font-mono"
+                      >
+                        {rooms.map((r) => (
+                          <option key={r.name} value={r.name} className="bg-neutral-900 text-white">
+                            {r.name} - [{r.isLocked ? "Locked" : "Unlocked"}], {r.currentUsers}/{r.maxUsers} users
+                          </option>
+                        ))}
+                      </select>
+
+                      {/* Password Field: Dynamically Shown ONLY when selected room is Locked! */}
+                      {selectedRoom?.isLocked ? (
+                        <div className="space-y-1 animate-in fade-in duration-200">
+                          <div className="flex items-center justify-between text-[11px] font-mono text-neutral-400">
+                            <span className="flex items-center gap-1 text-amber-400">
+                              <Lock size={11} />
+                              <span>Room Password:</span>
+                            </span>
+                            <span className="text-[10px] text-neutral-500">
+                              Hint: &apos;{selectedRoom.password || "matrix"}&apos;
+                            </span>
+                          </div>
+                          <input
+                            type="password"
+                            value={joinPassword}
+                            onChange={(e) => setJoinPassword(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && handleJoinRoom(e)}
+                            onClick={(e) => e.stopPropagation()}
+                            placeholder="Enter password to unlock..."
+                            className="w-full bg-black/60 border border-amber-500/30 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none focus:border-amber-400 font-mono"
+                          />
+                        </div>
+                      ) : (
+                        <div className="p-2 rounded-lg bg-white/5 border border-white/10 text-[11px] font-mono text-neutral-400 flex items-center gap-1.5">
+                          <Unlock size={12} className="text-emerald-400 shrink-0" />
+                          <span>This chatroom is public. No password required.</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleJoinRoom}
+                      className="w-full py-1.5 rounded-lg bg-white hover:bg-neutral-200 active:bg-neutral-300 text-black text-xs font-bold transition-colors flex items-center justify-center gap-1.5 mt-2 shadow"
+                    >
+                      <Radio size={13} />
+                      <span>Connect</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* State 2: Active Room (ChatWindow) */
+              <div className="flex-1 min-h-0 flex flex-col p-3 space-y-2.5">
+                {/* Room Header */}
+                <div className="flex items-center justify-between pb-2 border-b border-white/10 shrink-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-white font-mono">{activeRoom?.name}</span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border border-white/15 bg-white/5 text-neutral-300">
+                      {activeRoom?.isLocked ? "🔒 Locked" : "🔓 Public"}
+                    </span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border border-white/15 bg-white/5 text-neutral-300 flex items-center gap-1">
+                      <Users size={10} />
+                      <span>
+                        {activeRoom?.currentUsers}/{activeRoom?.maxUsers} Users
+                      </span>
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleDisconnectRoom}
+                    className="px-2.5 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-500/30 text-xs font-medium transition-colors flex items-center gap-1.5"
+                  >
+                    <Power size={12} />
+                    <span>Disconnect</span>
+                  </button>
+                </div>
+
+                {/* Messages Display (QTextEdit) */}
+                <div className="flex-1 min-h-0 bg-black/75 rounded-xl border border-white/10 p-3 overflow-y-auto space-y-2 text-xs font-mono">
+                  {activeRoom?.messages.map((m, i) => (
+                    <div key={i} className="leading-relaxed">
+                      {m.isSystem ? (
+                        <div className="text-neutral-500 italic text-[11px] py-0.5">
+                          *** {m.text} ({m.time}) ***
+                        </div>
+                      ) : (
+                        <div className="flex items-start gap-1.5">
+                          <span className="text-neutral-500 text-[10px] shrink-0 mt-0.5">{m.time}</span>
+                          <span
+                            className={
+                              m.sender === username
+                                ? "text-cyan-400 font-bold shrink-0"
+                                : "text-neutral-300 font-bold shrink-0"
+                            }
+                          >
+                            {m.sender}:
+                          </span>
+                          <span className={m.sender === username ? "text-white" : "text-neutral-200"}>
+                            {m.text}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  <div ref={chatMessagesEndRef} />
+                </div>
+
+                {/* Chat Input Bar */}
+                <div className="flex items-center gap-2 shrink-0">
+                  <input
+                    type="text"
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSendMessage(e)}
+                    onClick={(e) => e.stopPropagation()}
+                    placeholder="Type message to room..."
+                    className="flex-1 bg-black/70 border border-white/15 rounded-xl px-3 py-2 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-white/40 font-mono"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSendMessage}
+                    className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 active:bg-white/5 border border-white/20 text-white text-xs font-bold transition-colors flex items-center gap-1.5 shrink-0"
+                  >
+                    <Send size={13} />
+                    <span>Send</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Simulated QMessageBox Warning Modal */}
+            {warningModal && (
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="absolute inset-0 bg-black/80 backdrop-blur-sm z-30 flex items-center justify-center p-4 animate-in fade-in duration-150"
+              >
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-full max-w-sm bg-[#1e1e1e] border border-amber-500/40 rounded-xl shadow-2xl p-4 text-left space-y-3"
+                >
+                  <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                    <div className="flex items-center gap-2 text-amber-400 text-xs font-semibold">
+                      <AlertTriangle size={15} />
+                      <span>{warningModal.title}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setWarningModal(null);
+                      }}
+                      className="text-neutral-400 hover:text-white p-1 rounded"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                  <p className="text-xs text-neutral-200 leading-relaxed font-sans">
+                    {warningModal.message}
+                  </p>
+                  <div className="flex justify-end pt-1">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setWarningModal(null);
+                      }}
+                      className="px-4 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-medium transition-colors"
+                    >
+                      OK
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          /* =============================================================== */
+          /* C++ Socket Server & Bus Monitor View                            */
+          /* =============================================================== */
+          <div className="flex-1 min-h-0 flex flex-col rounded-2xl border border-white/15 bg-black/90 overflow-hidden shadow-2xl p-3 font-mono space-y-2.5">
+            {/* Terminal Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pb-2 border-b border-white/10 shrink-0 text-xs">
+              <div className="flex items-center gap-2">
+                <Terminal size={14} className="text-cyan-400 shrink-0" />
+                <span className="text-white font-semibold">
+                  {isServerRunning
+                    ? "Server listening on 127.0.0.1:3000"
+                    : "SERVER OFFLINE (Port 3000 Closed)"}
+                </span>
+                <span className="text-neutral-500 text-[10px] hidden md:inline">
+                  {isServerRunning ? "| POSIX Threads (pthreads)" : "| All sockets closed"}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {isServerRunning ? (
+                  <button
+                    type="button"
+                    onClick={handleServerShutdown}
+                    className="px-2 py-0.5 rounded-md bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-500/30 text-[10px] transition-colors flex items-center gap-1"
+                  >
+                    <Power size={10} />
+                    <span>SHUTDOWN</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleServerRestart}
+                    className="px-2 py-0.5 rounded-md bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] transition-colors flex items-center gap-1"
+                  >
+                    <Play size={10} />
+                    <span>RESTART</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setServerLogs([]);
+                  }}
+                  className="px-2 py-0.5 rounded-md bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white border border-white/10 text-[10px] transition-colors"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+
+            {/* Filter Pills */}
+            <div className="flex items-center gap-1 text-[10px] overflow-x-auto pb-1 no-scrollbar shrink-0">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLogFilter("all");
+                }}
+                className={`px-2 py-0.5 rounded-md transition-colors ${
+                  logFilter === "all"
+                    ? "bg-white/20 text-white font-bold"
+                    : "bg-white/5 text-neutral-400 hover:text-white"
+                }`}
+              >
+                All Logs ({serverLogs.length})
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLogFilter("packets");
+                }}
+                className={`px-2 py-0.5 rounded-md transition-colors ${
+                  logFilter === "packets"
+                    ? "bg-white/20 text-white font-bold"
+                    : "bg-white/5 text-neutral-400 hover:text-white"
+                }`}
+              >
+                Packets ({serverLogs.filter((l) => l.type === "recv" || l.type === "send").length})
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLogFilter("mutex");
+                }}
+                className={`px-2 py-0.5 rounded-md transition-colors ${
+                  logFilter === "mutex"
+                    ? "bg-white/20 text-white font-bold"
+                    : "bg-white/5 text-neutral-400 hover:text-white"
+                }`}
+              >
+                Mutex Locks ({serverLogs.filter((l) => l.type === "mutex").length})
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLogFilter("broadcast");
+                }}
+                className={`px-2 py-0.5 rounded-md transition-colors ${
+                  logFilter === "broadcast"
+                    ? "bg-white/20 text-white font-bold"
+                    : "bg-white/5 text-neutral-400 hover:text-white"
+                }`}
+              >
+                Broadcasts ({serverLogs.filter((l) => l.type === "bcast" || l.type === "shutdown").length})
+              </button>
+            </div>
+
+            {/* Terminal Stream */}
+            <div className="flex-1 min-h-0 bg-black/80 rounded-xl border border-white/10 p-2.5 overflow-y-auto space-y-1 text-[11px] leading-relaxed">
+              {filteredLogs.map((log) => (
+                <div key={log.id} className="flex items-start gap-1.5 flex-wrap">
+                  <span className="text-neutral-500 text-[10px] shrink-0">[{log.timestamp}]</span>
+                  <span
+                    className={
+                      log.type === "mutex"
+                        ? "text-amber-400 font-bold bg-amber-400/10 px-1 py-0.2 rounded shrink-0"
+                        : log.type === "recv"
+                        ? "text-emerald-400 font-bold shrink-0"
+                        : log.type === "send"
+                        ? "text-purple-400 font-bold shrink-0"
+                        : log.type === "bcast"
+                        ? "text-sky-400 font-bold shrink-0"
+                        : log.type === "shutdown"
+                        ? "text-rose-400 font-bold shrink-0"
+                        : "text-neutral-400 shrink-0"
+                    }
+                  >
+                    [{log.thread}]
+                  </span>
+                  <span
+                    className={
+                      log.type === "mutex"
+                        ? "text-amber-200"
+                        : log.type === "recv"
+                        ? "text-emerald-300"
+                        : log.type === "send"
+                        ? "text-purple-300"
+                        : log.type === "bcast"
+                        ? "text-sky-300"
+                        : log.type === "shutdown"
+                        ? "text-rose-300"
+                        : "text-neutral-300"
+                    }
+                  >
+                    {log.text}
+                  </span>
+                </div>
+              ))}
+              <div ref={logsEndRef} />
+            </div>
+
+            {/* Direct Socket Packet Injection */}
+            <div className="flex gap-2 pt-1 border-t border-white/10 shrink-0">
+              <div className="flex-1 flex items-center bg-black/60 rounded-xl border border-white/10 px-3">
+                <span className="text-neutral-500 text-xs font-mono mr-2 shrink-0">$ nc :3000 &gt;&gt;</span>
+                <input
+                  type="text"
+                  value={customPacketInput}
+                  onChange={(e) => setCustomPacketInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleCustomPacketSend(e)}
+                  onClick={(e) => e.stopPropagation()}
+                  placeholder="Raw packet (e.g. JOIN_ROOM;dev-lounge;NO_PASSWORD;guest)"
+                  className="w-full bg-transparent text-xs text-white placeholder:text-neutral-600 focus:outline-none py-1.5 font-mono"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handleCustomPacketSend}
+                className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 active:bg-white/5 text-white text-xs border border-white/20 transition-colors font-mono font-bold shrink-0"
+              >
+                Dispatch
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
