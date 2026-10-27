@@ -446,7 +446,7 @@ const SortingHubWidget = () => {
 
 /* ------------------------------------------------------------------------- */
 
-/* 4. Bobby: The Town of Enginerea Preview Widget (Start Menu Showcase)       */
+/* 4. Bobby: The Town of Enginerea Preview Widget (Immersive Arcade Screen)   */
 /* ------------------------------------------------------------------------- */
 const EnginereaWidget = () => {
   const navigate = useNavigate();
@@ -454,70 +454,86 @@ const EnginereaWidget = () => {
   return (
     <div
       onClick={() => navigate("/projects/enginerea")}
-      className="relative h-[480px] sm:h-[520px] md:h-[560px] w-full bg-black flex items-center justify-center p-6 overflow-hidden group/enginerea cursor-pointer"
-      title="Click to Explore Bobby: The Town of Enginerea Case Study"
+      className="relative h-[480px] sm:h-[520px] md:h-[560px] w-full bg-neutral-950 flex flex-col justify-between p-4 sm:p-5 md:p-6 overflow-hidden group/enginerea cursor-pointer"
+      title="Click to Explore Bobby: The Town of Enginerea"
     >
-      {/* Background with Start Menu Stage Backdrop */}
+      {/* Ambient Cyber Glow & Blurred Backdrop */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(6,182,212,0.12),transparent_70%)] pointer-events-none" />
       <img
         src="/images/projects/enginerea/scene_start_menu.png"
-        alt="Bobby: The Town of Enginerea Start Menu Screen"
-        className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover/enginerea:scale-105 transition-transform duration-700"
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 w-full h-full object-cover opacity-20 filter blur-2xl scale-110 pointer-events-none"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/60 pointer-events-none" />
+      <div className="absolute inset-0 bg-black/55 pointer-events-none" />
 
-      {/* Start Menu Capsule */}
-      <div className="relative z-10 w-full max-w-sm sm:max-w-md p-6 sm:p-8 rounded-3xl bg-neutral-950/80 border border-white/20 backdrop-blur-xl text-center shadow-[0_0_50px_rgba(0,0,0,0.8)] transition-all duration-300 group-hover/enginerea:border-white/50 group-hover/enginerea:shadow-[0_0_40px_rgba(255,255,255,0.08)]">
-        {/* Game Icon & Engine Badge */}
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 p-1 flex items-center justify-center shadow-inner">
-            <img
-              src="/images/projects/enginerea/gameicon.png"
-              alt="Bobby Icon"
-              className="w-7 h-7 object-contain"
-            />
-          </div>
-          <span className="px-2.5 py-1 rounded-full bg-white/10 text-neutral-300 border border-white/15 text-[10px] font-mono uppercase tracking-wider">
-            Pygame · 150 FPS Engine
-          </span>
-        </div>
-
-        {/* Title & Subtitle */}
-        <h4 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight uppercase font-mono">
-          Bobby: The Town of Enginerea
-        </h4>
-        <p className="text-xs text-neutral-400 mt-2 font-mono leading-relaxed max-w-xs mx-auto">
-          2D action-adventure platformer with AABB moving platform physics, spinning projectile deflections, and homing enemy AI.
-        </p>
-
-        {/* Start Menu Action Buttons */}
-        <div className="mt-6 space-y-2.5">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate("/projects/enginerea");
-            }}
-            className="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-neutral-200 text-black font-semibold text-xs font-mono flex items-center justify-center gap-2 shadow-lg transition-all duration-200 hover:scale-[1.02]"
-          >
-            <Play size={13} className="fill-black" />
-            Explore Case Study & Architecture
-          </button>
-
-          <div className="grid grid-cols-2 gap-2 text-[11px] font-mono text-neutral-400">
-            <div className="py-1.5 px-2.5 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center gap-1.5">
-              <span>3 Campaign Stages</span>
-            </div>
-            <div className="py-1.5 px-2.5 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center gap-1.5">
-              <span>Modular Shop Loadouts</span>
-            </div>
+      {/* Top In-Game HUD Bar */}
+      <div className="relative z-10 flex items-center justify-between gap-2 text-xs font-mono">
+        {/* Top-Left Badge */}
+        <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-black/70 border border-white/15 backdrop-blur-md shadow-lg pointer-events-none shrink-0">
+          <img
+            src="/images/projects/enginerea/gameicon.png"
+            alt="Bobby Icon"
+            className="w-4 h-4 sm:w-5 sm:h-5 rounded object-contain shrink-0"
+          />
+          <div className="flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-[11px] text-neutral-200 whitespace-nowrap">
+            <span className="font-semibold text-white">
+              Pygame<span className="hidden sm:inline"> 2D</span> Engine
+            </span>
+            <span className="text-white/40">·</span>
+            <span className="text-emerald-400 font-semibold flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              150 FPS
+            </span>
           </div>
         </div>
 
-        {/* Footnote */}
-        <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-[10px] font-mono text-neutral-500">
-          <span>Python 3.10 · Pygame</span>
-          <span className="text-amber-400/80 flex items-center gap-1">
-            Start Menu Preview <ArrowRight size={10} />
+        {/* Top-Right Badge */}
+        <div className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-black/70 border border-white/15 backdrop-blur-md shadow-lg text-[9px] sm:text-[11px] text-neutral-300 pointer-events-none whitespace-nowrap shrink-0">
+          <span className="text-white font-semibold">
+            3 <span className="hidden sm:inline">Campaign </span>Stages
           </span>
+          <span className="text-white/40">·</span>
+          <span className="text-neutral-400">
+            <span className="hidden sm:inline">AABB </span>Kinematics
+          </span>
+        </div>
+      </div>
+
+      {/* Center: Immersive Framed 1200:575 Arcade Viewport */}
+      <div className="relative z-10 my-auto w-full max-w-3xl aspect-[1200/575] rounded-2xl overflow-hidden border-2 border-white/20 shadow-[0_0_50px_rgba(0,0,0,0.9),0_0_25px_rgba(6,182,212,0.15)] bg-black transition-all duration-300 group-hover/enginerea:scale-[1.02] group-hover/enginerea:border-white/50 group-hover/enginerea:shadow-[0_0_60px_rgba(6,182,212,0.25)]">
+        <img
+          src="/images/projects/enginerea/scene_start_menu.png"
+          alt="Bobby: The Town of Enginerea Arcade Start Menu Viewport"
+          className="w-full h-full object-cover select-none"
+          loading="eager"
+        />
+
+        {/* Subtle CRT Vignette & Screen Atmosphere */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-white/[0.04] pointer-events-none" />
+        <div className="absolute inset-0 shadow-[inset_0_0_30px_rgba(0,0,0,0.6)] pointer-events-none" />
+      </div>
+
+      {/* Bottom In-Game HUD Bar */}
+      <div className="relative z-10 flex items-center justify-between gap-2 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-black/70 border border-white/15 backdrop-blur-md text-[9px] sm:text-[11px] font-mono pointer-events-none whitespace-nowrap">
+        <div className="flex items-center gap-1.5 sm:gap-2 text-neutral-300">
+          <span className="text-white font-medium">Modular Shop<span className="hidden sm:inline"> Loadouts</span></span>
+          <span className="hidden sm:inline text-white/30">·</span>
+          <span className="hidden sm:inline text-neutral-400">Axe Deflections</span>
+        </div>
+        <div className="flex items-center gap-1.5 sm:gap-2 text-neutral-300">
+          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
+          <span className="text-white font-medium">
+            <span className="hidden sm:inline">Spinning </span>Projectile Deflection<span className="hidden sm:inline"> AI</span>
+          </span>
+        </div>
+      </div>
+
+      {/* Hover Action Overlay */}
+      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/enginerea:opacity-100 transition-opacity flex items-center justify-center pointer-events-none backdrop-blur-[2px] z-20">
+        <div className="px-5 py-2.5 rounded-full bg-white text-black font-bold text-xs font-mono shadow-2xl flex items-center gap-2 transform translate-y-2 group-hover/enginerea:translate-y-0 transition-transform">
+          <span>Explore Project</span>
+          <ArrowRight size={14} />
         </div>
       </div>
     </div>
