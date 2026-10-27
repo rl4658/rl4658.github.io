@@ -370,22 +370,22 @@ const ChatroomWidget = () => {
   return (
     <div
       onClick={() => navigate("/projects/chatroom-whisperers")}
-      className="relative h-[480px] sm:h-[520px] md:h-[560px] w-full bg-neutral-950 flex flex-col justify-between p-4 sm:p-5 md:p-6 overflow-hidden group/chatroom cursor-pointer"
+      className="relative min-h-[480px] h-[480px] sm:h-[520px] md:h-[560px] w-full bg-neutral-950 flex flex-col justify-between p-2.5 sm:p-5 md:p-6 overflow-hidden group/chatroom cursor-pointer select-none"
       title="Click to Explore Chatroom Whisperers"
     >
       {/* Ambient Gradient Glow */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(59,130,246,0.08),transparent_70%)] pointer-events-none" />
 
       {/* Top HUD Bar */}
-      <div className="relative z-10 flex items-center justify-between gap-2 text-xs font-mono">
-        <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-black/70 border border-white/15 backdrop-blur-md shadow-lg pointer-events-none shrink-0">
+      <div className="relative z-10 flex items-center justify-between gap-1.5 sm:gap-2 text-xs font-mono shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-black/70 border border-white/15 backdrop-blur-md shadow-lg pointer-events-none shrink-0">
           <img
             src="/images/projects/chatroom/logo.png"
             alt="Chatroom Logo"
-            className="w-4 h-4 rounded object-contain shrink-0"
+            className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded object-contain shrink-0"
           />
           <div className="flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-[11px] text-neutral-200 whitespace-nowrap">
-            <span className="font-semibold text-white">C++ POSIX Sockets</span>
+            <span className="font-semibold text-white">C++<span className="hidden sm:inline"> POSIX</span> Sockets</span>
             <span className="text-white/40">·</span>
             <span className="text-emerald-400 font-semibold flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -394,133 +394,158 @@ const ChatroomWidget = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-black/70 border border-white/15 backdrop-blur-md shadow-lg text-[9px] sm:text-[11px] text-neutral-300 pointer-events-none whitespace-nowrap shrink-0">
-          <span className="text-white font-semibold">Worker Thread Pool</span>
-          <span className="text-white/40">·</span>
-          <span className="text-neutral-400">std::mutex Locks</span>
+        <div className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-black/70 border border-white/15 backdrop-blur-md shadow-lg text-[9px] sm:text-[11px] text-neutral-300 pointer-events-none whitespace-nowrap shrink-0">
+          <span className="text-white font-semibold">Worker<span className="hidden sm:inline"> Thread</span> Pool</span>
+          <span className="hidden sm:inline text-white/40">·</span>
+          <span className="hidden sm:inline text-neutral-400">std::mutex Locks</span>
         </div>
       </div>
 
-      {/* Center: Authentic PyQt5 Desktop Window Frame */}
-      <div className="relative z-10 my-auto w-full max-w-md rounded-2xl overflow-hidden border-2 border-white/20 shadow-[0_0_50px_rgba(0,0,0,0.9),0_0_25px_rgba(59,130,246,0.12)] bg-[#121212] transition-all duration-300 group-hover/chatroom:scale-[1.02] group-hover/chatroom:border-white/50">
+      {/* Center: Authentic PyQt5 Desktop Window Frame (Centered & Dual-Column) */}
+      <div className="relative z-10 my-auto w-full max-w-xl sm:max-w-2xl mx-auto rounded-2xl overflow-hidden border-2 border-white/20 shadow-[0_0_50px_rgba(0,0,0,0.9),0_0_25px_rgba(59,130,246,0.12)] bg-[#121212] transition-all duration-300 group-hover/chatroom:scale-[1.02] group-hover/chatroom:border-white/50 transform-gpu shrink-0">
         {/* Title Bar */}
-        <div className="flex items-center justify-between px-3.5 py-2 bg-[#181818] border-b border-white/10 shrink-0">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between px-2.5 sm:px-3.5 py-1 sm:py-2 bg-[#181818] border-b border-white/10 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <img
               src="/images/projects/chatroom/logo.png"
               alt="Chatroom Whisperers"
-              className="w-4 h-4 rounded-sm object-contain bg-white/5 p-0.5"
+              className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-sm object-contain bg-white/5 p-0.5"
             />
-            <span className="text-xs font-semibold text-neutral-200 font-mono">Chatroom Whisperers</span>
+            <span className="text-[10px] sm:text-xs font-semibold text-neutral-200 font-mono">Chatroom Whisperers</span>
           </div>
           <div className="flex items-center gap-1.5 text-neutral-400 text-xs font-mono">
-            <div className="w-4 h-4 rounded flex items-center justify-center hover:bg-white/10">
+            <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded flex items-center justify-center hover:bg-white/10">
               <Minus size={10} />
             </div>
-            <div className="w-4 h-4 rounded flex items-center justify-center hover:bg-white/10">
+            <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded flex items-center justify-center hover:bg-white/10">
               <Square size={8} />
             </div>
-            <div className="w-4 h-4 rounded flex items-center justify-center hover:bg-red-500 hover:text-white">
+            <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded flex items-center justify-center hover:bg-red-500 hover:text-white">
               <X size={10} />
             </div>
           </div>
         </div>
 
-        {/* Native PyQt5 Single Vertical Stack (QVBoxLayout from client.py) */}
-        <div className="p-4 space-y-2.5 font-sans text-xs select-none">
-          {/* QLabel("Username:") + QLineEdit */}
-          <div>
-            <label className="text-[11px] font-semibold text-neutral-300 block mb-1">Username:</label>
-            <div className="bg-black/60 border border-white/15 rounded px-2.5 py-1 text-white text-xs font-mono flex items-center justify-between">
-              <span>alex</span>
-              <span className="text-[10px] text-neutral-500">Socket FD: 4</span>
+        {/* Top bar inside window: Username & Socket status */}
+        <div className="px-2.5 sm:px-4 py-0.5 sm:py-2 border-b border-white/10 flex items-center justify-between gap-2 bg-[#151515]">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="text-[9px] sm:text-[11px] font-semibold text-neutral-400 font-sans">Username:</span>
+            <div className="bg-black/60 border border-white/15 rounded px-2 sm:px-2.5 py-0.5 text-white text-[9px] sm:text-xs font-mono font-medium">
+              alex
             </div>
           </div>
-
-          {/* QLabel("Create Chatroom") [underline] */}
-          <div className="pt-1">
-            <span className="text-xs font-bold text-white underline tracking-wide">Create Chatroom</span>
+          <div className="flex items-center gap-1 text-[8px] sm:text-[10px] font-mono text-neutral-400 bg-black/40 border border-white/10 px-1.5 sm:px-2 py-0.5 rounded">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span>127.0.0.1:3000<span className="hidden sm:inline"> (FD: 4)</span></span>
           </div>
+        </div>
 
-          {/* QLabel("Chatroom Name:") + QLineEdit */}
-          <div>
-            <label className="text-[11px] text-neutral-300 block mb-0.5">Chatroom Name:</label>
-            <div className="bg-black/60 border border-white/15 rounded px-2.5 py-1 text-neutral-300 text-xs font-mono">
-              cyber-den
+        {/* Dual-column content (QVBoxLayout from client.py split cleanly) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-4 p-2 sm:p-4 font-sans select-none text-xs">
+          {/* Left Column (Create Chatroom) */}
+          <div className="space-y-1 sm:space-y-2">
+            <div>
+              <span className="text-[10px] sm:text-xs font-bold text-white underline tracking-wide">
+                Create Chatroom
+              </span>
             </div>
-          </div>
 
-          {/* QLabel("Chatroom Password (Optional):") + QLineEdit(Password) */}
-          <div>
-            <label className="text-[11px] text-neutral-300 block mb-0.5">Chatroom Password (Optional):</label>
-            <div className="bg-black/60 border border-white/15 rounded px-2.5 py-1 text-neutral-400 text-xs font-mono tracking-widest">
-              ••••••••
+            <div>
+              <label className="text-[8px] sm:text-[11px] text-neutral-300 block mb-0.5">
+                Chatroom Name:
+              </label>
+              <div className="bg-black/60 border border-white/15 rounded px-2 sm:px-2.5 py-0.5 sm:py-1 text-neutral-200 text-[9px] sm:text-xs font-mono">
+                cyber-den
+              </div>
             </div>
-          </div>
 
-          {/* QLabel("Lobby Size (2-5):") + QSlider */}
-          <div>
-            <div className="flex items-center justify-between text-[11px] text-neutral-300 mb-1">
-              <span>Lobby Size (2-5):</span>
-              <span className="text-cyan-400 font-mono font-bold">4 Users</span>
-            </div>
-            <div className="w-full bg-neutral-800 h-1.5 rounded relative flex items-center">
-              <div className="w-3/4 bg-white h-1.5 rounded" />
-              <div className="w-3.5 h-3.5 rounded-full bg-white shadow -ml-1.5 border border-black/40" />
-            </div>
-            <div className="flex justify-between text-[9px] text-neutral-500 font-mono mt-0.5 px-0.5">
-              <span>2</span>
-              <span>3</span>
-              <span className="text-white font-bold">4</span>
-              <span>5</span>
-            </div>
-          </div>
-
-          {/* QPushButton("Create Chatroom") */}
-          <div className="pt-0.5">
-            <div className="w-full py-1.5 rounded bg-white/15 border border-white/20 text-neutral-200 text-center font-medium text-xs shadow-sm">
-              Create Chatroom
-            </div>
-          </div>
-
-          {/* Spacing(20) & QLabel("Join Chat Room") [underline] */}
-          <div className="pt-2 border-t border-white/10">
-            <span className="text-xs font-bold text-white underline tracking-wide">Join Chat Room</span>
-          </div>
-
-          {/* QLabel("Available Chatrooms:") + QComboBox */}
-          <div>
-            <label className="text-[11px] text-neutral-300 block mb-0.5">Available Chatrooms:</label>
-            <div className="bg-black/60 border border-white/15 rounded px-2.5 py-1 text-white text-xs font-mono flex items-center justify-between">
-              <span>cyber-den - [Locked], 2/4 users</span>
-              <span className="text-[10px] text-neutral-500">▼</span>
-            </div>
-          </div>
-
-          {/* QLabel("Password:") + QLineEdit & QPushButton("Connect") */}
-          <div className="flex items-center gap-2 pt-1">
-            <div className="flex-1">
-              <div className="bg-black/60 border border-amber-500/30 rounded px-2.5 py-1 text-amber-300 text-xs font-mono tracking-widest">
+            <div>
+              <label className="text-[8px] sm:text-[11px] text-neutral-300 block mb-0.5">
+                Chatroom Password (Optional):
+              </label>
+              <div className="bg-black/60 border border-white/15 rounded px-2 sm:px-2.5 py-0.5 sm:py-1 text-neutral-400 text-[9px] sm:text-xs font-mono tracking-widest">
                 ••••••••
               </div>
             </div>
-            <div className="px-4 py-1 rounded bg-white text-black font-bold text-xs shadow">
-              Connect
+
+            <div>
+              <div className="flex items-center justify-between text-[8px] sm:text-[11px] text-neutral-300 mb-0.5 sm:mb-1">
+                <span>Lobby Size (2-5):</span>
+                <span className="text-cyan-400 font-mono font-bold text-[8px] sm:text-[11px]">4 Users</span>
+              </div>
+              <div className="w-full bg-neutral-800 h-1 sm:h-1.5 rounded relative flex items-center">
+                <div className="w-3/4 bg-white h-full rounded" />
+                <div className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-full bg-white shadow -ml-1 sm:-ml-1.5 border border-black/40" />
+              </div>
+              <div className="flex justify-between text-[7px] sm:text-[9px] text-neutral-500 font-mono mt-0.5 px-0.5">
+                <span>2</span>
+                <span>3</span>
+                <span className="text-white font-bold">4</span>
+                <span>5</span>
+              </div>
+            </div>
+
+            <div className="pt-0.5 sm:pt-1">
+              <div className="w-full py-0.5 sm:py-1.5 rounded bg-white/15 border border-white/20 text-neutral-200 text-center font-medium text-[9px] sm:text-xs shadow-sm">
+                Create Chatroom
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column (Join Chat Room) */}
+          <div className="space-y-1 sm:space-y-2 pt-1 sm:pt-0 border-t sm:border-t-0 sm:border-l border-white/10 sm:pl-4">
+            <div>
+              <span className="text-[10px] sm:text-xs font-bold text-white underline tracking-wide">
+                Join Chat Room
+              </span>
+            </div>
+
+            <div>
+              <label className="text-[8px] sm:text-[11px] text-neutral-300 block mb-0.5">
+                Available Chatrooms:
+              </label>
+              <div className="bg-black/60 border border-white/15 rounded px-2 sm:px-2.5 py-0.5 sm:py-1 text-white text-[9px] sm:text-xs font-mono flex items-center justify-between gap-1">
+                <span className="truncate">cyber-den - [Locked], 2/4 users</span>
+                <span className="text-[9px] sm:text-[10px] text-neutral-500 shrink-0">▼</span>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between text-[8px] sm:text-[11px] text-neutral-300 mb-0.5">
+                <span>Password:</span>
+                <span className="text-[7px] sm:text-[10px] text-amber-400/80 font-mono">(Hint: 'matrix')</span>
+              </div>
+              <div className="bg-black/60 border border-amber-500/30 rounded px-2 sm:px-2.5 py-0.5 sm:py-1 text-amber-300 text-[9px] sm:text-xs font-mono tracking-widest">
+                ••••••••
+              </div>
+            </div>
+
+            <div className="pt-0.5 sm:pt-1">
+              <div className="w-full py-0.5 sm:py-1.5 rounded bg-white text-black text-center font-bold text-[9px] sm:text-xs shadow">
+                Connect
+              </div>
+            </div>
+
+            <div className="pt-0.5 sm:pt-1 text-center sm:text-left">
+              <span className="text-[7px] sm:text-[10px] text-neutral-500 font-mono flex items-center justify-center sm:justify-start gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
+                <span>ASCII Socket Stream · Mutex Protected</span>
+              </span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Bottom HUD Bar */}
-      <div className="relative z-10 flex items-center justify-between gap-2 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-black/70 border border-white/15 backdrop-blur-md text-[9px] sm:text-[11px] font-mono pointer-events-none whitespace-nowrap">
-        <div className="flex items-center gap-1.5 sm:gap-2 text-neutral-300">
-          <span className="text-white font-medium">Semicolon Protocol</span>
+      <div className="relative z-10 flex items-center justify-between gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1 sm:py-2 rounded-xl bg-black/70 border border-white/15 backdrop-blur-md text-[9px] sm:text-[11px] font-mono pointer-events-none whitespace-nowrap shrink-0">
+        <div className="flex items-center gap-1 sm:gap-2 text-neutral-300">
+          <span className="text-white font-medium">Semicolon<span className="hidden sm:inline"> Protocol</span></span>
           <span className="hidden sm:inline text-white/30">·</span>
           <span className="hidden sm:inline text-neutral-400">CREATE_ROOM / JOIN_ROOM</span>
         </div>
-        <div className="flex items-center gap-1.5 sm:gap-2 text-neutral-300">
+        <div className="flex items-center gap-1 sm:gap-2 text-neutral-300">
           <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
-          <span className="text-white font-medium">Thread-Safe State Broadcast</span>
+          <span className="text-white font-medium">Thread-Safe<span className="hidden sm:inline"> Broadcast</span></span>
         </div>
       </div>
 
